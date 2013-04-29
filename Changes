@@ -1,6 +1,6 @@
 Revision history for Toadfarm
 
-0.02
+0.02     Mon Apr 29 21:36:48 2013
        * Add $VERSION
        * Add suppor for "plugins"
        * Will not poke into mojolicious internals

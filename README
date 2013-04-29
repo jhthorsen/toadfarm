@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.01
+    0.02
 
 SYNOPSIS
   Production
@@ -62,9 +62,21 @@ CONFIG FILE
           workers => 12,
           # ...
         },
+        plugins => [
+          MojoPlugin => CONFIG,
+        ],
       }
 
     See "SETTINGS" in Mojo::Server::Hypnotoad for more "hypnotoad" settings.
+
+    "plugins" can be used to load plugins into Toadfarm. The plugins are
+    loaded after the "apps" are loaded. They will receive the "CONFIG" as
+    the third argument:
+
+      sub register {
+        my($self, $app, CONFIG) = @_;
+        # ...
+      }
 
 METHODS
   startup

@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.01
+0.02
 
 =head1 SYNOPSIS
 
@@ -93,7 +93,7 @@ argument:
 use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 
-our $VERSION = '0.01';
+our $VERSION = eval '0.02';
 
 =head1 METHODS
 
