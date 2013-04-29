@@ -6,4 +6,5 @@
 ^blib/
 ^Makefile$
 ^MANIFEST.*
-^Mojo-Mounter
+^Toadfarm
+\.pid

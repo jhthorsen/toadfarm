@@ -1,0 +1,73 @@
+NAME
+    Toadfarm - One Mojolicious app to rule them all
+
+SYNOPSIS
+  Production
+    You can start the application by running:
+
+      $ toadfarm myconfig.conf;
+
+    "myconfig.conf" should contain a list with the application you want to
+    run and a set of HTTP headers to act on. Example:
+
+      {
+        apps => [
+          'My::App' => {
+            'X-Request-Base' => 'http://mydomain.com/whatever',
+          },
+          'My::Other::App' => {
+            'Host' => 'mydomain.com',
+          },
+        ],
+      }
+
+    The config above will run "My::App" when the "X-Request-Base" header is
+    set to "http://mydomain.com/whatever".
+
+    Or it will pass the request on to "My::Other::App" if the "Host" header
+    is set to "mydomain.com".
+
+    NOTE: "X-Request-Base" is a special header: Normally the route object
+    will be attached to the route object of the Toadfarm route object. This
+    does not happen with the "X-Request-Base" header.
+
+    NOTE: The apps are processed in the order they are defined. This means
+    that the first app that match will be executed.
+
+  Debug
+    It is possible to start the server in foreground as well:
+
+      $ MOJO_CONFIG=myconfig.conf toadfarm prefork
+      $ MOJO_CONFIG=myconfig.conf toadfarm daemon
+
+    See other options by running:
+
+      $ toadfarm -h
+
+DESCRIPTION
+    This application can be used to load other Mojolicious apps inside one
+    app. This could be useful if you want to save memory or instances on
+    dotcloud or heroku.
+
+CONFIG FILE
+    Additional config params.
+
+      {
+        apps => [...], # See SYNOPSIS
+        hypnotoad => {
+          listen => ['http://*:1234'],
+          workers => 12,
+          # ...
+        },
+      }
+
+    See "SETTINGS" in Mojo::Server::Hypnotoad for more "hypnotoad" settings.
+
+METHODS
+  startup
+    This method will read the "MOJO_CONFIG" and mount the applications
+    specified.
+
+AUTHOR
+    Jan Henning Thorsen - "jhthorsen@cpan.org"
+
