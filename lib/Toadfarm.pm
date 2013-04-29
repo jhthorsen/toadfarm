@@ -62,6 +62,7 @@ Additional config params.
 
   {
     apps => [...], # See SYNOPSIS
+    log_file => '/path/to/log/file.log',
     hypnotoad => {
       listen => ['http://*:1234'],
       workers => 12,
@@ -105,6 +106,8 @@ sub startup {
     my @apps = @{ $config->{apps} || [] };
     my @plugins = @{ $config->{plugins} || [] };
     my $n = 0;
+
+    $self->log->path($config->{log_file}) if $config->{log_file};
 
     while(@apps) {
       my($path, $rules) = (shift @apps, shift @apps);
