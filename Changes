@@ -1,6 +1,7 @@
 Revision history for Toadfarm
 
 0.03
+       * Fix cannot pass MOJO_CONFIG to sub apps
        * Accept "log_file" from config
 
 0.02     Mon Apr 29 21:36:48 2013

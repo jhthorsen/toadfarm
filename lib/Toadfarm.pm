@@ -113,6 +113,7 @@ sub startup {
       my($path, $rules) = (shift @apps, shift @apps);
       my($app, $r, $request_base, @over);
 
+      delete local $ENV{MOJO_CONFIG};
       $path = class_to_path $path unless -e $path;
       $app = Mojo::Server->new->load_app($path);
 
