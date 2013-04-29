@@ -1,6 +1,9 @@
 NAME
     Toadfarm - One Mojolicious app to rule them all
 
+VERSION
+    0.01
+
 SYNOPSIS
   Production
     You can start the application by running:
@@ -15,7 +18,7 @@ SYNOPSIS
           'My::App' => {
             'X-Request-Base' => 'http://mydomain.com/whatever',
           },
-          'My::Other::App' => {
+          '/path/to/my-app' => {
             'Host' => 'mydomain.com',
           },
         ],

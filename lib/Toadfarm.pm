@@ -24,7 +24,7 @@ and a set of HTTP headers to act on. Example:
       'My::App' => {
         'X-Request-Base' => 'http://mydomain.com/whatever',
       },
-      'My::Other::App' => {
+      '/path/to/my-app' => {
         'Host' => 'mydomain.com',
       },
     ],
@@ -79,10 +79,9 @@ See L<Mojo::Server::Hypnotoad/SETTINGS> for more "hypnotoad" settings.
 =cut
 
 use Mojo::Base 'Mojolicious';
+use Mojo::Util 'class_to_path';
 
 our $VERSION = '0.01';
-
-my %APPS;
 
 =head1 METHODS
 
@@ -94,34 +93,35 @@ This method will read the C<MOJO_CONFIG> and mount the applications specified.
 
 sub startup {
     my $self = shift;
+    my $routes = $self->routes;
     my $config = $self->_config;
     my @apps = @{ $config->{apps} || [] };
-    my @cb;
+    my $n = 0;
 
     while(@apps) {
-      my($app, $rules) = (shift @apps, shift @apps);
-      my $keep_parent = 1;
-      my @rules;
+      my($path, $rules) = (shift @apps, shift @apps);
+      my($app, $r, $request_base, @over);
 
-      eval "require $app; 1" or die "Could not load $app: $@";
-      $APPS{$app} = $app->new;
+      $path = class_to_path $path unless -e $path;
+      $app = Mojo::Server->new->load_app($path);
 
       while(my($name, $value) = each %$rules) {
-        $keep_parent &= $name ne 'X-Request-Base';
-        push @rules, "\$h->header('$name') eq '$value'";
+        $request_base = $value if $name eq 'X-Request-Base';
+        push @over, "return 0 unless +(\$h->header('$name') // '') eq '$value';\n";
       }
 
-      push @cb, "return _dispatch_to_app(\$c, '$app', $keep_parent) if(", join('and', @rules), ');';
+      $r = $routes->route('/*original_path')->detour(app => $app, original_path => '');
+
+      if(@over) {
+        unshift @over, "sub { my \$h = \$_[1]->req->headers;\n";
+        push @over, "\$_[1]->req->url->base(Mojo::URL->new('$request_base'));" if $request_base;
+        push @over, "return 1; }";
+        $routes->add_condition("toadfarm_condition_$n", => eval "@over" || die "@over: $@");
+        $r->over("toadfarm_condition_$n");
+      }
+
+      $n++;
     }
-
-    die "Either config file is missing or no apps are defined\n" if !@cb and !$ENV{TOADFARM_THIS_WILL_PROBABLY_CHANGE};
-    unshift @cb, 'sub {', 'my $c = shift;', 'my $h = $c->req->headers;';
-    push @cb, '$c->render_not_found;', '}';
-
-    $self->routes->route('/*original_path')->to(
-      original_path => '',
-      cb => eval "@cb" || die "@cb: $@",
-    );
 }
 
 sub _config {
@@ -130,17 +130,6 @@ sub _config {
   return {} if $ENV{TOADFARM_THIS_WILL_PROBABLY_CHANGE};
   die "You need to set MOJO_CONFIG\n" unless $ENV{MOJO_CONFIG};
   $self->plugin('Config');
-}
-
-sub _dispatch_to_app {
-    my($c, $name, $keep_parent) = @_;
-    my $app = $APPS{$name};
-    my $r = $app->routes;
-
-    $app->log->debug(qq{Dispatching to application "$name" ($keep_parent).});
-    Scalar::Util::weaken($r->parent($c->match->endpoint)->{parent}) if $keep_parent;
-    $app->handler($c);
-    ++$c->stash->{'mojo.routed'};
 }
 
 =head1 AUTHOR
