@@ -1,8 +1,9 @@
 Revision history for Toadfarm
 
 0.03
+       * Add Ubuntu setup example
        * Fix cannot pass MOJO_CONFIG to sub apps
-       * Accept "log_file" from config
+       * Accept log settings from config
 
 0.02     Mon Apr 29 21:36:48 2013
        * Add $VERSION
