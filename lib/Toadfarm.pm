@@ -4,6 +4,10 @@ package Toadfarm;
 
 Toadfarm - One Mojolicious app to rule them all
 
+=head1 VERSION
+
+0.01
+
 =head1 SYNOPSIS
 
 =head2 Production
@@ -75,6 +79,8 @@ See L<Mojo::Server::Hypnotoad/SETTINGS> for more "hypnotoad" settings.
 =cut
 
 use Mojo::Base 'Mojolicious';
+
+our $VERSION = '0.01';
 
 my %APPS;
 
