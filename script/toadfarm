@@ -17,4 +17,6 @@ elsif(!$ENV{MOJO_APP_LOADER}) {
 
 # Start command line interface for application
 require Mojolicious::Commands;
-Mojolicious::Commands->start_app('Toadfarm');
+my $commands = Mojolicious::Commands->new;
+unshift @{ $commands->namespaces }, 'Toadfarm::Command';
+$commands->run(@ARGV);
