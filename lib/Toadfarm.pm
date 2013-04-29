@@ -72,9 +72,21 @@ Additional config params.
       workers => 12,
       # ...
     },
+    plugins => [
+      MojoPlugin => CONFIG,
+    ],
   }
 
 See L<Mojo::Server::Hypnotoad/SETTINGS> for more "hypnotoad" settings.
+
+"plugins" can be used to load plugins into L<Toadfarm>. The plugins are loaded
+after the "apps" are loaded. They will receive the C<CONFIG> as the third
+argument:
+
+  sub register {
+    my($self, $app, CONFIG) = @_;
+    # ...
+  }
 
 =cut
 
@@ -96,6 +108,7 @@ sub startup {
     my $routes = $self->routes;
     my $config = $self->_config;
     my @apps = @{ $config->{apps} || [] };
+    my @plugins = @{ $config->{plugins} || [] };
     my $n = 0;
 
     while(@apps) {
@@ -121,6 +134,11 @@ sub startup {
       }
 
       $n++;
+    }
+
+    while(@plugins) {
+      my($plugin, $config) = (shift @plugins, shift @plugins);
+      $self->plugin($plugin, $config);
     }
 }
 

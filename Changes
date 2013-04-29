@@ -2,6 +2,8 @@ Revision history for Toadfarm
 
 0.02
        * Add $VERSION
+       * Add suppor for "plugins"
+       * Will not poke into mojolicious internals
 
 0.01     Mon Apr 29 20:28:14 2013
        * Toadfarm can dispatch based on headers

@@ -20,4 +20,8 @@ $t->get_ok('/', { 'X-Request-Base' => 'http://localhost:1234/yikes' })
   ->status_is(200)
   ->content_is('http://localhost:1234/yikes/test/123');
 
+$t->get_ok('/info')
+  ->status_is(200)
+  ->content_is('["yikes"]');
+
 done_testing;
