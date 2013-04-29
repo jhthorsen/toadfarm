@@ -33,16 +33,11 @@ and a set of HTTP headers to act on. Example:
 The config above will run C<My::App> when the "X-Request-Base" header is set
 to "http://mydomain.com/whatever".
 
-Or it will pass the request on to C<My::Other::App> if the "Host" header is
+Or it will pass the request on to C</path/to/my-app> if the "Host" header is
 set to "mydomain.com".
 
-NOTE: "X-Request-Base" is a special header: Normally the
-L<route|Mojolicious::Routes> object will be attached to the route object of
-the L<Toadfarm> route object. This does not happen with the "X-Request-Base"
-header.
-
-NOTE: The apps are processed in the order they are defined. This means that
-the first app that match will be executed.
+The apps are processed in the order they are defined. This means that the
+first app that match will be executed.
 
 =head2 Debug
 
