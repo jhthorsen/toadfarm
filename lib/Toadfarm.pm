@@ -62,7 +62,10 @@ Additional config params.
 
   {
     apps => [...], # See SYNOPSIS
-    log_file => '/path/to/log/file.log',
+    log => {
+      file => '/path/to/log/file.log',
+      combined => 1, # true to make all applications log to the same file
+    },
     hypnotoad => {
       listen => ['http://*:1234'],
       workers => 12,
@@ -107,7 +110,7 @@ sub startup {
     my @plugins = @{ $config->{plugins} || [] };
     my $n = 0;
 
-    $self->log->path($config->{log_file}) if $config->{log_file};
+    $self->log->path($config->{log}{file}) if $config->{log}{file};
 
     while(@apps) {
       my($path, $rules) = (shift @apps, shift @apps);
@@ -116,6 +119,8 @@ sub startup {
       delete local $ENV{MOJO_CONFIG};
       $path = class_to_path $path unless -e $path;
       $app = Mojo::Server->new->load_app($path);
+
+      $app->log->path($config->{log}{file}) if $config->{log}{combined};
 
       while(my($name, $value) = each %$rules) {
         $request_base = $value if $name eq 'X-Request-Base';
