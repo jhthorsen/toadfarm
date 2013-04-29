@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
+
+if(@ARGV and -r $ARGV[0]) {
+    $ENV{MOJO_CONFIG} = shift @ARGV;
+    exec hypnotoad => $0;
+}
+elsif(@ARGV) {
+    $ENV{TOADFARM_THIS_WILL_PROBABLY_CHANGE} = 1;
+}
+elsif(!$ENV{MOJO_APP_LOADER}) {
+    exec perldoc => 'Toadfarm';
+}
+
+# Start command line interface for application
+require Mojolicious::Commands;
+Mojolicious::Commands->start_app('Toadfarm');
