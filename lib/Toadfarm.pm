@@ -119,6 +119,7 @@ sub startup {
     my $n = 0;
 
     $self->log->path($config->{log}{file}) if $config->{log}{file};
+    delete $self->log->{handle};
 
     while(@apps) {
       my($path, $rules) = (shift @apps, shift @apps);
@@ -128,7 +129,7 @@ sub startup {
       $path = class_to_path $path unless -e $path;
       $app = Mojo::Server->new->load_app($path);
 
-      $app->log->path($config->{log}{file}) if $config->{log}{combined};
+      $app->log($self->log) if $config->{log}{combined};
 
       while(my($name, $value) = each %$rules) {
         $request_base = $value if $name eq 'X-Request-Base';
