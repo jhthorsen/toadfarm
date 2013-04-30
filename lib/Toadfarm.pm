@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.02
+0.03
 
 =head1 SYNOPSIS
 
@@ -100,7 +100,7 @@ forward all traffic to the server using the "iptables" rule below:
 use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 
-our $VERSION = eval '0.02';
+our $VERSION = eval '0.03';
 
 =head1 METHODS
 

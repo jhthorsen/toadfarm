@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.02
+    0.03
 
 SYNOPSIS
   Production
@@ -27,15 +27,11 @@ SYNOPSIS
     The config above will run "My::App" when the "X-Request-Base" header is
     set to "http://mydomain.com/whatever".
 
-    Or it will pass the request on to "My::Other::App" if the "Host" header
+    Or it will pass the request on to "/path/to/my-app" if the "Host" header
     is set to "mydomain.com".
 
-    NOTE: "X-Request-Base" is a special header: Normally the route object
-    will be attached to the route object of the Toadfarm route object. This
-    does not happen with the "X-Request-Base" header.
-
-    NOTE: The apps are processed in the order they are defined. This means
-    that the first app that match will be executed.
+    The apps are processed in the order they are defined. This means that
+    the first app that match will be executed.
 
   Debug
     It is possible to start the server in foreground as well:
@@ -57,6 +53,10 @@ CONFIG FILE
 
       {
         apps => [...], # See SYNOPSIS
+        log => {
+          file => '/path/to/log/file.log',
+          combined => 1, # true to make all applications log to the same file
+        },
         hypnotoad => {
           listen => ['http://*:1234'],
           workers => 12,
@@ -77,6 +77,13 @@ CONFIG FILE
         my($self, $app, CONFIG) = @_;
         # ...
       }
+
+EXAMPLE SETUP
+    Look at <https://github.com/jhthorsen/toadfarm/tree/etc/> for example
+    resources which show how to start Toadfarm on ubuntu. In addition, you
+    can forward all traffic to the server using the "iptables" rule below:
+
+      $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
 
 METHODS
   startup
