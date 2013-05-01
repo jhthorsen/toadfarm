@@ -4,12 +4,10 @@ use warnings;
 use FindBin;
 BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
 
-if(@ARGV and -r $ARGV[0]) {
-    $ENV{MOJO_CONFIG} = shift @ARGV;
-    exec hypnotoad => $0;
-}
-elsif(!$ENV{MOJO_APP_LOADER}) {
-    exec perldoc => 'Toadfarm';
+@ARGV = grep { +(-r $_ ? ($ENV{MOJO_CONFIG} = $_, 0) : 1) } @ARGV;
+
+if(@ARGV == 0 and !$ENV{MOJO_APP_LOADER}) {
+    exec $ENV{MOJO_CONFIG} ? (hypnotoad => $0) : (perldoc => 'Toadfarm');
 }
 
 # Start command line interface for application
