@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.06
+       * Fix need to run chdir before git commands
+
 0.05     Wed May  1 22:45:02 2013
        * Add support for custom log level from config
        * Fix major routing bug

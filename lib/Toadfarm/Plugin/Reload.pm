@@ -131,30 +131,33 @@ sub _fork_and_reload {
 
 sub _reload {
   my($self, $pid, $payload) = @_;
+  my $log = $self->{log};
   my $branch = $payload->{ref} || '/ref';
   my $name = $payload->{repository}{name} || '/repository/name';
   my $sha1 = $payload->{head_commit}{id} || '/head_commit/id';
-  my $config;
+  my $config = $self->{repositories}{$name};
 
   $branch =~ s!refs/heads/!!;
 
-  unless($config = $self->{repositories}{$name}) {
-    return $self->{log}->warn("Could not find repository config from $name");
+  unless($config) {
+    return $log->warn("Could not find repository config from $name");
   }
   unless($config->{branch} eq $branch) {
-    return $self->{log}->debug("Skip branch $branch (not $config->{branch})");
+    return $log->debug("Skip branch $branch (not $config->{branch})");
   }
 
   eval {
+    $log->info("chdir $config->{path}");
+    chdir $config->{path};
     $self->_run($GIT => remote => update => $config->{remote});
     $self->_run($GIT => log => '--format=%H', '-n1', "$config->{remote}/$branch", sub {
-      return $self->{log}->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
+      return $log->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
       $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$branch");
       $self->_run(kill => -USR2 => $pid);
     });
     1;
   } or do {
-    $self->{log}->error($@);
+    $log->error($@);
   };
 }
 

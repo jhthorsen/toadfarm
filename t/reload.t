@@ -4,19 +4,20 @@ use Test::More;
 use Test::Mojo;
 use Cwd;
 
-*Toadfarm::Plugin::Reload::getppid = sub {
-  $$;
-};
-
 plan skip_all => $^O unless $^O =~ /linux/i;
 plan skip_all => 'Started from wrong directory' unless -x 't/bin/git';
 
-my($t, $USR2);
+my $pid = $$;
+my($t, $got_signal, $chdir);
+
+*Toadfarm::Plugin::Reload::getppid = sub { $pid };
+*Toadfarm::Plugin::Reload::chdir = sub { kill 'USR1', $pid; CORE::chdir(@_) };
 
 $ENV{PATH} = "t/bin:$ENV{PATH}";
 $ENV{PATH} = join ':', 't/bin', $ENV{PATH};
 $ENV{MOJO_CONFIG} = 't/reload.conf';
-$SIG{USR2} = sub { $USR2++; Mojo::IOLoop->stop; };
+$SIG{USR1} = sub { $chdir++ };
+$SIG{USR2} = sub { $got_signal++; Mojo::IOLoop->stop; };
 
 $t = Test::Mojo->new('Toadfarm');
 
@@ -34,7 +35,8 @@ Mojo::IOLoop->timer(2, sub {
 });
 
 Mojo::IOLoop->start;
-is $USR2, 1, 'receive USR2 signal';
+is $chdir, 1, 'chdir before git commands';
+is $got_signal, 1, 'receive USR2 signal';
 
 #=============================================================================
 done_testing;
