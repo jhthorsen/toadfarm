@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.04
+    0.05
 
 SYNOPSIS
   Production
@@ -55,6 +55,7 @@ CONFIG FILE
         apps => [...], # See SYNOPSIS
         log => {
           file => '/path/to/log/file.log',
+          level => 'debug', # debug, info, warn, ...
           combined => 1, # true to make all applications log to the same file
         },
         hypnotoad => {
