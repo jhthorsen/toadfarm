@@ -81,7 +81,6 @@ This is the path on disk to the local git repo.
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
-use Mojo::Asset::File;
 use Mojo::JSON;
 
 our $GIT = $ENV{GIT_EXE} || 'git';
