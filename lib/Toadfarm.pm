@@ -156,7 +156,7 @@ sub _start_apps {
       push @over, "return 0 unless +(\$h->header('$name') // '') eq '$value';\n";
     }
 
-    $r = $routes->route('/*original_path')->detour(app => $app, original_path => '');
+    $r = $routes->route('/')->detour(app => $app);
 
     if(@over) {
       $app->log->info("Mounting $path with conditions");

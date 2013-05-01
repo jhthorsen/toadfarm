@@ -2,6 +2,7 @@ Revision history for Toadfarm
 
 0.05
        * Add support for custom log level from config
+       * Fix major routing bug
 
 0.04     Wed May  1 19:56:25 2013
        * Add Reload plugin
