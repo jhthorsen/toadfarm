@@ -64,6 +64,7 @@ Additional config params.
     apps => [...], # See SYNOPSIS
     log => {
       file => '/path/to/log/file.log',
+      level => 'debug', # debug, info, warn, ...
       combined => 1, # true to make all applications log to the same file
     },
     hypnotoad => {
@@ -120,8 +121,13 @@ sub startup {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : {};
 
-  $self->log->path($config->{log}{file}) if $config->{log}{file};
-  delete $self->log->{handle}; # Not sure why I need to reset the handle...
+  if($config->{log}{file}) {
+    my $log = Mojo::Log->new;
+    $log->path($config->{log}{file});
+    $log->level($config->{log}{level} || 'info');
+    $self->log($log);
+  }
+
   $self->_start_apps(@{ $config->{apps} }) if $config->{apps};
   $self->_start_plugins(@{ $config->{plugins} }) if $config->{plugins};
 }
@@ -130,6 +136,10 @@ sub _start_apps {
   my $self = shift;
   my $routes = $self->routes;
   my $n = 0;
+
+  if($self->config->{log}{combined}) {
+    $self->log->info('All apps will log to ' .$self->config->{log}{file});
+  }
 
   while(@_) {
     my($path, $rules) = (shift @_, shift @_);
@@ -149,11 +159,15 @@ sub _start_apps {
     $r = $routes->route('/*original_path')->detour(app => $app, original_path => '');
 
     if(@over) {
+      $app->log->info("Mounting $path with conditions");
       unshift @over, "sub { my \$h = \$_[1]->req->headers;\n";
       push @over, "\$_[1]->req->url->base(Mojo::URL->new('$request_base'));" if $request_base;
       push @over, "return 1; }";
       $routes->add_condition("toadfarm_condition_$n", => eval "@over" || die "@over: $@");
       $r->over("toadfarm_condition_$n");
+    }
+    else {
+      $app->log->info("Mounting $path without condition");
     }
 
     $n++;
@@ -169,6 +183,7 @@ sub _start_plugins {
 
   while(@_) {
     my($plugin, $config) = (shift @_, shift @_);
+    $self->log->info("Loading plugin $plugin");
     $self->plugin($plugin, $config);
   }
 }
