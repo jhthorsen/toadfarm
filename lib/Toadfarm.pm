@@ -87,6 +87,8 @@ argument:
     # ...
   }
 
+See also: L<Toadfarm::Plugin::Reload/SYNOPSIS>.
+
 =head1 EXAMPLE SETUP
 
 Look at L<https://github.com/jhthorsen/toadfarm/tree/etc/> for example
@@ -94,6 +96,10 @@ resources which show how to start L<Toadfarm> on ubuntu. In addition, you can
 forward all traffic to the server using the "iptables" rule below:
 
   $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
+
+=head1 PLUGINS
+
+L<Toadfarm::Plugin::Reload>.
 
 =cut
 
@@ -158,6 +164,8 @@ sub _start_apps {
 
 sub _start_plugins {
   my $self = shift;
+
+  unshift @{ $self->plugins->namespaces }, 'Toadfarm::Plugin';
 
   while(@_) {
     my($plugin, $config) = (shift @_, shift @_);

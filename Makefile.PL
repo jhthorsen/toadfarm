@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
   NAME => 'Toadfarm',
-  VERSION => '0.03',
+  VERSION => '0.04',
   AUTHOR => 'Jan Henning Thorsen <jhthorsen@cpan.org>',
   EXE_FILES => [ 'script/toadfarm' ],
   PREREQ_PM => {
