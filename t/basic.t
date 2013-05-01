@@ -3,9 +3,6 @@ use warnings;
 use Test::More;
 use Test::Mojo;
 
-eval { Test::Mojo->new('Toadfarm') };
-is $@, "You need to set MOJO_CONFIG\n", "config is missing";
-
 $ENV{MOJO_CONFIG} = 't/basic.conf';
 my $t = Test::Mojo->new('Toadfarm');
 
