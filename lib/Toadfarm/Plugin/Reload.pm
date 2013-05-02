@@ -122,7 +122,7 @@ sub register {
       }
     }
 
-    $c->render_text($status || "no repositories\n");
+    $c->render_text($status || "no repositories\n", format => 'text');
   });
 }
 
