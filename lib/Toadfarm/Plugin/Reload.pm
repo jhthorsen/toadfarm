@@ -105,13 +105,24 @@ sub register {
   $app->routes->any($config->{path})->to(cb => sub {
     my $c = shift;
     my $payload = $c->req->body_params->param('payload');
+    my $status = '';
 
     if($payload) {
-      $self->_fork_and_reload(Mojo::JSON->new->decode($payload))
-        or return $c->render_exception("fork: $!");
+      $status = $self->_fork_and_reload(Mojo::JSON->new->decode($payload)) ? "ok\n" : "$!\n";
+    }
+    else {
+      for my $name (keys %{ $self->{repositories} }) {
+        $status .= "--- $name\n";
+        $self->_run(
+          { GIT_DIR => "$self->{repositories}{$name}{path}/.git" },
+          $GIT => log => -3 => '--format=%s',
+          sub { $status .= "$_[0]\n" },
+        );
+        $status .= "\n";
+      }
     }
 
-    $c->render_text("$t0\n");
+    $c->render_text($status || "no repositories\n");
   });
 }
 
@@ -163,11 +174,17 @@ sub _reload {
 
 sub _run {
   my($self, @cmd) = @_;
+  my $env = ref @cmd[0] eq 'HASH' ? shift @cmd : {};
   my $cb = ref $cmd[-1] eq 'CODE' ? pop @cmd : sub { $self->{log}->info("<<< $_[0]") };
   my @res;
 
+  local %ENV = %ENV;
+  $ENV{$_} = $env->{$_} for keys %$env;
+  $env = join ', ', map { "$_=$env->{$_}" } sort keys %$env;
+  $env = "[$env] " if $env;
+
   # TODO:
-  $self->{log}->info("run(@cmd)");
+  $self->{log}->info("${env}run(@cmd)");
   open my $CMD, '-|', @cmd or die "@cmd: $!";
   while(<$CMD>) {
     chomp;

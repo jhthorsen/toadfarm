@@ -1,2 +1,6 @@
 #!/bin/sh
-echo $@
+if [ "x$1" = "xlog" ]; then
+  /usr/bin/git $@;
+else
+  echo $@
+fi
