@@ -4,9 +4,9 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile(
   NAME => 'Toadfarm',
-  VERSION => '0.06',
   AUTHOR => 'Jan Henning Thorsen <jhthorsen@cpan.org>',
   EXE_FILES => [ 'script/toadfarm' ],
+  VERSION_FROM => 'lib/Toadfarm.pm',
   PREREQ_PM => {
     'Mojolicious' => '3.91'
   },

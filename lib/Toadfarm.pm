@@ -130,7 +130,7 @@ L<Toadfarm::Plugin::Reload>.
 use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 
-our $VERSION = eval '0.07';
+our $VERSION = '0.07';
 
 =head1 METHODS
 
