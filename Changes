@@ -2,6 +2,7 @@ Revision history for Toadfarm
 
 0.07
        * Improved status page for reload plugin
+       * Add support for custom error pages and assets
 
 0.06     Thu May  2 00:18:17 2013
        * Fix need to run chdir before git commands
