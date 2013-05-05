@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.06
+    0.07
 
 SYNOPSIS
   Production
@@ -63,23 +63,44 @@ CONFIG FILE
           workers => 12,
           # ...
         },
+        paths => {
+          renderer => [ '/my/custom/template/path' ],
+          static => [ '/my/custom/static/path' ],
+        },
         plugins => [
           MojoPlugin => CONFIG,
         ],
       }
 
-    See "SETTINGS" in Mojo::Server::Hypnotoad for more "hypnotoad" settings.
+    *   log
 
-    "plugins" can be used to load plugins into Toadfarm. The plugins are
-    loaded after the "apps" are loaded. They will receive the "CONFIG" as
-    the third argument:
+        Used to set up where Toadfarm should log to. It is also possible to
+        set "combined" to true if you want all the other apps to log to the
+        same file.
 
-      sub register {
-        my($self, $app, CONFIG) = @_;
-        # ...
-      }
+    *   hypnotoad
 
-    See also: "SYNOPSIS" in Toadfarm::Plugin::Reload.
+        See "SETTINGS" in Mojo::Server::Hypnotoad for more "hypnotoad"
+        settings.
+
+    *   paths
+
+        Set this to enable custom templates and public files for this
+        application. This is useful if you want your own error templates or
+        serve other assets from Toadfarm.
+
+    *   plugins
+
+        "plugins" can be used to load plugins into Toadfarm. The plugins are
+        loaded after the "apps" are loaded. They will receive the "CONFIG"
+        as the third argument:
+
+          sub register {
+            my($self, $app, CONFIG) = @_;
+            # ...
+          }
+
+        See also: "SYNOPSIS" in Toadfarm::Plugin::Reload.
 
 EXAMPLE SETUP
     Look at <https://github.com/jhthorsen/toadfarm/tree/etc/> for example

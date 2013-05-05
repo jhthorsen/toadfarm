@@ -1,6 +1,6 @@
 Revision history for Toadfarm
 
-0.07
+0.07     Sun May  5 16:26:13 2013
        * Improved status page for reload plugin
        * Add support for custom error pages and assets
 
