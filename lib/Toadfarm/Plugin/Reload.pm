@@ -99,8 +99,8 @@ sub register {
   my($self, $app, $config) = @_;
   my $t0 = localtime $^T;
 
-  $self->_valid_config($config) or return;
   $self->{log} = $app->log;
+  $self->_valid_config($config) or return;
 
   $app->routes->any($config->{path})->to(cb => sub {
     my $c = shift;
@@ -174,7 +174,7 @@ sub _reload {
 
 sub _run {
   my($self, @cmd) = @_;
-  my $env = ref @cmd[0] eq 'HASH' ? shift @cmd : {};
+  my $env = ref $cmd[0] eq 'HASH' ? shift @cmd : {};
   my $cb = ref $cmd[-1] eq 'CODE' ? pop @cmd : sub { $self->{log}->info("<<< $_[0]") };
   my @res;
 

@@ -18,7 +18,6 @@ chomp $LAST_COMMIT;
 *Toadfarm::Plugin::Reload::chdir = sub { kill 'USR1', $PID; CORE::chdir(@_) };
 
 $ENV{PATH} = "t/bin:$ENV{PATH}";
-$ENV{PATH} = join ':', 't/bin', $ENV{PATH};
 $ENV{MOJO_CONFIG} = 't/reload.conf';
 $SIG{USR1} = sub { $chdir++ };
 $SIG{USR2} = sub { $got_signal++; Mojo::IOLoop->stop; };
