@@ -1,0 +1,18 @@
+!/bin/sh -e
+
+export MOJO_CONFIG=/etc/toadfarm/toadfarm.conf
+export PATH="/usr/local/bin:/usr/bin:/sbin";
+
+case "$1" in
+  start) 
+    iptables-restore /etc/iptables.rules
+    sudo -E -u www hypnotoad /usr/local/bin/toadfarm
+  ;;
+  restart)
+    $0 start
+  ;;
+  *)
+    echo "Usage: $0 {start|restart}" >&2;
+    exit 1
+  ;;
+esac
