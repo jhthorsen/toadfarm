@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.10
+       * Add AccessLog plugin
+
 0.09     Tue May 21 01:13:10 2013
        * Add support for multiple repositories with the same name
 
