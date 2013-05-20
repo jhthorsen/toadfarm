@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.0801
+0.09
 
 =head1 SYNOPSIS
 
@@ -130,7 +130,7 @@ L<Toadfarm::Plugin::Reload>.
 use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 
-our $VERSION = '0.0801';
+our $VERSION = '0.09';
 
 =head1 METHODS
 
@@ -225,5 +225,7 @@ sub _start_plugins {
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
+
+1;
 
 1;
