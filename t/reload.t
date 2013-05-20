@@ -39,7 +39,7 @@ is $got_signal, 1, 'receive USR2 signal';
 
 $t->get_ok('/bad-path')
   ->status_is(200)
-  ->content_like(qr{^--- toadfarm\n})
+  ->content_like(qr{^--- toadfarm/master\n})
   ->content_like(qr{\n\n$});
 
 #=============================================================================

@@ -35,13 +35,13 @@ This is a config template for L<Toadfarm>:
     plugins => [
       Reload => {
         path => '/some/secret/path',
-        repositories => {
+        repositories => [
           'cool-repo' => {
             branch => 'some-branch',
             path => '/path/to/cool-repo',
             remote => 'whatever', # defaults to "origin"
           },
-        },
+        ],
       },
       # ...
     ],
@@ -111,10 +111,10 @@ sub register {
       $status = $self->_fork_and_reload(Mojo::JSON->new->decode($payload)) ? "ok\n" : "$!\n";
     }
     else {
-      for my $name (keys %{ $self->{repositories} }) {
-        $status .= "--- $name\n";
+      for my $config (@{ $self->{repositories} }) {
+        $status .= "--- $config->{name}/$config->{branch}\n";
         $self->_run(
-          { GIT_DIR => "$self->{repositories}{$name}{path}/.git" },
+          { GIT_DIR => "$config->{path}/.git" },
           $GIT => log => -3 => '--format=%s',
           sub { $status .= "$_[0]\n" },
         );
@@ -142,28 +142,30 @@ sub _fork_and_reload {
 
 sub _reload {
   my($self, $pid, $payload) = @_;
-  my $log = $self->{log};
   my $branch = $payload->{ref} || '/ref';
   my $name = $payload->{repository}{name} || '/repository/name';
   my $sha1 = $payload->{head_commit}{id} || '/head_commit/id';
-  my $config = $self->{repositories}{$name};
 
   $branch =~ s!refs/heads/!!;
 
-  unless($config) {
-    return $log->warn("Could not find repository config from $name");
+  for my $config (@{ $self->{repositories} }) {
+    next unless $config->{name} eq $name;
+    next unless $config->{branch} eq $branch;
+    $self->_refresh_repo($config, $pid, $sha1);
   }
-  unless($config->{branch} eq $branch) {
-    return $log->debug("Skip branch $branch (not $config->{branch})");
-  }
+}
+
+sub _refresh_repo {
+  my($self, $config, $pid, $sha1) = @_;
+  my $log = $self->{log};
 
   eval {
     $log->info("chdir $config->{path}");
     chdir $config->{path};
     $self->_run($GIT => remote => update => $config->{remote});
-    $self->_run($GIT => log => '--format=%H', '-n1', "$config->{remote}/$branch", sub {
+    $self->_run($GIT => log => '--format=%H', '-n1', "$config->{remote}/$config->{branch}", sub {
       return $log->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
-      $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$branch");
+      $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$config->{branch}");
       $self->_run(kill => -USR2 => $pid);
     });
     1;
@@ -200,16 +202,24 @@ sub _valid_config {
     $self->{log}->error('Abort loading Reload: "path" missing in config');
     return;
   }
-  if(ref $repositories ne 'HASH' or !%$repositories) {
+  if(ref $repositories eq 'HASH') {
+    $repositories = [
+      map {
+        $repositories->{$_}{name} = $_;
+        $repositories->{$_};
+      } keys %$repositories
+    ];
+  }
+  if(ref $repositories ne 'ARRAY' or !@$repositories) {
     $self->{log}->error('Abort loading Reload: "repositories" missing in config');
     return;
   }
 
-  while(my($name, $config) = each %$repositories) {
+  for my $config (@$repositories) {
     $config->{remote} ||= 'origin';
     for my $key (qw/ path branch /) {
       next if $config->{$key};
-      $self->{log}->error(qq[Abort loading Reload: "repositories -> $name -> $key" missing in config]);
+      $self->{log}->error(qq[Abort loading Reload: "repositories -> $config->{name} -> $key" missing in config]);
       return;
     }
   }
