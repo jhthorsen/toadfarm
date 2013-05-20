@@ -36,7 +36,8 @@ This is a config template for L<Toadfarm>:
       Reload => {
         path => '/some/secret/path',
         repositories => [
-          'cool-repo' => {
+          {
+            name => 'cool-repo',
             branch => 'some-branch',
             path => '/path/to/cool-repo',
             remote => 'whatever', # defaults to "origin"
