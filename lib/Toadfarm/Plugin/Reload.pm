@@ -98,7 +98,7 @@ See L</SYNOPSIS> for C<%config> parameters.
 
 sub register {
   my($self, $app, $config) = @_;
-  my $t0 = localtime $^T;
+  my $t0 = localtime;
 
   $self->{log} = $app->log;
   $self->_valid_config($config) or return;
@@ -106,10 +106,10 @@ sub register {
   $app->routes->any($config->{path})->to(cb => sub {
     my $c = shift;
     my $payload = $c->req->body_params->param('payload');
-    my $status = '';
+    my $status = "Started: $t0\n\n";
 
     if($payload) {
-      $status = $self->_fork_and_reload(Mojo::JSON->new->decode($payload)) ? "ok\n" : "$!\n";
+      $status = $self->_fork_and_reload(Mojo::JSON->new->decode($payload)) ? "ok\n" : "nok\n";
     }
     else {
       for my $config (@{ $self->{repositories} }) {
@@ -123,56 +123,65 @@ sub register {
       }
     }
 
-    $c->render(text => $status || "no repositories\n", format => 'text');
+    $c->render(text => $status, format => 'text');
   });
 }
 
 sub _fork_and_reload {
   my($self, $payload) = @_;
   my $manager_pid = getppid;
+  my $branch = $payload->{ref};
+  my $name = $payload->{repository}{name};
+  my $sha1 = $payload->{head_commit}{id};
+  my $refreshed = 0;
   my $pid;
+
+  unless($branch and $name and $sha1) {
+    $self->{log}->warn("Skip reload on bad payload: " .Mojo::JSON->new->encode($payload));
+    return;
+  }
 
   $SIG{CHLD} = 'IGNORE';
   $pid = fork;
 
   return 1 if $pid;
   return 0 if !defined $pid;
-  $self->_reload($manager_pid, $payload);
-  exit;
-}
 
-sub _reload {
-  my($self, $pid, $payload) = @_;
-  my $branch = $payload->{ref} || '/ref';
-  my $name = $payload->{repository}{name} || '/repository/name';
-  my $sha1 = $payload->{head_commit}{id} || '/head_commit/id';
-
+  # child process
   $branch =~ s!refs/heads/!!;
 
   for my $config (@{ $self->{repositories} }) {
-    next unless $config->{name} eq $name;
-    next unless $config->{branch} eq $branch;
-    $self->_refresh_repo($config, $pid, $sha1);
+    $config->{name} eq $name or next;
+    $config->{branch} eq $branch or next;
+
+    eval {
+      $self->{log}->info("Reloading repo $name, branch $branch");
+      $self->_refresh_repo($config, $sha1);
+      ++$refreshed;
+    } or do {
+      $self->{log}->error($@);
+    };
   }
+
+  if($refreshed) {
+    $self->_run(kill => -USR2 => $manager_pid)
+  }
+  else {
+    $self->{log}->warn("Skip reload on name=$name and branch=$branch");
+  }
+
+  exit 0;
 }
 
 sub _refresh_repo {
-  my($self, $config, $pid, $sha1) = @_;
-  my $log = $self->{log};
+  my($self, $config, $sha1) = @_;
 
-  eval {
-    $log->info("chdir $config->{path}");
-    chdir $config->{path};
-    $self->_run($GIT => remote => update => $config->{remote});
-    $self->_run($GIT => log => '--format=%H', '-n1', "$config->{remote}/$config->{branch}", sub {
-      return $log->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
-      $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$config->{branch}");
-      $self->_run(kill => -USR2 => $pid);
-    });
-    1;
-  } or do {
-    $log->error($@);
-  };
+  chdir $config->{path};
+  $self->_run($GIT => remote => update => $config->{remote});
+  $self->_run($GIT => log => '--format=%H', '-n1', "$config->{remote}/$config->{branch}", sub {
+    return $self->{log}->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
+    $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$config->{branch}");
+  });
 }
 
 sub _run {
@@ -187,7 +196,7 @@ sub _run {
   $env = "[$env] " if $env;
 
   # TODO:
-  $self->{log}->info("${env}run(@cmd)");
+  $self->{log}->debug("${env}run(@cmd)");
   open my $CMD, '-|', @cmd or die "@cmd: $!";
   while(<$CMD>) {
     chomp;

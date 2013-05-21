@@ -24,35 +24,64 @@ $SIG{USR2} = sub { $got_signal++; Mojo::IOLoop->stop; };
 
 $t = Test::Mojo->new('Toadfarm');
 
-$t->post_ok('/bad-path', {}, form => { payload => payload('refs/heads/master') })
-  ->status_is(200)
-  ->content_is("ok\n");
+{
+  diag 'Reloading';
+  $t->post_ok('/bad-path', {}, form => { payload => payload('refs/heads/master') })
+    ->status_is(200)
+    ->content_is("ok\n");
 
-Mojo::IOLoop->timer(2, sub {
-  ok 0, 'possible race condition';
-  Mojo::IOLoop->stop;
-});
+  Mojo::IOLoop->timer(2, sub {
+    ok 0, 'possible race condition';
+    Mojo::IOLoop->stop;
+  });
 
-Mojo::IOLoop->start;
-is $chdir, 1, 'chdir before git commands';
-is $got_signal, 1, 'receive USR2 signal';
+  Mojo::IOLoop->start;
+  is $chdir, 1, 'chdir before git commands';
+  is $got_signal, 1, 'receive USR2 signal';
+}
 
-$t->get_ok('/bad-path')
-  ->status_is(200)
-  ->content_like(qr{^--- toadfarm/master\n})
-  ->content_like(qr{\n\n$});
+{
+  diag 'Skip reloading';
+  $t->post_ok('/bad-path', {}, form => { payload => payload('refs/heads/foo/bar') })
+    ->status_is(200)
+    ->content_is("ok\n");
+
+  Mojo::IOLoop->timer(0.5, sub { Mojo::IOLoop->stop; });
+  Mojo::IOLoop->start;
+  is $chdir, 1, 'chdir before git commands';
+  is $got_signal, 1, 'receive USR2 signal';
+}
+
+{
+  diag 'Bad payload';
+  $t->post_ok('/bad-path', {}, form => { payload => payload('') })
+    ->status_is(200)
+    ->content_is("nok\n");
+}
+
+{
+  diag 'Status';
+  $t->get_ok('/bad-path')
+    ->status_is(200)
+    ->content_like(qr{^--- toadfarm/master\n}m)
+    ->content_like(qr{^Started: \w+}m)
+    ->content_like(qr{\n\n$}s);
+}
 
 #=============================================================================
 done_testing;
 
 sub payload {
-  Mojo::JSON->new->encode({
-    ref => shift,
-    head_commit => {
-      id => $LAST_COMMIT,
-    },
-    repository => {
-      name => 'toadfarm',
-    },
-  })
+  my $ref = shift;
+  return <<"  JSON";
+{
+   "repository" : {
+      "name" : "toadfarm"
+   },
+   "ref" : "$ref",
+   "head_commit" : {
+      "id" : "$LAST_COMMIT"
+   }
+}
+  JSON
 }
