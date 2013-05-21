@@ -35,7 +35,7 @@ sub register {
 
     $log->info(
       sprintf "%s %s %s %s",
-      $c->tx->remote_address,
+      $c->req->headers->header('X-Forwarded-For') || $c->tx->remote_address,
       $c->req->method,
       $c->req->url->to_abs,
       $c->res->code || 200,
