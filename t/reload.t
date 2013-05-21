@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 use Test::Mojo;
 use Cwd;
+use utf8;
 
 plan skip_all => $^O unless $^O =~ /linux/i;
 plan skip_all => 'Started from wrong directory' unless -x 't/bin/git';
@@ -80,7 +81,12 @@ sub payload {
    },
    "ref" : "$ref",
    "head_commit" : {
-      "id" : "$LAST_COMMIT"
+      "id" : "$LAST_COMMIT",
+      "author" : {
+        "email" : "markus\@vesoen.com",
+        "name" : "Markus Vesøen",
+        "username" : "markusvesoen"
+      }
    }
 }
   JSON
