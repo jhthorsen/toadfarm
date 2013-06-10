@@ -16,7 +16,11 @@ my($t, $got_signal, $chdir);
 chomp $LAST_COMMIT;
 
 *Toadfarm::Plugin::Reload::getppid = sub { $PID };
-*Toadfarm::Plugin::Reload::chdir = sub { kill 'USR1', $PID; CORE::chdir(@_) };
+*Toadfarm::Plugin::Reload::chdir = sub {
+  CORE::chdir($_[1]) or return;
+  kill 'USR1', $PID;
+  1;
+};
 
 $ENV{PATH} = "t/bin:$ENV{PATH}";
 $ENV{MOJO_CONFIG} = 't/reload.conf';

@@ -118,12 +118,16 @@ sub register {
     else {
       for my $config (@{ $self->{repositories} }) {
         $status .= "--- $config->{name}/$config->{branch}\n";
-        $self->_run(
-          { GIT_DIR => "$config->{path}/.git" },
-          $GIT => log => -3 => '--format=%s',
-          sub { $status .= "$_[0]\n" },
-        );
-        $status .= "\n";
+        eval {
+          $self->_run(
+            { GIT_DIR => "$config->{path}/.git" },
+            $GIT => log => -3 => '--format=%s',
+            sub { $status .= "$_[0]\n" },
+          );
+          $status .= "\n";
+        } or do {
+          $self->{log}->error($@);
+        };
       }
     }
 
@@ -179,8 +183,9 @@ sub _fork_and_reload {
 
 sub _refresh_repo {
   my($self, $config, $sha1) = @_;
+  my $log = $self->{log};
 
-  chdir $config->{path};
+  chdir $config->{path} or die "chdir $config->{path}: $!";
   $self->_run($GIT => remote => update => $config->{remote});
   $self->_run($GIT => log => '--format=%H', '-n1', "$config->{remote}/$config->{branch}", sub {
     return $self->{log}->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
@@ -206,6 +211,7 @@ sub _run {
     chomp;
     push @res, $cb->($_);
   }
+  close $CMD or die "open(@cmd): $?" if $?;
 }
 
 sub _valid_config {
