@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.1001
+0.11
 
 =head1 SYNOPSIS
 
@@ -62,6 +62,7 @@ Additional config params.
 
   {
     apps => [...], # See SYNOPSIS
+    secret => 'some super duper unique string',
     log => {
       file => '/path/to/log/file.log',
       level => 'debug', # debug, info, warn, ...
@@ -130,7 +131,7 @@ L<Toadfarm::Plugin::Reload>.
 use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 
-our $VERSION = '0.1001';
+our $VERSION = '0.11';
 
 =head1 METHODS
 
@@ -156,6 +157,7 @@ sub startup {
     $self->$type->paths($paths);
   }
 
+  $self->secret($config->{secret}) if $config->{secret};
   $self->_start_apps(@{ $config->{apps} }) if $config->{apps};
   $self->_start_plugins(@{ $config->{plugins} }) if $config->{plugins};
 

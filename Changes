@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.11     Tue Jul 23 10:22:17 2013
+       * Add support for "secret" in config file
+
 0.1001   Mon Jun 10 22:30:19 2013
        * Capturing more system errors
 

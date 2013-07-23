@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.1001
+    0.11
 
 SYNOPSIS
   Production
@@ -53,6 +53,7 @@ CONFIG FILE
 
       {
         apps => [...], # See SYNOPSIS
+        secret => 'some super duper unique string',
         log => {
           file => '/path/to/log/file.log',
           level => 'debug', # debug, info, warn, ...
