@@ -29,6 +29,8 @@ $SIG{USR2} = sub { $got_signal++; Mojo::IOLoop->stop; };
 
 $t = Test::Mojo->new('Toadfarm');
 
+$ENV{TOADFARM_GITHUB_DELAY} = 0;
+
 {
   diag 'Reloading';
   $t->post_ok('/bad-path', {}, form => { payload => payload('refs/heads/master') })

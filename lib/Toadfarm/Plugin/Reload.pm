@@ -88,6 +88,8 @@ use Mojo::Util;
 my $JSON = Mojo::JSON->new;
 our $GIT = $ENV{GIT_EXE} || 'git';
 
+$ENV{TOADFARM_GITHUB_DELAY} ||= 2;
+
 =head1 METHODS
 
 =head2 register
@@ -158,6 +160,9 @@ sub _fork_and_reload {
   # child process
   $branch =~ s!refs/heads/!!;
 
+  # maybe i need to wait for github?
+  sleep $ENV{TOADFARM_GITHUB_DELAY} if $ENV{TOADFARM_GITHUB_DELAY};
+
   for my $config (@{ $self->{repositories} }) {
     $config->{name} eq $name or next;
     $config->{branch} eq $branch or next;
@@ -186,7 +191,7 @@ sub _refresh_repo {
   my $log = $self->{log};
 
   chdir $config->{path} or die "chdir $config->{path}: $!";
-  $self->_run($GIT => remote => update => $config->{remote});
+  $self->_run($GIT => fetch => $config->{remote});
   $self->_run($GIT => log => '--format=%H', '-n1', "$config->{remote}/$config->{branch}", sub {
     return $self->{log}->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
     $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$config->{branch}");
@@ -211,7 +216,6 @@ sub _run {
     chomp;
     push @res, $cb->($_);
   }
-  close $CMD or die "open(@cmd): $?" if $?;
 }
 
 sub _valid_config {

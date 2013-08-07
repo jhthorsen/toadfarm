@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.12     Wed Aug  7 15:34:15 2013
+       * Change from "git remote update ..." to "git fetch ..."
+
 0.11     Tue Jul 23 10:22:17 2013
        * Add support for "secret" in config file
 
