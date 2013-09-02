@@ -13,4 +13,9 @@ WriteMakefile(
   test => {
     TESTS => 't/*.t'
   },
+  META_MERGE => {
+    resources => {
+      repository => 'https://github.com/jhthorsen/toadfarm',
+    },
+  },
 );
