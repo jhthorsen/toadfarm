@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.13     Fri Sep  6 10:43:37 2013
+       * Add support for config
+
 0.12     Wed Aug  7 15:34:15 2013
        * Change from "git remote update ..." to "git fetch ..."
 

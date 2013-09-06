@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.12
+0.13
 
 =head1 SYNOPSIS
 
@@ -23,6 +23,7 @@ and a set of HTTP headers to act on. Example:
     apps => [
       'My::App' => {
         'X-Request-Base' => 'http://mydomain.com/whatever',
+        'config' => { app_config => 123 },
       },
       '/path/to/my-app' => {
         'Host' => 'mydomain.com',
@@ -38,6 +39,24 @@ set to "mydomain.com".
 
 The apps are processed in the order they are defined. This means that the
 first app that match will be executed.
+
+=head2 Application config
+
+The application will load the config as you would expect, but it is also
+possible to override the app config from the toadfarm config. This is
+especially useful when starting an app installed from cpan:
+
+  apps => {
+    # https://metacpan.org/module/App::mojopaste
+    '/usr/local/bin/mojopaste' => {
+      Host => 'p.thorsen.pm',
+      config => {
+        paste_dir => '/some/other/location
+      },
+    },
+  },
+
+NOTE! This config will be override the default application config.
 
 =head2 Debug
 
@@ -131,7 +150,7 @@ L<Toadfarm::Plugin::Reload>.
 use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 =head1 METHODS
 
@@ -185,7 +204,13 @@ sub _start_apps {
     $path = class_to_path $path unless -e $path;
     $app = Mojo::Server->new->load_app($path);
 
-    $app->log($self->log) if $self->config->{log}{combined};
+    if($self->config->{log}{combined}) {
+      $app->log($self->log);
+    }
+    if(ref $rules->{config} eq 'HASH') {
+      my $config = delete $rules->{config};
+      $app->config->{$_} = $config->{$_} for keys %$config;
+    }
 
     while(my($name, $value) = each %$rules) {
       $request_base = $value if $name eq 'X-Request-Base';

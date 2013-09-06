@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.12
+    0.13
 
 SYNOPSIS
   Production
@@ -17,6 +17,7 @@ SYNOPSIS
         apps => [
           'My::App' => {
             'X-Request-Base' => 'http://mydomain.com/whatever',
+            'config' => { app_config => 123 },
           },
           '/path/to/my-app' => {
             'Host' => 'mydomain.com',
@@ -32,6 +33,23 @@ SYNOPSIS
 
     The apps are processed in the order they are defined. This means that
     the first app that match will be executed.
+
+  Application config
+    The application will load the config as you would expect, but it is also
+    possible to override the app config from the toadfarm config. This is
+    especially useful when starting an app installed from cpan:
+
+      apps => {
+        # https://metacpan.org/module/App::mojopaste
+        '/usr/local/bin/mojopaste' => {
+          Host => 'p.thorsen.pm',
+          config => {
+            paste_dir => '/some/other/location
+          },
+        },
+      },
+
+    NOTE! This config will be override the default application config.
 
   Debug
     It is possible to start the server in foreground as well:

@@ -21,4 +21,8 @@ $t->get_ok('/info')
   ->status_is(200)
   ->content_is('["yikes"]');
 
+$t->get_ok('/config.json', { 'X-Request-Base' => 'http://localhost:1234/yikes' })
+  ->status_is(200)
+  ->json_is('/foo', 123);
+
 done_testing;
