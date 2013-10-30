@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.16     Wed Oct 30 20:13:38 2013
+       * Sub app inherit toadfarm config
+
 0.15     Wed Oct 30 19:01:54 2013
        * Allowing Ubic::Service::Toadfarm to start any hypnotoad
          application.

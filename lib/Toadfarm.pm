@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.15
+0.16
 
 =head1 SYNOPSIS
 
@@ -150,7 +150,7 @@ L<Toadfarm::Plugin::Reload>.
 use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 
-our $VERSION = '0.15';
+our $VERSION = '0.16';
 
 =head1 METHODS
 
@@ -190,10 +190,11 @@ sub startup {
 sub _start_apps {
   my $self = shift;
   my $routes = $self->routes;
+  my $config = $self->config;
   my $n = 0;
 
-  if($self->config->{log}{combined}) {
-    $self->log->info('All apps will log to ' .$self->config->{log}{file});
+  if($config->{log}{combined}) {
+    $self->log->info('All apps will log to ' .$config->{log}{file});
   }
 
   while(@_) {
@@ -204,13 +205,15 @@ sub _start_apps {
     $path = class_to_path $path unless -e $path;
     $app = Mojo::Server->new->load_app($path);
 
-    if($self->config->{log}{combined}) {
+    if($config->{log}{combined}) {
       $app->log($self->log);
     }
     if(ref $rules->{config} eq 'HASH') {
-      my $config = delete $rules->{config};
-      $app->config->{$_} = $config->{$_} for keys %$config;
+      my $local = delete $rules->{config};
+      $app->config->{$_} = $local->{$_} for keys %$local;
     }
+
+    $app->config->{$_} ||= $config->{$_} for keys %$config;
 
     while(my($name, $value) = each %$rules) {
       $request_base = $value if $name eq 'X-Request-Base';

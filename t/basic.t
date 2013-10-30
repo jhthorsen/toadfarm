@@ -23,6 +23,10 @@ $t->get_ok('/info')
 
 $t->get_ok('/config.json', { 'X-Request-Base' => 'http://localhost:1234/yikes' })
   ->status_is(200)
-  ->json_is('/foo', 123);
+  ->json_is('/foo', 123)
+  ->json_has('/plugins', 'inherit toadfarm config')
+  ->json_has('/apps')
+  ->json_is('/apps/1/Host', 'te.st')
+  ;
 
 done_testing;
