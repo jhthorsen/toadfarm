@@ -8,3 +8,5 @@
 ^MANIFEST.*
 ^Toadfarm
 \.pid
+t/ubic
+MYMETA*
