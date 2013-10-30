@@ -6,6 +6,7 @@ WriteMakefile(
   AUTHOR => 'Jan Henning Thorsen <jhthorsen@cpan.org>',
   LICENSE => 'perl',
   PREREQ_PM => {
+    'File::Which' => '1.00',
     'Mojolicious' => '4.30',
   },
   BUILD_REQUIRES => {

@@ -26,7 +26,7 @@ Put the code below in a C<ubic> service file:
     plugins => [...],
   );
 
-=head2 DETAILS
+=head2 Details
 
 =over 4
 
@@ -44,6 +44,16 @@ service class. The config file will be stored in the "tmp" directory in your
 
 =back
 
+=head2 Hypnotoad starter
+
+It is possible to use this module as a generic C<hypnotoad> starter, instead
+of L<Ubic::Service::Hypnotoad>, by setting the "HYPNOTOAD_APP" environment
+variable:
+
+  $ENV{HYPNOTOAD_APP} = '/path/to/my-mojo-app';
+  use Ubic::Service::Toadfarm;
+  Ubic::Service::Toadfarm->new(...);
+
 =cut
 
 use strict;
@@ -57,6 +67,8 @@ use Ubic::Settings;
 use constant DEBUG => $ENV{UBIC_TOADFARM_DEBUG} || 0;
 
 use parent 'Ubic::Service::Skeleton';
+
+$ENV{HYPNOTOAD_APP} ||= which 'toadfarm';
 
 =head1 METHODS
 
@@ -93,11 +105,10 @@ The config will be written to the "tmp" directory in ubic's data directory.
 sub start_impl {
   my $self = shift;
   my $hypnotoad = which 'hypnotoad';
-  my $toadfarm = which 'toadfarm';
 
   $self->_write_mojo_config;
-  warn "MOJO_CONFIG=$ENV{MOJO_CONFIG} system $hypnotoad $toadfarm\n" if DEBUG;
-  system $hypnotoad => $toadfarm;
+  warn "MOJO_CONFIG=$ENV{MOJO_CONFIG} system $hypnotoad $ENV{HYPNOTOAD_APP}\n" if DEBUG;
+  system $hypnotoad => $ENV{HYPNOTOAD_APP};
 }
 
 =head2 status_impl
