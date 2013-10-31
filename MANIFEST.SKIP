@@ -8,5 +8,5 @@
 ^MANIFEST.*
 ^Toadfarm
 \.pid
-t/ubic
-MYMETA*
+t/ubic\/.*
+MYMETA.*
