@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.1601   Thu Oct 31 20:12:43 2013
+       * Ubic is not bundled
+
 0.16     Wed Oct 30 20:13:38 2013
        * Sub app inherit toadfarm config
 
