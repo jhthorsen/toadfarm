@@ -61,7 +61,7 @@ my $service = Ubic::Service::Toadfarm->new(log => { file => $log_file }, hypnoto
     $tx;
   };
 
-  is $service->status_impl, 'running', 'toadfarm is running';
+  is $service->status_impl, 'running (status 42)', 'toadfarm is running';
 }
 
 {

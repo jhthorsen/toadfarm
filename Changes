@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.17
+       * Add status message to Ubic service
+
 0.1601   Thu Oct 31 20:12:43 2013
        * Ubic is not bundled
 

@@ -130,8 +130,8 @@ sub status_impl {
   $tx = Mojo::UserAgent->new(%args)->head("$listen/ubic-status");
   warn $tx->res->code // 'No HTTP code', "\n" if DEBUG;
 
-  if($tx->res->code) {
-    return result 'running';
+  if(my $code = $tx->res->code) {
+    return result "running", "status $code";
   }
   else {
     return result 'not running';
