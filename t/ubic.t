@@ -21,7 +21,15 @@ my(@system, @kill);
 }
 
 my $log_file = 't/ubic/toadfarm.log';
-my $service = Ubic::Service::Toadfarm->new(log => { file => $log_file }, hypnotoad => { listen => ['http://*:1345'] });
+my $service = Ubic::Service::Toadfarm->new(
+                log => {
+                  file => $log_file,
+                },
+                hypnotoad => {
+                  listen => ['http://*:1345'],
+                  status_resource => '/status123',
+                },
+              );
 
 {
   is $service->{stdout}, $log_file, 'stdout set';
@@ -44,6 +52,7 @@ my $service = Ubic::Service::Toadfarm->new(log => { file => $log_file }, hypnoto
       hypnotoad => {
         listen => ['http://*:1345'],
         pid_file => 't/ubic/tmp/toadfarm-test123.pid',
+        status_resource => '/status123',
       },
       log => { file => 't/ubic/toadfarm.log' },
     },
@@ -52,16 +61,19 @@ my $service = Ubic::Service::Toadfarm->new(log => { file => $log_file }, hypnoto
 }
 
 {
+  my $url;
   is $service->status_impl, 'not running', 'toadfarm not running';
 
   no warnings 'redefine';
   *Mojo::UserAgent::head = sub {
     my $tx = Mojo::Transaction->new;
+    $url = $_[1];
     $tx->res->code(42);
     $tx;
   };
 
   is $service->status_impl, 'running (status 42)', 'toadfarm is running';
+  like $url, qr{/status123$}, 'correct status url';
 }
 
 {
