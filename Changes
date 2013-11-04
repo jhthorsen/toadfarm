@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.1701   Mon Nov  4 19:54:35 2013
+       * Fix bad 00-basic.t
+
 0.17     Sat Nov  2 17:16:24 2013
        * Add status message to Ubic service
        * Add support for custom status resource

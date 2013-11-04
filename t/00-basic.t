@@ -21,11 +21,12 @@ find(
 
 plan tests => @files * 3;
 
-SKIP:
 for my $file (@files) {
-  skip 'Ubis not bundled', 3 if $file =~ /Ubic/;
-  my $module = $file; $module =~ s,\.pm$,,; $module =~ s,.*/?lib/,,; $module =~ s,/,::,g;
-  ok eval "use $module; 1", "use $module" or diag $@;
-  Test::Pod::pod_file_ok($file);
-  Test::Pod::Coverage::pod_coverage_ok($module);
+  SKIP: {
+    skip 'Ubic not bundled', 3 if $file =~ /Ubic/;
+    my $module = $file; $module =~ s,\.pm$,,; $module =~ s,.*/?lib/,,; $module =~ s,/,::,g;
+    ok eval "use $module; 1", "use $module" or diag $@;
+    Test::Pod::pod_file_ok($file);
+    Test::Pod::Coverage::pod_coverage_ok($module);
+  }
 }
