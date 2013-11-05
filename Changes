@@ -1,5 +1,9 @@
 Revision history for Toadfarm
 
+0.18     Tue Nov  5 19:38:21 2013
+       * Don't need to check with request if the process is not running
+       * The server should respond quickly
+
 0.1701   Mon Nov  4 19:54:35 2013
        * Fix bad 00-basic.t
 

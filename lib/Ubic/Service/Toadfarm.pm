@@ -121,11 +121,18 @@ response is not important, the important thing is that the server responds.
 sub status_impl {
   my $self = shift;
   my $listen = $self->{hypnotoad}{listen}[0];
+  my $pid = $self->_read_pid;
   my $resource = $self->{hypnotoad}{status_resource} || "/ubic-status";
-  my %args = ( connect_timeout => 5, request_timeout => 20 );
-  my $tx;
+  my($tx, %args);
+
+  # no need to check if process is not running
+  if(!$pid or !kill 0, $pid) {
+    return result 'not running';
+  }
 
   require Mojo::UserAgent;
+  $args{connect_timeout} = $ENV{MOJO_CONNECT_TIMEOUT} || 2;
+  $args{request_timeout} = $ENV{MOJO_REQUEST_TIMEOUT} || 10;
 
   $listen =~ s!\*!localhost!;
   $tx = Mojo::UserAgent->new(%args)->head($listen .$resource);
