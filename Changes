@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.19     Thu Nov 14 16:37:46 2013
+       * Will return ubic status with pid as well
+
 0.18     Tue Nov  5 19:38:21 2013
        * Don't need to check with request if the process is not running
        * The server should respond quickly

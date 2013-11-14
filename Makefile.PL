@@ -16,7 +16,7 @@ WriteMakefile(
     resources => {
       license => 'http://dev.perl.org/licenses/',
       homepage => 'https://metacpan.org/release/Toadfarm',
-      bugtracker => 'http://rt.cpan.org/NoAuth/Bugs.html?Dist=Toadfarm',
+      bugtracker => 'https://github.com/jhthorsen/toadfarm/issues',
       repository => 'https://github.com/jhthorsen/toadfarm',
     },
   },

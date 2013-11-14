@@ -72,7 +72,7 @@ my $service = Ubic::Service::Toadfarm->new(
     $tx;
   };
 
-  is $service->status_impl, 'running (status 42)', 'toadfarm is running';
+  like $service->status_impl, qr/running \(pid \d+, status 42\)/, 'toadfarm is running';
   like $url, qr{/status123$}, 'correct status url';
 }
 

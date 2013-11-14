@@ -139,7 +139,7 @@ sub status_impl {
   warn $tx->res->code // 'No HTTP code', "\n" if DEBUG;
 
   if(my $code = $tx->res->code) {
-    return result "running", "status $code";
+    return result "running", "pid $pid, status $code";
   }
   else {
     return result 'not running';
