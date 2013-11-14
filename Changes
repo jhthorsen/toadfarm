@@ -1,5 +1,9 @@
 Revision history for Toadfarm
 
+0.20     Thu Nov 14 17:13:38 2013
+       * Change format for AccessLog plugin:
+         1.2.3.4 GET http://... 200 0.001s
+
 0.19     Thu Nov 14 16:37:46 2013
        * Will return ubic status with pid as well
 

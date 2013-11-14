@@ -15,6 +15,7 @@ is subject for change. For now it is:
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
+use Time::HiRes qw( gettimeofday tv_interval );
 
 =head1 METHODS
 
@@ -28,18 +29,23 @@ sub register {
   my($self, $app, $config) = @_;
   my $log = $app->log;
 
-  $app->hook(around_dispatch => sub {
-    my($next, $c) = @_;
+  $app->hook(before_dispatch => sub {
+    my $c = shift;
 
-    $next->();
+    $c->tx->req->env->{t0} = [gettimeofday];
+    $c->tx->on(finish => sub {
+      my $tx = shift;
+      my $req = $tx->req;
 
-    $log->info(
-      sprintf "%s %s %s %s",
-      $c->req->headers->header('X-Forwarded-For') || $c->tx->remote_address,
-      $c->req->method,
-      $c->req->url->to_abs,
-      $c->res->code || 200,
-    );
+      $log->info(
+        sprintf '%s %s %s %s %ss',
+        $req->env->{identity} || $req->headers->header('X-Forwarded-For') || $tx->remote_address,
+        $req->method,
+        $req->url->to_abs,
+        $tx->res->code || '000',
+        tv_interval($req->env->{t0}),
+      );
+    });
   });
 }
 
