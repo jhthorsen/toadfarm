@@ -20,6 +20,8 @@ my(@system, @kill);
   like $@, qr{log => file}, 'log => file missing';
 }
 
+delete $ENV{TEST123};
+
 my $log_file = 't/ubic/toadfarm.log';
 my $service = Ubic::Service::Toadfarm->new(
                 log => {
@@ -29,9 +31,13 @@ my $service = Ubic::Service::Toadfarm->new(
                   listen => ['http://*:1345'],
                   status_resource => '/status123',
                 },
+                env => {
+                  TEST123 => 123,
+                },
               );
 
 {
+  is $ENV{TEST123}, 123, 'environment set';
   is $service->{stdout}, $log_file, 'stdout set';
   is $service->{stderr}, $log_file, 'stderr set';
   is $service->{ubic_log}, $log_file, 'ubic_log set';

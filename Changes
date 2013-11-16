@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.21
+       * Add support for setting environment variables from Ubic service
+
 0.20     Thu Nov 14 17:13:38 2013
        * Change format for AccessLog plugin:
          1.2.3.4 GET http://... 200 0.001s

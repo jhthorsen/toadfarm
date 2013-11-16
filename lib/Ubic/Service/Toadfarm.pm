@@ -82,11 +82,16 @@ sub new {
   my $class = shift;
   my $args = @_ ? @_ > 1 ? {@_} : {%{$_[0]}} : {};
   my $self = bless $args, $class;
+  my $env = $args->{env} || {};
 
   ref $self->{hypnotoad}{listen} eq 'ARRAY' or die 'Invalid/missing hypnotoad => listen';
   $self->{stderr} ||= $self->{log}{file} or die "Missing log => file";
   $self->{stdout} ||= $self->{log}{file};
   $self->{ubic_log} ||= $self->{log}{file};
+
+  while(my($name, $value) = keys %$env) {
+    $ENV{$name} = $value;
+  }
 
   warn Data::Dumper::Dumper($self) if DEBUG == 2;
   return $self;
