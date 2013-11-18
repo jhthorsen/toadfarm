@@ -181,6 +181,7 @@ sub reload {
   warn "pid=$pid\n" if DEBUG;
   return result 'not running' unless $pid;
   warn "kill USR2 $pid\n" if DEBUG;
+  $self->_write_mojo_config;
   return result 'not running' unless kill 'USR2', $pid;
   return result 'reloaded';
 }

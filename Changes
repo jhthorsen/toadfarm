@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.23
+       * Need to write new config on ubic reload
+
 0.22     Mon Nov 18 15:15:43 2013
        * Fix bug when passing %env to Ubi::Service::Toadfarm
 
