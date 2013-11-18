@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.22     Mon Nov 18 15:15:43 2013
+       * Fix bug when passing %env to Ubi::Service::Toadfarm
+
 0.21     Sat Nov 16 16:14:55 2013
        * Add support for setting environment variables from Ubic service
 

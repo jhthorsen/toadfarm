@@ -89,7 +89,7 @@ sub new {
   $self->{stdout} ||= $self->{log}{file};
   $self->{ubic_log} ||= $self->{log}{file};
 
-  while(my($name, $value) = keys %$env) {
+  while(my($name, $value) = each %$env) {
     $ENV{$name} = $value;
   }
 

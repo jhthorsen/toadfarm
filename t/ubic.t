@@ -55,6 +55,9 @@ my $service = Ubic::Service::Toadfarm->new(
     $config,
     {
       name => 'test123',
+      env => {
+        TEST123 => 123,
+      },
       hypnotoad => {
         listen => ['http://*:1345'],
         pid_file => 't/ubic/tmp/toadfarm-test123.pid',
