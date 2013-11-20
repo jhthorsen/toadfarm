@@ -210,7 +210,7 @@ sub _read_pid {
 }
 
 sub _write_mojo_config {
-  my($self, $args) = @_;
+  my $self = shift;
   my $data_dir = Ubic::Settings->data_dir;
   my $file = $self->_path_to_mojo_config;
   my %config = %$self;
