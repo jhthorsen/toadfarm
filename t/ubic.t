@@ -37,7 +37,7 @@ my $service = Ubic::Service::Toadfarm->new(
               );
 
 {
-  is $ENV{TEST123}, 123, 'environment set';
+  is $ENV{TEST123}, undef, 'environment localized';
   is $service->{stdout}, $log_file, 'stdout set';
   is $service->{stderr}, $log_file, 'stderr set';
   is $service->{ubic_log}, $log_file, 'ubic_log set';
