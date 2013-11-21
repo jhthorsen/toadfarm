@@ -187,15 +187,11 @@ sub reload {
 }
 
 sub _path_to_mojo_config {
-  $ENV{MOJO_CONFIG} = catfile(
-    Ubic::Settings->data_dir,
-    'tmp',
-    'toadfarm-' .$_[0]->name .'.conf'
-  );
+  catfile(Ubic::Settings->data_dir, 'tmp', $_[0]->full_name .'.conf');
 }
 
 sub _path_to_pid_file {
-  catfile(Ubic::Settings->data_dir, 'tmp', 'toadfarm-' .$_[0]->name .'.pid');
+  catfile(Ubic::Settings->data_dir, 'tmp', $_[0]->full_name .'.pid');
 }
 
 sub _read_pid {

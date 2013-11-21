@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.26
+       * Not compatible pid/config file change for ubic service
+
 0.25     Thu Nov 21 11:14:13 2013
        * Fix really bad bug: MUST NOT LOG user:password from request URL.
 
