@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.25     Thu Nov 21 11:14:13 2013
+       * Fix really bad bug: MUST NOT LOG user:password from request URL.
+
 0.24     Thu Nov 21 10:01:34 2013
        * Change ubic status will be "running" even if the server does not
          respond to HTTP request.

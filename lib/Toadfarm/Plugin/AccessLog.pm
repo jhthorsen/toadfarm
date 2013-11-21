@@ -41,7 +41,7 @@ sub register {
         sprintf '%s %s %s %s %ss',
         $req->env->{identity} || $req->headers->header('X-Forwarded-For') || $tx->remote_address,
         $req->method,
-        $req->url->to_abs,
+        $req->url->to_abs->userinfo(''),
         $tx->res->code || '000',
         tv_interval($req->env->{t0}),
       );
