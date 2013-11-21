@@ -137,7 +137,7 @@ sub status_impl {
 
   require Mojo::UserAgent;
   $args{connect_timeout} = $ENV{MOJO_CONNECT_TIMEOUT} || 2;
-  $args{request_timeout} = $ENV{MOJO_REQUEST_TIMEOUT} || 10;
+  $args{request_timeout} = $ENV{MOJO_REQUEST_TIMEOUT} || 2;
 
   $listen =~ s!\*!localhost!;
   $tx = Mojo::UserAgent->new(%args)->head($listen .$resource);
@@ -147,7 +147,7 @@ sub status_impl {
     return result "running", "pid $pid, status $code";
   }
   else {
-    return result 'not running';
+    return result +($ENV{UBIC_TOADFARM_NO_RESPONSE_STATE} || 'running'), "pid $pid, no response";
   }
 }
 

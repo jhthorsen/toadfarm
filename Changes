@@ -1,10 +1,14 @@
 Revision history for Toadfarm
 
+0.24     Thu Nov 21 10:01:34 2013
+       * Change ubic status will be "running" even if the server does not
+         respond to HTTP request.
+
 0.23     Mon Nov 18 16:56:06 2013
        * Need to write new config on ubic reload
 
 0.22     Mon Nov 18 15:15:43 2013
-       * Fix bug when passing %env to Ubi::Service::Toadfarm
+       * Fix bug when passing %env to Ubic::Service::Toadfarm
 
 0.21     Sat Nov 16 16:14:55 2013
        * Add support for setting environment variables from Ubic service

@@ -71,7 +71,7 @@ my $service = Ubic::Service::Toadfarm->new(
 
 {
   my $url;
-  is $service->status_impl, 'not running', 'toadfarm not running';
+  like $service->status_impl, qr{running \(pid \d+, no response\)}, 'toadfarm not running';
 
   no warnings 'redefine';
   *Mojo::UserAgent::head = sub {

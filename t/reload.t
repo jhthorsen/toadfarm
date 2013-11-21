@@ -17,7 +17,7 @@ chomp $LAST_COMMIT;
 
 *Toadfarm::Plugin::Reload::getppid = sub { $PID };
 *Toadfarm::Plugin::Reload::chdir = sub {
-  CORE::chdir($_[1]) or return;
+  CORE::chdir($_[0]) or return;
   kill 'USR1', $PID;
   1;
 };
