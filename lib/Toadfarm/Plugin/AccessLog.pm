@@ -39,7 +39,7 @@ sub register {
 
       $log->info(
         sprintf '%s %s %s %s %ss',
-        $req->env->{identity} || $req->headers->header('X-Forwarded-For') || $tx->remote_address,
+        $req->env->{identity} || $tx->remote_address,
         $req->method,
         $req->url->to_abs->userinfo(''),
         $tx->res->code || '000',
