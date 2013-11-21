@@ -87,9 +87,6 @@ sub new {
   my $self = bless $args, $class;
 
   ref $self->{hypnotoad}{listen} eq 'ARRAY' or die 'Invalid/missing hypnotoad => listen';
-  $self->{stderr} ||= $self->{log}{file} or die "Missing log => file";
-  $self->{stdout} ||= $self->{log}{file};
-  $self->{ubic_log} ||= $self->{log}{file};
 
   warn Data::Dumper::Dumper($self) if DEBUG == 2;
   return $self;
@@ -223,7 +220,6 @@ sub _write_mojo_config {
   my %config = %$self;
   my $dumper = Data::Dumper->new([\%config]);
 
-  delete $config{$_} for qw( stderr stdout ubic_log );
   $config{hypnotoad}{pid_file} ||= $self->_path_to_pid_file;
 
   open my $CONFIG, '>', $file or die "Could not write $file: $!";
