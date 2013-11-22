@@ -107,7 +107,7 @@ sub start_impl {
   my $hypnotoad = which 'hypnotoad';
 
   $self->_write_mojo_config;
-  local $ENV = $self->_env;
+  local %ENV = $self->_env;
   warn "MOJO_CONFIG=$ENV{MOJO_CONFIG} system $hypnotoad $ENV{HYPNOTOAD_APP}\n" if DEBUG;
   system $hypnotoad => $ENV{HYPNOTOAD_APP};
 }
@@ -126,7 +126,7 @@ sub status_impl {
   my $resource = $self->{hypnotoad}{status_resource} || "/ubic-status";
   my($tx, %args);
 
-  local $ENV = $self->_env;
+  local %ENV = $self->_env;
 
   # no need to check if process is not running
   if(!$pid or !kill 0, $pid) {

@@ -16,8 +16,6 @@ my(@system, @kill);
 {
   eval { Ubic::Service::Toadfarm->new };
   like $@, qr{hypnotoad => listen}, 'hypnotoad => listen missing';
-  eval { Ubic::Service::Toadfarm->new({ hypnotoad => { listen => [] } }) };
-  like $@, qr{log => file}, 'log => file missing';
 }
 
 delete $ENV{TEST123};
@@ -37,18 +35,12 @@ my $service = Ubic::Service::Toadfarm->new(
               );
 
 {
-  is $ENV{TEST123}, undef, 'environment localized';
-  is $service->{stdout}, $log_file, 'stdout set';
-  is $service->{stderr}, $log_file, 'stderr set';
-  is $service->{ubic_log}, $log_file, 'ubic_log set';
-}
-
-{
   mkdir 't/ubic';
   mkdir 't/ubic/tmp';
   unlink 't/ubic/tmp/test123.conf';
   $service->{name} = 'test123';
   $service->start_impl;
+  is $ENV{TEST123}, undef, 'environment localized';
   like "@system", qr{hypnotoad\s*script/toadfarm}, 'system hypnotoad toadfarm';
   my $config = do 't/ubic/tmp/test123.conf';
   is_deeply(
@@ -71,6 +63,7 @@ my $service = Ubic::Service::Toadfarm->new(
 
 {
   my $url;
+  my $test123;
   like $service->status_impl, qr{running \(pid \d+, no response\)}, 'toadfarm not running';
 
   no warnings 'redefine';
@@ -78,11 +71,14 @@ my $service = Ubic::Service::Toadfarm->new(
     my $tx = Mojo::Transaction->new;
     $url = $_[1];
     $tx->res->code(42);
+    $test123 = $ENV{TEST123};
     $tx;
   };
 
   like $service->status_impl, qr/running \(pid \d+, status 42\)/, 'toadfarm is running';
   like $url, qr{/status123$}, 'correct status url';
+  is $ENV{TEST123}, undef, 'environment does not leak';
+  is $test123, 123, 'environment localized inside the function';
 }
 
 {
