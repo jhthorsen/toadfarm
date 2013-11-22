@@ -1,5 +1,9 @@
 Revision history for Toadfarm
 
+0.2603
+       * Fix link to example etc directory
+         Merge pull request #2 from dsteinbrunner/patch-1
+
 0.2602   Fri Nov 22 12:18:11 2013
        * Clearning mojo environment variables
 
