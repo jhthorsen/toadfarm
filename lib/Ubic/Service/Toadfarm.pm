@@ -108,7 +108,7 @@ sub start_impl {
 
   $self->_write_mojo_config;
   local %ENV = $self->_env;
-  warn "MOJO_CONFIG=$ENV{MOJO_CONFIG} system $hypnotoad $ENV{HYPNOTOAD_APP}\n" if DEBUG;
+  warn "MOJO_CONFIG=$ENV{MOJO_CONFIG} $hypnotoad $ENV{HYPNOTOAD_APP}\n" if DEBUG;
   system $hypnotoad => $ENV{HYPNOTOAD_APP};
 }
 
@@ -187,10 +187,19 @@ sub reload {
 sub _env {
   my $self = shift;
 
+  # Not really sure how to make this work from within a mojo app
+  # without clearing these environment variables.
+
   return(
     %ENV,
     %{ $self->{env} || {} },
+    HYPNOTOAD_EXE => '',
+    HYPNOTOAD_FOREGROUND => 0,
+    HYPNOTOAD_REV => 0,
+    HYPNOTOAD_STOP => 0,
+    HYPNOTOAD_TEST => 0,
     MOJO_CONFIG => $self->_path_to_mojo_config,
+    MOJO_REVERSE_PROXY => $self->{hypnotoad}{proxy} || 0,
   );
 }
 
