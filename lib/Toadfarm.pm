@@ -135,7 +135,7 @@ See also: L<Toadfarm::Plugin::Reload/SYNOPSIS>.
 
 =head1 EXAMPLE SETUP
 
-Look at L<https://github.com/jhthorsen/toadfarm/tree/etc/> for example
+Look at L<https://github.com/jhthorsen/toadfarm/tree/master/etc> for example
 resources which show how to start L<Toadfarm> on ubuntu. In addition, you can
 forward all traffic to the server using the "iptables" rule below:
 
