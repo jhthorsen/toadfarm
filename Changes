@@ -1,6 +1,6 @@
 Revision history for Toadfarm
 
-0.26
+0.26     Fri Nov 22 09:07:04 2013
        * Not compatible pid/config file change for ubic service
        * Fix %ENV is localized
        * "log" in config is no longer required
