@@ -1,6 +1,7 @@
 Revision history for Toadfarm
 
-0.2603
+0.27
+       * Able to load application classes
        * Fix link to example etc directory
          Merge pull request #2 from dsteinbrunner/patch-1
 

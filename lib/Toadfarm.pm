@@ -149,6 +149,7 @@ L<Toadfarm::Plugin::Reload>.
 
 use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
+use File::Which;
 
 our $VERSION = '0.2602';
 
@@ -198,13 +199,20 @@ sub _start_apps {
   }
 
   while(@_) {
-    my($path, $rules) = (shift @_, shift @_);
-    my($app, $request_base, @over);
+    my($name, $rules) = (shift @_, shift @_);
+    my $server = Mojo::Server->new;
+    my $path = $name;
+    my($app, $request_base, @over, @error);
 
     delete local $ENV{MOJO_CONFIG};
-    $path = class_to_path $path unless -e $path;
-    $app = Mojo::Server->new->load_app($path);
 
+    $path = File::Which::which($path) || class_to_path($path) unless -r $path;
+    $app ||= eval { $server->load_app($path) } or push @error, $@;
+    $app ||= eval { $server->build_app($name) } or push @error, $@;
+
+    if(!$app) {
+      die join "\n", @error;
+    }
     if($config->{log}{combined}) {
       $app->log($self->log);
     }
