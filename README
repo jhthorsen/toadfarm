@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.2602
+    0.27
 
 SYNOPSIS
   Production
@@ -122,9 +122,10 @@ CONFIG FILE
         See also: "SYNOPSIS" in Toadfarm::Plugin::Reload.
 
 EXAMPLE SETUP
-    Look at <https://github.com/jhthorsen/toadfarm/tree/etc/> for example
-    resources which show how to start Toadfarm on ubuntu. In addition, you
-    can forward all traffic to the server using the "iptables" rule below:
+    Look at <https://github.com/jhthorsen/toadfarm/tree/master/etc> for
+    example resources which show how to start Toadfarm on ubuntu. In
+    addition, you can forward all traffic to the server using the "iptables"
+    rule below:
 
       $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
 
