@@ -1,13 +1,110 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use FindBin;
-BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
+use Cwd qw( abs_path );
 
-@ARGV = grep { +(-r $_ ? ($ENV{MOJO_CONFIG} = $_, 0) : 1) } @ARGV;
+$ENV{HOME} ||= '__UNDEF__';
+$ENV{MOJO_CONFIG} ||= '';
+$ENV{TOADFARM_SILENT} ||= 0;
 
-if(@ARGV == 0 and !$ENV{MOJO_APP_LOADER}) {
-    exec $ENV{MOJO_CONFIG} ? (hypnotoad => $0) : (perldoc => 'Toadfarm');
+sub help {
+  return <<"HELP";
+usage: $0 [OPTIONS] [CONFIG_FILE]
+
+  # Show manual page
+  toadfarm --man
+
+  # Start or hot reload
+  toadfarm path/to/apps.conf
+
+  # Custom application
+  toadfarm -a /path/to/myapp.pl path/to/mojo.conf
+
+These options are available:
+  -a <path>          Custom application (other than toadfarm)
+  -f, --foreground   Keep manager process in foreground.
+  -h, --help         Show this message.
+      --man          Show manual
+      --start        Only start - no hot reload
+  -s, --stop         Stop server gracefully.
+  -t, --test         Test application and exit.
+
+HELP
+}
+
+sub read_pid {
+  my $pid_file = $_[0]->{hypnotoad}{pid_file} or die "Cannot start without hypnotoad => pid_file in config file\n";
+
+  warn "pid_file=$pid_file" if $ENV{TOADFARM_SILENT} == -1;
+
+  return 0 unless -s $pid_file;
+  return eval {
+    open my $PID, $pid_file or die "Could not read $pid_file: $!";
+    scalar(<$PID>) =~ /(\d+)/g ? $1 : 0;
+  };
+}
+
+sub start {
+  $ENV{MOJO_CONFIG} or die "Path to config file is required as input\n";
+  my $config = do $ENV{MOJO_CONFIG} or die $@;
+  my $pid = read_pid($config);
+
+  warn "pid=$pid" if $ENV{TOADFARM_SILENT} == -1;
+
+  if($pid and kill 0, $pid) {
+    print "$ENV{HYPNOTOAD_APP} - running ($pid)\n" unless $ENV{TOADFARM_SILENT};
+  }
+  else {
+    print "$ENV{HYPNOTOAD_APP} - starting\n" unless $ENV{TOADFARM_SILENT};
+    exec hypnotoad => @_ => $ENV{HYPNOTOAD_APP};
+  }
+
+  return 0;
+}
+
+unless($ENV{MOJO_APP_LOADER}) {
+  $ENV{HYPNOTOAD_APP} = $0;
+  my($start, @args);
+
+  while(@ARGV) {
+    my $arg = shift @ARGV;
+    if(-r $arg) {
+      $ENV{MOJO_CONFIG} = $arg;
+    }
+    elsif(-r "$ENV{HOME}/.toadfarm/$arg") {
+      $ENV{MOJO_CONFIG} = "$ENV{HOME}/.toadfarm/$arg";
+    }
+    elsif($arg eq '-a') {
+      $ENV{HYPNOTOAD_APP} = shift @ARGV or die "Usage: -a <app> ...\n";
+      unless(-x $ENV{HYPNOTOAD_APP}) {
+        require File::Spec;
+        for my $p (File::Spec->path) {
+          next unless -x "$p/$ENV{HYPNOTOAD_APP}";
+          $ENV{HYPNOTOAD_APP} = "$p/$ENV{HYPNOTOAD_APP}";
+          last;
+        }
+      }
+    }
+    elsif($arg eq '--man') {
+      exec perldoc => 'Toadfarm';
+    }
+    elsif($arg eq '--start') {
+      $start = 1;
+    }
+    else {
+      push @args, $arg;
+    }
+  }
+
+  if($ENV{MOJO_CONFIG}) {
+    $ENV{MOJO_CONFIG} = abs_path $ENV{MOJO_CONFIG};
+    warn "MOJO_CONFIG=$ENV{MOJO_CONFIG} hypnotoad @args $ENV{HYPNOTOAD_APP}" if $ENV{TOADFARM_SILENT} == -1;
+  }
+
+  exit start(@args) if $start;
+  exec hypnotoad => @args => $ENV{HYPNOTOAD_APP} if $ENV{MOJO_CONFIG};
+  print help();
+  exit 0;
 }
 
 # Start command line interface for application
