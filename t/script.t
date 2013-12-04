@@ -5,6 +5,7 @@ use Test::More;
 $ENV{TOADFARM_SILENT} = 1;
 $ENV{HOME} = 't';
 
+plan skip_all => 'Cannot run on Win32' if $^O =~ /win/i;
 plan skip_all => 'Cannot read t/.toadfarm/script.conf' unless -r 't/.toadfarm/script.conf';
 
 my(@exec, $ret);

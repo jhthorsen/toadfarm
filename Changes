@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.2801
+       * Skipping t/script.t on Win32
+
 0.28     Tue Dec  3 21:18:06 2013
        * Add extra (experimental) options to script/toadfarm
 
