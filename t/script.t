@@ -63,4 +63,13 @@ my(@exec, $ret);
   is_deeply \@exec, [], 'already running';
 }
 
+{
+  delete $ENV{MOJO_CONFIG};
+  local $ENV{PATH} = '/bin:script:/foo';
+  local @ARGV = qw( -a script/myapp.pl );
+  do 'script/toadfarm';
+  is_deeply \@exec, [ hypnotoad => 'script/myapp.pl' ], 'hypnotoad with just -a';
+  like $ENV{MOJO_CONFIG}, qr{/t/\.toadfarm/myapp\.pl\.conf}, 'MOJO_CONFIG from -a';
+}
+
 done_testing;

@@ -1,7 +1,8 @@
 Revision history for Toadfarm
 
-0.2801
+0.29     Wed Dec  4 09:06:13 2013
        * Skipping t/script.t on Win32
+       * Default config file from app name
 
 0.28     Tue Dec  3 21:18:06 2013
        * Add extra (experimental) options to script/toadfarm

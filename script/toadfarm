@@ -1,9 +1,10 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
+use File::Basename qw( basename );
 use Cwd qw( abs_path );
 
-$ENV{HOME} ||= '__UNDEF__';
+$ENV{HOME} ||= '__NO_HOME__';
 $ENV{MOJO_CONFIG} ||= '';
 $ENV{TOADFARM_SILENT} ||= 0;
 
@@ -19,6 +20,11 @@ usage: $0 [OPTIONS] [CONFIG_FILE]
 
   # Custom application
   toadfarm -a /path/to/myapp.pl path/to/mojo.conf
+
+Default config file will be "\$HOME/.toadfarm/\$app.conf", where
+\$app is specified by "-a".
+
+  toadfarm -a toadfarm == toadfarm \$HOME/.toadfarm/toadfarm.conf"
 
 These options are available:
   -a <path>          Custom application (other than toadfarm)
@@ -76,6 +82,8 @@ unless($ENV{MOJO_APP_LOADER}) {
     }
     elsif($arg eq '-a') {
       $ENV{HYPNOTOAD_APP} = shift @ARGV or die "Usage: -a <app> ...\n";
+      $ENV{MOJO_CONFIG} ||= sprintf '%s/.toadfarm/%s.conf', $ENV{HOME}, basename $ENV{HYPNOTOAD_APP};
+
       unless(-x $ENV{HYPNOTOAD_APP}) {
         require File::Spec;
         for my $p (File::Spec->path) {
