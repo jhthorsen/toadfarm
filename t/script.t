@@ -21,15 +21,15 @@ my(@exec, $ret);
 {
   local @ARGV = qw( a b c --man d e --start );
   do 'script/toadfarm';
-  like $@, qr{exec}, 'exec...';
-  is_deeply \@exec, [ perldoc => 'Toadfarm' ], 'perldoc';
+  like $@, qr{exec}, 'exec perldoc';
+  is_deeply \@exec, [ perldoc => 'Toadfarm' ], 'perldoc Toadfarm';
 }
 
 {
   local @ARGV = qw( script.conf );
   do 'script/toadfarm';
-  like $@, qr{exec}, 'exec...';
-  is_deeply \@exec, [ hypnotoad => 't/script.t' ], 'hypnotoad';
+  like $@, qr{exec}, 'exec hypnotoad';
+  is_deeply \@exec, [ hypnotoad => 'script/toadfarm' ], 'hypnotoad script/toadfarm';
   like $ENV{MOJO_CONFIG}, qr{t/\.toadfarm/script\.conf$}, 'MOJO_CONFIG';
 
   local @ARGV = qw( t/.toadfarm/script.conf -a );
@@ -66,10 +66,21 @@ my(@exec, $ret);
 {
   delete $ENV{MOJO_CONFIG};
   local $ENV{PATH} = '/bin:script:/foo';
-  local @ARGV = qw( -a script/myapp.pl );
+  local @ARGV = qw( -a t/app.pl );
+  chmod 0755, 't/app.pl';
   do 'script/toadfarm';
-  is_deeply \@exec, [ hypnotoad => 'script/myapp.pl' ], 'hypnotoad with just -a';
-  like $ENV{MOJO_CONFIG}, qr{/t/\.toadfarm/myapp\.pl\.conf}, 'MOJO_CONFIG from -a';
+  is_deeply \@exec, [ hypnotoad => 't/app.pl' ], 'hypnotoad with just -a';
+  like $ENV{MOJO_CONFIG}, qr{/t/\.toadfarm/app\.pl\.conf}, 'MOJO_CONFIG from -a';
+  is $ENV{TOADFARM_APPLICATION_CLASS}, 'Toadfarm', 'default TOADFARM_APPLICATION_CLASS';
+}
+
+{
+  delete $ENV{MOJO_CONFIG};
+  local @ARGV = qw( -a t::App );
+  do 'script/toadfarm';
+  is_deeply \@exec, [ hypnotoad => 'script/toadfarm' ], 'hypnotoad with application class';
+  is $ENV{TOADFARM_APPLICATION_CLASS}, 't::App', 'custom TOADFARM_APPLICATION_CLASS';
+  like $ENV{MOJO_CONFIG}, qr{/t/\.toadfarm/t-app\.conf}, 'MOJO_CONFIG from TOADFARM_APPLICATION_CLASS';
 }
 
 done_testing;

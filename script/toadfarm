@@ -6,6 +6,7 @@ use Cwd qw( abs_path );
 
 $ENV{HOME} ||= '__NO_HOME__';
 $ENV{MOJO_CONFIG} ||= '';
+$ENV{TOADFARM_APPLICATION_CLASS} = 'Toadfarm';
 $ENV{TOADFARM_SILENT} ||= 0;
 
 sub help {
@@ -69,7 +70,7 @@ sub start {
 }
 
 unless($ENV{MOJO_APP_LOADER}) {
-  $ENV{HYPNOTOAD_APP} = $0;
+  $ENV{HYPNOTOAD_APP} = __FILE__;
   my($start, @args);
 
   while(@ARGV) {
@@ -82,15 +83,24 @@ unless($ENV{MOJO_APP_LOADER}) {
     }
     elsif($arg eq '-a') {
       $ENV{HYPNOTOAD_APP} = shift @ARGV or die "Usage: -a <app> ...\n";
-      $ENV{MOJO_CONFIG} ||= sprintf '%s/.toadfarm/%s.conf', $ENV{HOME}, basename $ENV{HYPNOTOAD_APP};
 
-      unless(-x $ENV{HYPNOTOAD_APP}) {
+      if(!-x $ENV{HYPNOTOAD_APP}) {
         require File::Spec;
         for my $p (File::Spec->path) {
           next unless -x "$p/$ENV{HYPNOTOAD_APP}";
           $ENV{HYPNOTOAD_APP} = "$p/$ENV{HYPNOTOAD_APP}";
           last;
         }
+      }
+
+      if(-x $ENV{HYPNOTOAD_APP}) {
+        $ENV{MOJO_CONFIG} ||= sprintf '%s/.toadfarm/%s.conf', $ENV{HOME}, basename $ENV{HYPNOTOAD_APP};
+      }
+      else {
+        $ENV{TOADFARM_APPLICATION_CLASS} = $ENV{HYPNOTOAD_APP};
+        $ENV{HYPNOTOAD_APP} =~ s/::/-/g;
+        $ENV{MOJO_CONFIG} ||= sprintf '%s/.toadfarm/%s.conf', $ENV{HOME}, lc $ENV{HYPNOTOAD_APP};
+        $ENV{HYPNOTOAD_APP} = __FILE__;
       }
     }
     elsif($arg eq '--man') {
@@ -117,4 +127,4 @@ unless($ENV{MOJO_APP_LOADER}) {
 
 # Start command line interface for application
 require Mojolicious::Commands;
-Mojolicious::Commands->start_app('Toadfarm');
+Mojolicious::Commands->start_app($ENV{TOADFARM_APPLICATION_CLASS});

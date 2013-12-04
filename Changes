@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.30     Wed Dec  4 14:52:20 2013
+       * Toadfarm can load application class
+
 0.29     Wed Dec  4 09:06:13 2013
        * Skipping t/script.t on Win32
        * Default config file from app name
