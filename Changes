@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.3001   Wed Dec  4 15:16:56 2013
+       * Toadfarm could not really load application class in 0.30
+
 0.30     Wed Dec  4 14:52:20 2013
        * Toadfarm can load application class
 

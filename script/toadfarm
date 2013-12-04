@@ -6,7 +6,7 @@ use Cwd qw( abs_path );
 
 $ENV{HOME} ||= '__NO_HOME__';
 $ENV{MOJO_CONFIG} ||= '';
-$ENV{TOADFARM_APPLICATION_CLASS} = 'Toadfarm';
+$ENV{TOADFARM_APPLICATION_CLASS} ||= 'Toadfarm';
 $ENV{TOADFARM_SILENT} ||= 0;
 
 sub help {
@@ -53,7 +53,7 @@ sub read_pid {
 
 sub start {
   $ENV{MOJO_CONFIG} or die "Path to config file is required as input\n";
-  my $config = do $ENV{MOJO_CONFIG} or die $@;
+  my $config = do $ENV{MOJO_CONFIG} or die($@ || $!);
   my $pid = read_pid($config);
 
   warn "pid=$pid" if $ENV{TOADFARM_SILENT} == -1;
