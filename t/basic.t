@@ -6,6 +6,8 @@ use Test::Mojo;
 $ENV{MOJO_CONFIG} = 't/basic.conf';
 my $t = Test::Mojo->new('Toadfarm');
 
+is_deeply $t->app->secrets, ['super-secret'], 'secrets are set';
+
 $t->get_ok('/')
   ->status_is(404);
 

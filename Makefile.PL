@@ -7,7 +7,7 @@ WriteMakefile(
   LICENSE => 'perl',
   PREREQ_PM => {
     'File::Which' => '1.00',
-    'Mojolicious' => '4.30',
+    'Mojolicious' => '4.63',
   },
   BUILD_REQUIRES => {
     'Test::More' => '0.90',
