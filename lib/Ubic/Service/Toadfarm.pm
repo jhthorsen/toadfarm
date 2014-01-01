@@ -16,7 +16,7 @@ Put the code below in a C<ubic> service file:
   use Ubic::Service::Toadfarm;
   Ubic::Service::Toadfarm->new(
     log => {
-      file => '/path/to/log/file' # required
+      file => '/path/to/log/file', # required
       combined => 1,
     },
 
