@@ -153,6 +153,8 @@ use File::Which;
 
 our $VERSION = '0.40';
 
+$ENV{MOJO_CONFIG} = $ENV{TOADFARM_CONFIG} if $ENV{TOADFARM_CONFIG};
+
 =head1 METHODS
 
 =head2 startup
@@ -164,6 +166,9 @@ This method will read the C<MOJO_CONFIG> and mount the applications specified.
 sub startup {
   my $self = shift;
   my $config = $ENV{MOJO_CONFIG} ? $self->plugin('Config') : {};
+
+  # remember the config when hot reloading the app
+  $ENV{TOADFARM_CONFIG} = delete $ENV{MOJO_CONFIG};
 
   if($config->{log}{file}) {
     my $log = Mojo::Log->new;
@@ -204,8 +209,6 @@ sub _start_apps {
     my $server = Mojo::Server->new;
     my $path = $name;
     my($app, $request_base, @over, @error);
-
-    delete local $ENV{MOJO_CONFIG};
 
     $path = File::Which::which($path) || class_to_path($path) unless -r $path;
     $app ||= eval { $server->load_app($path) } or push @error, $@;
