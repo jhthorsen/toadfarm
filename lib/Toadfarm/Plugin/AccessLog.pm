@@ -38,7 +38,7 @@ sub register {
       my $req = $tx->req;
 
       $log->info(
-        sprintf '%s %s %s %s %ss',
+        sprintf '%s %s %s %s %.4fs',
         $req->env->{identity} || $tx->remote_address,
         $req->method,
         $req->url->to_abs->userinfo(''),
