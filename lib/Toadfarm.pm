@@ -229,7 +229,9 @@ sub _start_apps {
 
     while(my($name, $value) = each %$rules) {
       $request_base = $value if $name eq 'X-Request-Base';
-      push @over, "return 0 unless +(\$h->header('$name') // '') eq '$value';\n";
+      push @over, ref $value
+        ? "return 0 unless +(\$h->header('$name') // '') =~ /$value/;\n"
+        : "return 0 unless +(\$h->header('$name') // '') eq '$value';\n";
     }
 
     if(@over) {
