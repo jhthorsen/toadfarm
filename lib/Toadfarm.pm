@@ -8,9 +8,22 @@ Toadfarm - One Mojolicious app to rule them all
 
 0.41
 
-=head1 SYNOPSIS
+=head1 DESCRIPTION
 
-=head2 Production
+Toadfarm is wrapper around L<hypnotoad|Mojo::Server::Hypnotoad> that allow
+you to mount many L<Mojolicious> applications inside one hypnotoad server.
+
+See also L<Mojolicious::Plugin::Mount>. The mount plugin is useful if
+your applications are hard coupled, while Toadfarm provide functionality
+to route requests to a standalone application based on HTTP headers instead
+of the request path.
+
+C<toadfarm> can also be useful for standalone applications, since it allow
+using C<crontab> as a application starter:
+
+  * * * * * /usr/local/bin/toadfarm -a toadfarm --start 1>/tmp/toadfarm.cron.log 2>&1
+
+=head1 SYNOPSIS
 
 You can start the application by running:
 
@@ -58,6 +71,39 @@ especially useful when starting an app installed from cpan:
 
 NOTE! This config will be override the default application config.
 
+=head2 Command line options
+
+C<toadfarm> understands these options:
+
+  -a <path>          Custom application (other than toadfarm)
+  -a <class>         Custom application class
+  -f, --foreground   Keep manager process in foreground.
+  -h, --help         Show this message.
+      --man          Show manual
+      --start        Only start - no hot reload
+  -s, --stop         Stop server gracefully.
+  -t, --test         Test application and exit.
+
+Default config file will be C<$HOME/.toadfarm/$app.conf>, where
+C<$app> is specified by "-a".
+
+  toadfarm -a toadfarm == toadfarm $HOME/.toadfarm/toadfarm.conf"
+
+When loading a class C<My::App>, the config file be
+C<$HOME/.toadfarm/my-app.conf>.
+
+Examples:
+
+  # Start or hot reload application
+  toadfarm path/to/apps.conf
+
+  # Start and print status
+  toadfarm --start path/to/apps.conf
+
+  # Custom application
+  toadfarm -a /path/to/myapp.pl path/to/mojo.conf
+  toadfarm -a My::App path/to/mojo.conf
+
 =head2 Debug
 
 It is possible to start the server in foreground as well:
@@ -68,12 +114,6 @@ It is possible to start the server in foreground as well:
 See other options by running:
 
   $ toadfarm -h
-
-=head1 DESCRIPTION
-
-This application can be used to load other L<Mojolicious> apps inside one app.
-This could be useful if you want to save memory or instances on dotcloud or
-heroku.
 
 =head1 CONFIG FILE
 

@@ -4,8 +4,21 @@ NAME
 VERSION
     0.41
 
+DESCRIPTION
+    Toadfarm is wrapper around hypnotoad that allow you to mount many
+    Mojolicious applications inside one hypnotoad server.
+
+    See also Mojolicious::Plugin::Mount. The mount plugin is useful if your
+    applications are hard coupled, while Toadfarm provide functionality to
+    route requests to a standalone application based on HTTP headers instead
+    of the request path.
+
+    "toadfarm" can also be useful for standalone applications, since it
+    allow using "crontab" as a application starter:
+
+      * * * * * /usr/local/bin/toadfarm -a toadfarm --start 1>/tmp/toadfarm.cron.log 2>&1
+
 SYNOPSIS
-  Production
     You can start the application by running:
 
       $ toadfarm myconfig.conf;
@@ -51,6 +64,38 @@ SYNOPSIS
 
     NOTE! This config will be override the default application config.
 
+  Command line options
+    "toadfarm" understands these options:
+
+      -a <path>          Custom application (other than toadfarm)
+      -a <class>         Custom application class
+      -f, --foreground   Keep manager process in foreground.
+      -h, --help         Show this message.
+          --man          Show manual
+          --start        Only start - no hot reload
+      -s, --stop         Stop server gracefully.
+      -t, --test         Test application and exit.
+
+    Default config file will be "$HOME/.toadfarm/$app.conf", where $app is
+    specified by "-a".
+
+      toadfarm -a toadfarm == toadfarm $HOME/.toadfarm/toadfarm.conf"
+
+    When loading a class "My::App", the config file be
+    "$HOME/.toadfarm/my-app.conf".
+
+    Examples:
+
+      # Start or hot reload application
+      toadfarm path/to/apps.conf
+
+      # Start and print status
+      toadfarm --start path/to/apps.conf
+
+      # Custom application
+      toadfarm -a /path/to/myapp.pl path/to/mojo.conf
+      toadfarm -a My::App path/to/mojo.conf
+
   Debug
     It is possible to start the server in foreground as well:
 
@@ -60,11 +105,6 @@ SYNOPSIS
     See other options by running:
 
       $ toadfarm -h
-
-DESCRIPTION
-    This application can be used to load other Mojolicious apps inside one
-    app. This could be useful if you want to save memory or instances on
-    dotcloud or heroku.
 
 CONFIG FILE
     Additional config params.
