@@ -1,0 +1,132 @@
+=head1 NAME
+
+Toadfarm::Manual::Config - Config format for toadfarm
+
+=head1 DESCRIPTION
+
+This manual gives in depth information about the config file format.
+
+=head1 CONFIG FILE
+
+=head2 Basic structure
+
+The basic structure is a pure Perl file, which defines a hash-ref:
+
+  {
+    apps => [],
+    hynotoad => {},
+    log => {},
+    paths => {},
+    plugins => [],
+    secrets => [],
+  };
+
+Anything you put before the hash-ref is up to you.
+
+=head2 Apps
+
+The apps is a list
+
+The application will load the config as you would expect, but it is also
+possible to override the app config from the toadfarm config. This is
+especially useful when starting an app installed from cpan:
+
+  {
+    apps => {
+      '/usr/local/bin/mojopaste' => {
+        Host => 'p.thorsen.pm',
+        config => {
+          paste_dir => '/some/other/location
+        },
+      },
+    },
+    ...
+  };
+
+Most keys is used to filter the request based on the HTTP header value.
+Examples:
+
+  'Host' => 'p.thorsen.pm',
+  'X-Request-Base' => 'http://mydomain.com/whatever',
+  'X-Remote-IP' => '10.10.2.1',
+  'User-Agent' => qr{Mozilla},
+
+Exceptions from this list is:
+
+=over 4
+
+=item * config
+
+=item * mount_point
+
+=back
+
+=head2 Hypnotoad
+
+  {
+    hypnotoad => {
+      workers => 7,
+      listen => ['http://*:8080'],
+    },
+  }
+
+See L<Mojo::Server::Hypnotoad/SETTINGS> for more options.
+
+=head2 Log
+
+It is possible to get L<Toadfarm> to log for all your apps:
+
+  {
+    log => {
+      file => '/path/to/log/file.log',
+      level => 'debug', # debug, info, warn, ...
+      combined => 1,
+    },
+  }
+
+The trick here is the "combined" flag. It makes all the apps share the same
+L<Mojo::Log> object.
+
+=head2 Paths
+
+Set this to enable custom templates and public files for this application.
+This is useful if you want your own error templates or serve other assets from
+L<Toadfarm>.
+
+  {
+    paths => {
+      renderer => [ '/my/custom/template/path' ],
+      static => [ '/my/custom/static/path' ],
+    },
+  };
+
+=head2 Plugins
+
+It is possible to load plugins into the core of L<Toadfarm>.
+
+  {
+    plugins => [
+      "Some::Plugin" => @config_arguments,
+    ],
+  };
+
+L<Toadfarm> comes with two plugins: L<Toadfarm::Plugin::AccessLog> and
+L<Toadfarm::Plugin::Reload>, but you can also use other plugins from
+L<CPAN|https://metacpan.org/search?q=Mojolicious%3A%3APlugin>.
+
+=head2 Secrets
+
+Specifying secrets for your app is really important, when using
+L<sesssion|Mojolicious::Controller/session>.
+
+  {
+    secrets => ['my super secret'],
+  }
+
+See also L<Mojolicious/secrets>.
+
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+=cut

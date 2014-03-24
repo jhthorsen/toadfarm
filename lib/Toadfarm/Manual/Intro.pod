@@ -1,0 +1,69 @@
+=head1 NAME
+
+Toadfarm::Manual::Intro - Introduction to toadfarm
+
+=head1 DESCRIPTION
+
+This manual aims to give an introduction to how to set up C<toadfarm>.
+
+=head1 SYNOPSIS
+
+=head2 Config
+
+First you need to create a configuration file to describe when an application
+should be triggered. The config file is in plain Perl format and should
+contain a list with the application you want to run and a set of HTTP headers
+to act on.
+
+Example:
+
+  {
+    apps => [
+      '/home/web/project1/script/app1' => {
+        'X-Request-Base' => 'http://mydomain.com/whatever',
+      },
+      '/home/web/project2/script/app2' => {
+        'Host' => 'mydomain.com',
+      },
+    ],
+  }
+
+The config above will pass the request on to C<My::App> when the
+"X-Request-Base" header is set to "http://mydomain.com/whatever".
+Or it will pass the request on to C</path/to/my-app> if the "Host" header is
+set to "mydomain.com".
+
+The apps are processed in the order they are defined. This means that the
+first app that match will be executed.
+
+You can save the content of the file anywhere, but the default location is
+C<$HOME/.toadfarm/toadfarm.conf>.
+
+=head2 Start toadfarm
+
+After you have saved the config file, you can start L<Toadfarm>:
+
+  $ toadfarm $HOME/.toadfarm/toadfarm.conf
+
+After this, you should see C<toadfarm> running and the application can be
+accessed on L<http://localhost:8080>.
+
+=head1 EXAMPLES
+
+Look at L<https://github.com/jhthorsen/toadfarm/tree/master/etc> for example
+resources which show how to start L<Toadfarm> on ubuntu. In addition, you can
+forward all traffic to the server using the "iptables" rule below:
+
+  $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
+
+=head1 SEE ALSO
+
+L<Toadfarm::Manual::Config>.
+
+L<Toadfarm::Manual::RunningToadfarm>.
+
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+=cut

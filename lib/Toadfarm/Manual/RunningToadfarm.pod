@@ -1,0 +1,63 @@
+=head1 NAME
+
+Toadfarm::Manual::RunningToadfarm - Command line options
+
+=head1 DESCRIPTION
+
+This manual goes through the command line options for C<toadfarm>.
+
+=head1 SYNOPSIS
+
+=head2 Running
+
+You can start the application by running:
+
+  $ toadfarm /path/to/toadfarm.conf;
+
+See L<Toadfarm::Manual::Config> for C<toadfarm.conf> format.
+
+=head2 Options
+
+C<toadfarm> understands these options:
+
+  -a <path>          Custom application (other than toadfarm)
+  -a <class>         Custom application class
+  -f, --foreground   Keep manager process in foreground.
+  -h, --help         Show this message.
+      --man          Show manual
+      --start        Only start - no hot reload
+  -s, --stop         Stop server gracefully.
+  -t, --test         Test application and exit.
+
+Default config file will be C<$HOME/.toadfarm/$app.conf>, where
+C<$app> is specified by "-a".
+
+  toadfarm -a toadfarm == toadfarm $HOME/.toadfarm/toadfarm.conf"
+
+When loading a class C<My::App>, the config file be
+C<$HOME/.toadfarm/my-app.conf>.
+
+=head2 Custom application
+
+Specifying a custom application disable all the L<Toadfarm> features, but
+allow the custom app to gain the command line options from the C<toadfarm>
+script. This allow the app to be started from crontab:
+
+  * * * * * /usr/local/bin/toadfarm -a My::App --start 1>/tmp/toadfarm.cron.log 2>&1
+
+=head2 Debug mode
+
+It is possible to start the server in foreground as well:
+
+  $ MOJO_CONFIG=myconfig.conf toadfarm prefork
+  $ MOJO_CONFIG=myconfig.conf toadfarm daemon
+
+See other options by running:
+
+  $ toadfarm -h
+
+=head1 AUTHOR
+
+Jan Henning Thorsen - C<jhthorsen@cpan.org>
+
+=cut

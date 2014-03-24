@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.42
+       * Improved documentation
+
 0.41     Wed Mar 19 17:58:41 2014
        * Add support for header regexp matching
        * Fix not let MOJO_CONFIG be visible in parent processes

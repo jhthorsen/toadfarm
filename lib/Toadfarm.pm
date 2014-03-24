@@ -18,172 +18,31 @@ your applications are hard coupled, while Toadfarm provide functionality
 to route requests to a standalone application based on HTTP headers instead
 of the request path.
 
-C<toadfarm> can also be useful for standalone applications, since it allow
-using C<crontab> as a application starter:
-
-  * * * * * /usr/local/bin/toadfarm -a toadfarm --start 1>/tmp/toadfarm.cron.log 2>&1
-
 =head1 SYNOPSIS
-
-You can start the application by running:
-
-  $ toadfarm myconfig.conf;
-
-C<myconfig.conf> should contain a list with the application you want to run
-and a set of HTTP headers to act on. Example:
-
-  {
-    apps => [
-      'My::App' => {
-        'X-Request-Base' => 'http://mydomain.com/whatever',
-        'config' => { app_config => 123 },
-      },
-      '/path/to/my-app' => {
-        'Host' => 'mydomain.com',
-      },
-    ],
-  }
-
-The config above will run C<My::App> when the "X-Request-Base" header is set
-to "http://mydomain.com/whatever".
-
-Or it will pass the request on to C</path/to/my-app> if the "Host" header is
-set to "mydomain.com".
-
-The apps are processed in the order they are defined. This means that the
-first app that match will be executed.
-
-=head2 Application config
-
-The application will load the config as you would expect, but it is also
-possible to override the app config from the toadfarm config. This is
-especially useful when starting an app installed from cpan:
-
-  apps => {
-    # https://metacpan.org/module/App::mojopaste
-    '/usr/local/bin/mojopaste' => {
-      Host => 'p.thorsen.pm',
-      config => {
-        paste_dir => '/some/other/location
-      },
-    },
-  },
-
-NOTE! This config will be override the default application config.
-
-=head2 Command line options
-
-C<toadfarm> understands these options:
-
-  -a <path>          Custom application (other than toadfarm)
-  -a <class>         Custom application class
-  -f, --foreground   Keep manager process in foreground.
-  -h, --help         Show this message.
-      --man          Show manual
-      --start        Only start - no hot reload
-  -s, --stop         Stop server gracefully.
-  -t, --test         Test application and exit.
-
-Default config file will be C<$HOME/.toadfarm/$app.conf>, where
-C<$app> is specified by "-a".
-
-  toadfarm -a toadfarm == toadfarm $HOME/.toadfarm/toadfarm.conf"
-
-When loading a class C<My::App>, the config file be
-C<$HOME/.toadfarm/my-app.conf>.
-
-Examples:
-
-  # Start or hot reload application
-  toadfarm path/to/apps.conf
-
-  # Start and print status
-  toadfarm --start path/to/apps.conf
-
-  # Custom application
-  toadfarm -a /path/to/myapp.pl path/to/mojo.conf
-  toadfarm -a My::App path/to/mojo.conf
-
-=head2 Debug
-
-It is possible to start the server in foreground as well:
-
-  $ MOJO_CONFIG=myconfig.conf toadfarm prefork
-  $ MOJO_CONFIG=myconfig.conf toadfarm daemon
-
-See other options by running:
-
-  $ toadfarm -h
-
-=head1 CONFIG FILE
-
-Additional config params.
-
-  {
-    apps => [...], # See SYNOPSIS
-    secrets => [qw( super duper unique string )], # See Mojolicious->secrets()
-    log => {
-      file => '/path/to/log/file.log',
-      level => 'debug', # debug, info, warn, ...
-      combined => 1, # true to make all applications log to the same file
-    },
-    hypnotoad => {
-      listen => ['http://*:1234'],
-      workers => 12,
-      # ...
-    },
-    paths => {
-      renderer => [ '/my/custom/template/path' ],
-      static => [ '/my/custom/static/path' ],
-    },
-    plugins => [
-      MojoPlugin => CONFIG,
-    ],
-  }
 
 =over 4
 
-=item * log
+=item * L<Toadfarm::Manual::Intro>
 
-Used to set up where L<Toadfarm> should log to. It is also possible to set
-"combined" to true if you want all the other apps to log to the same file.
+=item * L<Toadfarm::Manual::Config>
 
-=item * hypnotoad
+=item * L<Toadfarm::Manual::RunningToadfarm>
 
-See L<Mojo::Server::Hypnotoad/SETTINGS> for more "hypnotoad" settings.
+=item * L<Toadfarm::Manual::BehindReverseProxy>
 
-=item * paths
-
-Set this to enable custom templates and public files for this application.
-This is useful if you want your own error templates or serve other assets from
-L<Toadfarm>.
-
-=item * plugins
-
-"plugins" can be used to load plugins into L<Toadfarm>. The plugins are loaded
-after the "apps" are loaded. They will receive the C<CONFIG> as the third
-argument:
-
-  sub register {
-    my($self, $app, CONFIG) = @_;
-    # ...
-  }
-
-See also: L<Toadfarm::Plugin::Reload/SYNOPSIS>.
+=item * L<Toadfarm::Manual::VirtualHost>
 
 =back
 
-=head1 EXAMPLE SETUP
-
-Look at L<https://github.com/jhthorsen/toadfarm/tree/master/etc> for example
-resources which show how to start L<Toadfarm> on ubuntu. In addition, you can
-forward all traffic to the server using the "iptables" rule below:
-
-  $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
-
 =head1 PLUGINS
 
-L<Toadfarm::Plugin::Reload>.
+=over 4
+
+=item * L<Toadfarm::Plugin::AccessLog>
+
+=item * L<Toadfarm::Plugin::Reload>
+
+=back
 
 =cut
 
@@ -194,14 +53,6 @@ use File::Which;
 our $VERSION = '0.41';
 
 $ENV{MOJO_CONFIG} = $ENV{TOADFARM_CONFIG} if $ENV{TOADFARM_CONFIG};
-
-=head1 METHODS
-
-=head2 startup
-
-This method will read the C<MOJO_CONFIG> and mount the applications specified.
-
-=cut
 
 sub startup {
   my $self = shift;
@@ -248,6 +99,7 @@ sub _start_apps {
     my($name, $rules) = (shift @_, shift @_);
     my $server = Mojo::Server->new;
     my $path = $name;
+    my $mount_point = delete $rules->{mount_point} || '/';
     my($app, $request_base, @over, @error);
 
     $path = File::Which::which($path) || class_to_path($path) unless -r $path;
@@ -280,7 +132,7 @@ sub _start_apps {
       push @over, "\$_[1]->req->url->base(Mojo::URL->new('$request_base'));" if $request_base;
       push @over, "return 1; }";
       $routes->add_condition("toadfarm_condition_$n", => eval "@over" || die "@over: $@");
-      $routes->route('/')->detour(app => $app)->over("toadfarm_condition_$n");
+      $routes->route($mount_point)->detour(app => $app)->over("toadfarm_condition_$n");
     }
     else {
       $self->{root_app} = [ $path => $app ];
@@ -304,12 +156,17 @@ sub _start_plugins {
   }
 }
 
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2014, Jan Henning Thorsen
+
+This program is free software, you can redistribute it and/or modify it
+under the terms of the Artistic License version 2.0.
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;
 
 1;
