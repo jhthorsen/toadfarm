@@ -18,8 +18,8 @@ your applications are hard coupled, while Toadfarm provide functionality
 to route requests to a standalone application based on HTTP headers instead
 of the request path.
 
-C<toadfarm> can also be useful for standalone applications, since it allow
-using C<crontab> as a application starter:
+C<toadfarm> can also be useful for standalone applications, since it allows
+starting applications via C<crontab>:
 
   * * * * * /usr/local/bin/toadfarm -a toadfarm --start 1>/tmp/toadfarm.cron.log 2>&1
 
@@ -51,7 +51,7 @@ Or it will pass the request on to C</path/to/my-app> if the "Host" header is
 set to "mydomain.com".
 
 The apps are processed in the order they are defined. This means that the
-first app that match will be executed.
+first app that matchs will be executed.
 
 =head2 Application config
 
@@ -69,7 +69,7 @@ especially useful when starting an app installed from cpan:
     },
   },
 
-NOTE! This config will be override the default application config.
+NOTE! This will override the default application config.
 
 =head2 Command line options
 
@@ -87,7 +87,7 @@ C<toadfarm> understands these options:
 Default config file will be C<$HOME/.toadfarm/$app.conf>, where
 C<$app> is specified by "-a".
 
-  toadfarm -a toadfarm == toadfarm $HOME/.toadfarm/toadfarm.conf"
+  toadfarm -a toadfarm B<is the same as> toadfarm "$HOME/.toadfarm/toadfarm.conf"
 
 When loading a class C<My::App>, the config file be
 C<$HOME/.toadfarm/my-app.conf>.
@@ -106,7 +106,7 @@ Examples:
 
 =head2 Debug
 
-It is possible to start the server in foreground as well:
+It is possible to start the server in the foreground as well:
 
   $ MOJO_CONFIG=myconfig.conf toadfarm prefork
   $ MOJO_CONFIG=myconfig.conf toadfarm daemon

@@ -14,7 +14,7 @@ DESCRIPTION
     of the request path.
 
     "toadfarm" can also be useful for standalone applications, since it
-    allow using "crontab" as a application starter:
+    allows using "crontab" as a application starter:
 
       * * * * * /usr/local/bin/toadfarm -a toadfarm --start 1>/tmp/toadfarm.cron.log 2>&1
 
@@ -45,7 +45,7 @@ SYNOPSIS
     is set to "mydomain.com".
 
     The apps are processed in the order they are defined. This means that
-    the first app that match will be executed.
+    the first app that matchs will be executed.
 
   Application config
     The application will load the config as you would expect, but it is also
@@ -62,7 +62,7 @@ SYNOPSIS
         },
       },
 
-    NOTE! This config will be override the default application config.
+    NOTE! This will override the default application config.
 
   Command line options
     "toadfarm" understands these options:
@@ -79,7 +79,7 @@ SYNOPSIS
     Default config file will be "$HOME/.toadfarm/$app.conf", where $app is
     specified by "-a".
 
-      toadfarm -a toadfarm == toadfarm $HOME/.toadfarm/toadfarm.conf"
+      toadfarm -a toadfarm **is the same as** toadfarm "$HOME/.toadfarm/toadfarm.conf"
 
     When loading a class "My::App", the config file be
     "$HOME/.toadfarm/my-app.conf".
@@ -97,7 +97,7 @@ SYNOPSIS
       toadfarm -a My::App path/to/mojo.conf
 
   Debug
-    It is possible to start the server in foreground as well:
+    It is possible to start the server in the foreground as well:
 
       $ MOJO_CONFIG=myconfig.conf toadfarm prefork
       $ MOJO_CONFIG=myconfig.conf toadfarm daemon
