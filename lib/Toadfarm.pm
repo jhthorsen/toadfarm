@@ -134,6 +134,9 @@ sub _start_apps {
       $routes->add_condition("toadfarm_condition_$n", => eval "@over" || die "@over: $@");
       $routes->route($mount_point)->detour(app => $app)->over("toadfarm_condition_$n");
     }
+    elsif($mount_point) {
+      $routes->route($mount_point)->detour(app => $app);
+    }
     else {
       $self->{root_app} = [ $path => $app ];
     }
