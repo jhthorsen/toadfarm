@@ -22,9 +22,9 @@ functionality that you expect from a reverse proxy, such as Nginx.
 
 =over 4
 
-=item * L<Toadfarm::Manual::Intro> - Introduction tutorial.
+=item * L<Toadfarm::Manual::Intro> - Introduction.
 
-=item * L<Toadfarm::Manual::Config> - Config file format
+=item * L<Toadfarm::Manual::Config> - Config file format.
 
 =item * L<Toadfarm::Manual::RunningToadfarm> - Command line options.
 
@@ -99,7 +99,7 @@ sub _start_apps {
     my($name, $rules) = (shift @_, shift @_);
     my $server = Mojo::Server->new;
     my $path = $name;
-    my $mount_point = delete $rules->{mount_point} || '/';
+    my $mount_point = delete $rules->{mount_point};
     my($app, $request_base, @over, @error);
 
     $path = File::Which::which($path) || class_to_path($path) unless -r $path;
@@ -119,11 +119,13 @@ sub _start_apps {
 
     $app->config->{$_} ||= $config->{$_} for keys %$config;
 
-    while(my($name, $value) = each %$rules) {
-      $request_base = $value if $name eq 'X-Request-Base';
-      push @over, ref $value
-        ? "return 0 unless +(\$h->header('$name') // '') =~ /$value/;\n"
-        : "return 0 unless +(\$h->header('$name') // '') eq '$value';\n";
+    for my $k (qw( remote_address remote_port )) {
+      push @over, $self->_skip_if(tx => $k, delete $rules->{$k});
+    }
+
+    for my $name (sort keys %$rules) {
+      $request_base = $rules->{$name} if $name eq 'X-Request-Base';
+      push @over, $self->_skip_if(header => $name, $rules->{$name});
     }
 
     if(@over) {
@@ -132,7 +134,7 @@ sub _start_apps {
       push @over, "\$_[1]->req->url->base(Mojo::URL->new('$request_base'));" if $request_base;
       push @over, "return 1; }";
       $routes->add_condition("toadfarm_condition_$n", => eval "@over" || die "@over: $@");
-      $routes->route($mount_point)->detour(app => $app)->over("toadfarm_condition_$n");
+      $routes->route($mount_point || '/')->detour(app => $app)->over("toadfarm_condition_$n");
     }
     elsif($mount_point) {
       $routes->route($mount_point)->detour(app => $app);
@@ -156,6 +158,21 @@ sub _start_plugins {
     my($plugin, $config) = (shift @_, shift @_);
     $self->log->info("Loading plugin $plugin");
     $self->plugin($plugin, $config);
+  }
+}
+
+sub _skip_if {
+  my($self, $type, $k, $value) = @_;
+  my $format = $type eq 'tx' ? '$_[1]->tx->%s' : $type eq 'header' ? q[$h->header('%s')] : q[INVALID(%s)];
+
+  if(!defined $value) {
+    return;
+  }
+  elsif(ref $value eq 'Regexp') {
+    return sprintf "return 0 unless +($format || '') =~ /%s/;", $k, $value;
+  }
+  else {
+    return sprintf "return 0 unless +($format || '') eq '%s';", $k, $value;
   }
 }
 

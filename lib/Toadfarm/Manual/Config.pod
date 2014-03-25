@@ -69,7 +69,17 @@ is called. (This will hopefully be changed/fixed in future release of Toadfarm)
 The default mount point is "/". Setting this to "/foo" will only make the
 application accessible under "http://domain.com/foo".
 
-=item * X-Request-Base
+=item * remote_address => $str|$regex
+
+Used to only accept a given L<remote_address|Mojo::Transaction/remote_address>
+access.
+
+=item * remote_port => $str|$regex
+
+Used to only accept a given L<remote_port|Mojo::Transaction/remote_port>
+access.
+
+=item * X-Request-Base => $str
 
 This also sets the L<request base url|Mojo::URL/base> when this rule match.
 This is the same funtionality that is provided by
