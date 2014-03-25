@@ -10,7 +10,7 @@ as virtual host router.
 This is especially useful if already have a CDN (like L<http://cloudflare.com>)
 in front.
 
-=head1 SYNOPSIS
+=head2 Config
 
 The magic part here is the "Host" HTTP header which is sent by the browser,
 and will route to the correct application.

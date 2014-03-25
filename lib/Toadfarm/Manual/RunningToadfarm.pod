@@ -6,9 +6,7 @@ Toadfarm::Manual::RunningToadfarm - Command line options
 
 This manual goes through the command line options for C<toadfarm>.
 
-=head1 SYNOPSIS
-
-=head2 Running
+=head2 Basics
 
 You can start the application by running:
 
@@ -45,16 +43,17 @@ script. This allow the app to be started from crontab:
 
   * * * * * /usr/local/bin/toadfarm -a My::App --start 1>/tmp/toadfarm.cron.log 2>&1
 
+=head2 Running Toadfarm on ubuntu
+
+Look at L<https://github.com/jhthorsen/toadfarm/tree/master/etc> for example
+resources which show how to start L<Toadfarm> on ubuntu.
+
 =head2 Debug mode
 
 It is possible to start the server in foreground as well:
 
   $ MOJO_CONFIG=myconfig.conf toadfarm prefork
   $ MOJO_CONFIG=myconfig.conf toadfarm daemon
-
-See other options by running:
-
-  $ toadfarm -h
 
 =head1 AUTHOR
 

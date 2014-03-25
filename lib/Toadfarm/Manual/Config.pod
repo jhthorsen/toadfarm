@@ -1,14 +1,12 @@
 =head1 NAME
 
-Toadfarm::Manual::Config - Config format for toadfarm
+Toadfarm::Manual::Config - Config file format for Toadfarm
 
 =head1 DESCRIPTION
 
-This manual gives in depth information about the config file format.
+This manual gives in-depth information about the config file format.
 
-=head1 CONFIG FILE
-
-=head2 Basic structure
+=head2 Basics
 
 The basic structure is a pure Perl file, which defines a hash-ref:
 
@@ -25,11 +23,12 @@ Anything you put before the hash-ref is up to you.
 
 =head2 Apps
 
-The apps is a list
+The "apps" key holds a list of application/config pairs. The application can
+either be a full path to the application or a class name. The config is either
+HTTP headers to trigger on, or L</Special fields>.
 
-The application will load the config as you would expect, but it is also
-possible to override the app config from the toadfarm config. This is
-especially useful when starting an app installed from cpan:
+The apps are processed in the order they are defined. This means that the
+first app that match a given rule will receive the request.
 
   {
     apps => {
@@ -43,23 +42,42 @@ especially useful when starting an app installed from cpan:
     ...
   };
 
-Most keys is used to filter the request based on the HTTP header value.
-Examples:
+Most keys are used to filter the request based on the HTTP header value.
+Example header name/values:
 
   'Host' => 'p.thorsen.pm',
-  'X-Request-Base' => 'http://mydomain.com/whatever',
-  'X-Remote-IP' => '10.10.2.1',
   'User-Agent' => qr{Mozilla},
+  'X-Request-Base' => 'http://mydomain.com/whatever',
+  'X-Remote-IP' => qr{^10\.},
 
-Exceptions from this list is:
+=head3 Special fields
+
+Fields that are defined in the list below are special fields.
 
 =over 4
 
-=item * config
+=item * config => \%hash
 
-=item * mount_point
+This config param will override any L<config|Mojolicious/config> parameters
+already known in the target application.
+
+Note: These config params are set I<after> L<startup()|Mojolicious/startup>
+is called. (This will hopefully be changed/fixed in future release of Toadfarm)
+
+=item * mount_point => $str
+
+The default mount point is "/". Setting this to "/foo" will only make the
+application accessible under "http://domain.com/foo".
+
+=item * X-Request-Base
+
+This also sets the L<request base url|Mojo::URL/base> when this rule match.
+This is the same funtionality that is provided by
+L<Mojolicious::Plugin::RequestBase>.
 
 =back
+
+Additional fields might be added, but they will always be in lower case.
 
 =head2 Hypnotoad
 
@@ -89,8 +107,8 @@ L<Mojo::Log> object.
 
 =head2 Paths
 
-Set this to enable custom templates and public files for this application.
-This is useful if you want your own error templates or serve other assets from
+You can specify custom template and public file paths for Toadfarm. This is
+useful if you want your own error templates or serve other assets from
 L<Toadfarm>.
 
   {
@@ -116,7 +134,7 @@ L<CPAN|https://metacpan.org/search?q=Mojolicious%3A%3APlugin>.
 
 =head2 Secrets
 
-Specifying secrets for your app is really important, when using
+Specifying secrets for your app is really important if you are using
 L<sesssion|Mojolicious::Controller/session>.
 
   {

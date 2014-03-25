@@ -7,8 +7,6 @@ Toadfarm::Manual::BehindReverseProxy - Toadfarm behind nginx
 This is useful when you want to run L<Toadfarm> behind a reverse
 proxy, such as C<nginx>.
 
-=head1 SYNOPSIS
-
 =head2 Nginx config
 
 The "rewrite" rule is very important, since it will remove the "/myapp" part

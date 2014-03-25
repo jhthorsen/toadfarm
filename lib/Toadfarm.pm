@@ -13,24 +13,24 @@ Toadfarm - One Mojolicious app to rule them all
 Toadfarm is wrapper around L<hypnotoad|Mojo::Server::Hypnotoad> that allow
 you to mount many L<Mojolicious> applications inside one hypnotoad server.
 
-See also L<Mojolicious::Plugin::Mount>. The mount plugin is useful if
-your applications are hard coupled, while Toadfarm provide functionality
-to route requests to a standalone application based on HTTP headers instead
-of the request path.
+The L<Mojolicious::Plugin::Mount> plugin is useful if your applications
+are hard coupled, while Toadfarm provide functionality to route requests
+to a standalone application based on HTTP headers instead. This is
+functionality that you expect from a reverse proxy, such as Nginx.
 
-=head1 SYNOPSIS
+=head1 DOCUMENTATION INDEX
 
 =over 4
 
-=item * L<Toadfarm::Manual::Intro>
+=item * L<Toadfarm::Manual::Intro> - Introduction tutorial.
 
-=item * L<Toadfarm::Manual::Config>
+=item * L<Toadfarm::Manual::Config> - Config file format
 
-=item * L<Toadfarm::Manual::RunningToadfarm>
+=item * L<Toadfarm::Manual::RunningToadfarm> - Command line options.
 
-=item * L<Toadfarm::Manual::BehindReverseProxy>
+=item * L<Toadfarm::Manual::BehindReverseProxy> - Toadfarm behind nginx.
 
-=item * L<Toadfarm::Manual::VirtualHost>
+=item * L<Toadfarm::Manual::VirtualHost> - Virtual host setup.
 
 =back
 
