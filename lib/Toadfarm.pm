@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.42
+0.43
 
 =head1 DESCRIPTION
 
@@ -50,7 +50,7 @@ use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 use File::Which;
 
-our $VERSION = '0.42';
+our $VERSION = '0.43';
 
 $ENV{MOJO_CONFIG} = $ENV{TOADFARM_CONFIG} if $ENV{TOADFARM_CONFIG};
 
@@ -119,7 +119,7 @@ sub _start_apps {
 
     $app->config->{$_} ||= $config->{$_} for keys %$config;
 
-    for my $k (qw( remote_address remote_port )) {
+    for my $k (qw( local_port remote_address remote_port )) {
       push @over, $self->_skip_if(tx => $k, delete $rules->{$k});
     }
 

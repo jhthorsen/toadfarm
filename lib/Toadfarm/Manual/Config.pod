@@ -30,25 +30,51 @@ HTTP headers to trigger on, or L</Special fields>.
 The apps are processed in the order they are defined. This means that the
 first app that match a given rule will receive the request.
 
+The config example below contain all the special fields that you can use and
+a list of example headers to filter on. Each key (except "config") is used
+to filter the incoming request, and ALL the specified values must match
+for the request to get passed on to a given application.
+
   {
     apps => {
-      '/usr/local/bin/mojopaste' => {
-        Host => 'p.thorsen.pm',
-        config => {
-          paste_dir => '/some/other/location
-        },
+      "/path/to/myproject/script/myapp" => {
+
+        # special fields
+        config => { some_key => "value" },
+        local_port => 8080,
+        mount_point => "/myapp",
+        remote_address => "127.0.0.1",
+
+        # headers
+        "Host" => "home.thorsen.pm",
+        "User-Agent" => qr{curl},
+        "X-Request-Base" => "http://home.thorsen.pm/whatever",
       },
+      "Other::App" => {
+        # ...
+      },
+      # ...
     },
-    ...
+    # ...
   };
 
-Most keys are used to filter the request based on the HTTP header value.
-Example header name/values:
+Example HTTP request that will get sent to "myapp":
 
-  'Host' => 'p.thorsen.pm',
-  'User-Agent' => qr{Mozilla},
-  'X-Request-Base' => 'http://mydomain.com/whatever',
-  'X-Remote-IP' => qr{^10\.},
+  -- Connect (http:home.thorsen.pm:8080)
+  -- Client >>> Server (http://home.thorsen.pm/myapp)
+  GET /myapp HTTP/1.1
+  Connection: keep-alive
+  Content-Length: 0
+  Accept-Encoding: gzip
+  Host: home.thorsen.pm
+  User-Agent: curl/7.32.0
+  X-Request-Base: http://home.thorsen.pm/whatever
+
+So if "User-Agent" is "Mojolicious (Perl)" instead, but all the other headers
+match, then the request will NOT be passed on to "myapp".
+
+Got difficulties getting a request through to an application? Try removing
+rules until the request gets through.
 
 =head3 Special fields
 
@@ -64,6 +90,11 @@ already known in the target application.
 Note: These config params are set I<after> L<startup()|Mojolicious/startup>
 is called. (This will hopefully be changed/fixed in future release of Toadfarm)
 
+=item * local_port => $str|$regex
+
+Used to only accept requests on a given L<port|Mojo::Transaction/local_port>
+access.
+
 =item * mount_point => $str
 
 The default mount point is "/". Setting this to "/foo" will only make the
@@ -71,18 +102,13 @@ application accessible under "http://domain.com/foo".
 
 =item * remote_address => $str|$regex
 
-Used to only accept a given L<remote_address|Mojo::Transaction/remote_address>
-access.
-
-=item * remote_port => $str|$regex
-
-Used to only accept a given L<remote_port|Mojo::Transaction/remote_port>
+Used to only accept from a given L<address|Mojo::Transaction/remote_address>
 access.
 
 =item * X-Request-Base => $str
 
-This also sets the L<request base url|Mojo::URL/base> when this rule match.
-This is the same funtionality that is provided by
+This header will also set L<request base url|Mojo::URL/base> when this rule
+match. This is the same funtionality that is provided by
 L<Mojolicious::Plugin::RequestBase>.
 
 =back

@@ -1,5 +1,9 @@
 Revision history for Toadfarm
 
+0.43     Sun Mar 30 11:43:16 2014
+       * Improved documentation
+       * Add support for filtering on local_port
+
 0.42     Tue Mar 25 16:11:39 2014
        * Improved documentation
        * Add support for filtering on remote_address
