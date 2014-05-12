@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.4301   Mon May 12 15:19:09 2014
+       * Fix t/mount-point.conf
+
 0.43     Sun Mar 30 11:43:16 2014
        * Improved documentation
        * Add support for filtering on local_port
