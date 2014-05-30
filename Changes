@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.44     Fri May 30 08:00:13 2014
+       * Compatible with Mojolicious 5.0
+
 0.4301   Mon May 12 15:19:09 2014
        * Fix t/mount-point.conf
 

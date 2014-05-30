@@ -11,8 +11,8 @@ $ENV{MOJO_MODE} = 'production';
 plan skip_all => 'TEST_LIVE=1 is required' unless $ENV{TEST_LIVE} or $ENV{USER} eq 'jhthorsen';
 plan skip_all => 'MOJO_CONFIG /tmp/filter.t.conf exists' if -s $ENV{MOJO_CONFIG};
 
-my $allowed = Mojo::IOLoop->generate_port;
-my $denied = Mojo::IOLoop->generate_port;
+my $allowed = Mojo::IOLoop->can('generate_port') ? Mojo::IOLoop->generate_port : Mojo::IOLoop::Server->generate_port;
+my $denied = Mojo::IOLoop->can('generate_port') ? Mojo::IOLoop->generate_port : Mojo::IOLoop::Server->generate_port;
 
 spurt <<"CONFIG", $ENV{MOJO_CONFIG};
 {
