@@ -53,7 +53,9 @@ sub read_pid {
 
 sub start {
   $ENV{MOJO_CONFIG} or die "Path to config file is required as input\n";
-  my $config = do $ENV{MOJO_CONFIG} or die($@ || $!);
+  require Mojolicious::Plugin::Config;
+  require Mojolicious;
+  my $config = Mojolicious::Plugin::Config->new->load($ENV{MOJO_CONFIG}, {}, Mojolicious->new);
   my $pid = read_pid($config);
 
   warn "pid=$pid" if $ENV{TOADFARM_SILENT} == -1;

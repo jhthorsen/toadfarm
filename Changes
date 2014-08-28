@@ -1,5 +1,8 @@
 Revision history for Toadfarm
 
+0.05
+       * Fix toadfarm --start load config like Mojolicious
+
 0.44     Fri May 30 08:00:13 2014
        * Compatible with Mojolicious 5.0
 
