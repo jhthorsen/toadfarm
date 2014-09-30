@@ -61,7 +61,7 @@ sub startup {
   # remember the config when hot reloading the app
   $ENV{TOADFARM_CONFIG} = delete $ENV{MOJO_CONFIG};
 
-  if($config->{log}{file}) {
+  if ($config->{log}{file}) {
     my $log = Mojo::Log->new;
     $log->path($config->{log}{file});
     $log->level($config->{log}{level} || 'info');
@@ -73,42 +73,42 @@ sub startup {
     $self->$type->paths($paths);
   }
 
-  $self->secrets([$config->{secret}]) if $config->{secret};
-  $self->secrets($config->{secrets}) if $config->{secrets};
-  $self->_start_apps(@{ $config->{apps} }) if $config->{apps};
-  $self->_start_plugins(@{ $config->{plugins} }) if $config->{plugins};
+  $self->secrets([$config->{secret}])          if $config->{secret};
+  $self->secrets($config->{secrets})           if $config->{secrets};
+  $self->_start_apps(@{$config->{apps}})       if $config->{apps};
+  $self->_start_plugins(@{$config->{plugins}}) if $config->{plugins};
 
   # need to add the root app afterwards
-  if(my $app = delete $self->{root_app}) {
+  if (my $app = delete $self->{root_app}) {
     $self->log->info("Mounting $app->[0] without conditions.");
     $self->routes->route('/')->detour(app => $app->[1]);
   }
 }
 
 sub _start_apps {
-  my $self = shift;
+  my $self   = shift;
   my $routes = $self->routes;
   my $config = $self->config;
-  my $n = 0;
+  my $n      = 0;
 
-  while(@_) {
-    my($name, $rules) = (shift @_, shift @_);
-    my $server = Mojo::Server->new;
-    my $path = $name;
+  while (@_) {
+    my ($name, $rules) = (shift @_, shift @_);
+    my $server      = Mojo::Server->new;
+    my $path        = $name;
     my $mount_point = delete $rules->{mount_point};
-    my($app, $request_base, @over, @error);
+    my ($app, $request_base, @over, @error);
 
     $path = File::Which::which($path) || class_to_path($path) unless -r $path;
-    $app ||= eval { $server->load_app($path) } or push @error, $@;
+    $app ||= eval { $server->load_app($path) }  or push @error, $@;
     $app ||= eval { $server->build_app($name) } or push @error, $@;
 
-    if(!$app) {
+    if (!$app) {
       die join "\n", @error;
     }
-    if($config->{log}{combined}) {
+    if ($config->{log}{combined}) {
       $app->log($self->log);
     }
-    if(ref $rules->{config} eq 'HASH') {
+    if (ref $rules->{config} eq 'HASH') {
       my $local = delete $rules->{config};
       $app->config->{$_} = $local->{$_} for keys %$local;
     }
@@ -124,7 +124,7 @@ sub _start_apps {
       push @over, $self->_skip_if(header => $name, $rules->{$name});
     }
 
-    if(@over) {
+    if (@over) {
       $self->log->info("Mounting $path with conditions");
       unshift @over, "sub { my \$h = \$_[1]->req->headers;\n";
       push @over, "\$_[1]->req->url->base(Mojo::URL->new('$request_base'));" if $request_base;
@@ -132,11 +132,11 @@ sub _start_apps {
       $routes->add_condition("toadfarm_condition_$n", => eval "@over" || die "@over: $@");
       $routes->route($mount_point || '/')->detour(app => $app)->over("toadfarm_condition_$n");
     }
-    elsif($mount_point) {
+    elsif ($mount_point) {
       $routes->route($mount_point)->detour(app => $app);
     }
     else {
-      $self->{root_app} = [ $path => $app ];
+      $self->{root_app} = [$path => $app];
     }
 
     $n++;
@@ -148,23 +148,23 @@ sub _start_apps {
 sub _start_plugins {
   my $self = shift;
 
-  unshift @{ $self->plugins->namespaces }, 'Toadfarm::Plugin';
+  unshift @{$self->plugins->namespaces}, 'Toadfarm::Plugin';
 
-  while(@_) {
-    my($plugin, $config) = (shift @_, shift @_);
+  while (@_) {
+    my ($plugin, $config) = (shift @_, shift @_);
     $self->log->info("Loading plugin $plugin");
     $self->plugin($plugin, $config);
   }
 }
 
 sub _skip_if {
-  my($self, $type, $k, $value) = @_;
+  my ($self, $type, $k, $value) = @_;
   my $format = $type eq 'tx' ? '$_[1]->tx->%s' : $type eq 'header' ? q[$h->header('%s')] : q[INVALID(%s)];
 
-  if(!defined $value) {
+  if (!defined $value) {
     return;
   }
-  elsif(ref $value eq 'Regexp') {
+  elsif (ref $value eq 'Regexp') {
     return sprintf "return 0 unless +($format || '') =~ /%s/;", $k, $value;
   }
   else {

@@ -83,8 +83,8 @@ See L</SYNOPSIS>.
 
 sub new {
   my $class = shift;
-  my $args = @_ ? @_ > 1 ? {@_} : {%{$_[0]}} : {};
-  my $self = bless $args, $class;
+  my $args  = @_ ? @_ > 1 ? {@_} : {%{$_[0]}} : {};
+  my $self  = bless $args, $class;
 
   ref $self->{hypnotoad}{listen} eq 'ARRAY' or die 'Invalid/missing hypnotoad => listen';
 
@@ -103,7 +103,7 @@ The config will be written to the "tmp" directory in ubic's data directory.
 =cut
 
 sub start_impl {
-  my $self = shift;
+  my $self      = shift;
   my $hypnotoad = which 'hypnotoad';
 
   $self->_write_mojo_config;
@@ -120,16 +120,16 @@ response is not important, the important thing is that the server responds.
 =cut
 
 sub status_impl {
-  my $self = shift;
-  my $listen = $self->{hypnotoad}{listen}[0];
-  my $pid = $self->_read_pid;
+  my $self     = shift;
+  my $listen   = $self->{hypnotoad}{listen}[0];
+  my $pid      = $self->_read_pid;
   my $resource = $self->{hypnotoad}{status_resource} || "/ubic-status";
-  my($tx, %args);
+  my ($tx, %args);
 
   local %ENV = $self->_env;
 
   # no need to check if process is not running
-  if(!$pid or !kill 0, $pid) {
+  if (!$pid or !kill 0, $pid) {
     return result 'not running';
   }
 
@@ -138,14 +138,14 @@ sub status_impl {
   $args{request_timeout} = $ENV{MOJO_REQUEST_TIMEOUT} || 2;
 
   $listen =~ s!\*!localhost!;
-  $tx = Mojo::UserAgent->new(%args)->head($listen .$resource);
+  $tx = Mojo::UserAgent->new(%args)->head($listen . $resource);
   warn $tx->res->code // 'No HTTP code', "\n" if DEBUG;
 
-  if(my $code = $tx->res->code) {
+  if (my $code = $tx->res->code) {
     return result "running", "pid $pid, status $code";
   }
   else {
-    return result +($ENV{UBIC_TOADFARM_NO_RESPONSE_STATE} || 'running'), "pid $pid, no response";
+    return result + ($ENV{UBIC_TOADFARM_NO_RESPONSE_STATE} || 'running'), "pid $pid, no response";
   }
 }
 
@@ -157,7 +157,7 @@ This method will kill the server pid found in "pid_file" with "TERM".
 
 sub stop_impl {
   my $self = shift;
-  my $pid = $self->_read_pid;
+  my $pid  = $self->_read_pid;
 
   warn "pid=$pid\n" if DEBUG;
   return result 'not running' unless $pid;
@@ -174,7 +174,7 @@ This method will reload the server pid found in "pid_file" with "USR2".
 
 sub reload {
   my $self = shift;
-  my $pid = $self->_read_pid;
+  my $pid  = $self->_read_pid;
 
   warn "pid=$pid\n" if DEBUG;
   return result 'not running' unless $pid;
@@ -190,25 +190,24 @@ sub _env {
   # Not really sure how to make this work from within a mojo app
   # without clearing these environment variables.
 
-  return(
-    %ENV,
-    %{ $self->{env} || {} },
-    HYPNOTOAD_EXE => '',
+  return (
+    %ENV, %{$self->{env} || {}},
+    HYPNOTOAD_EXE        => '',
     HYPNOTOAD_FOREGROUND => 0,
-    HYPNOTOAD_REV => 0,
-    HYPNOTOAD_STOP => 0,
-    HYPNOTOAD_TEST => 0,
-    MOJO_CONFIG => $self->_path_to_mojo_config,
-    MOJO_REVERSE_PROXY => $self->{hypnotoad}{proxy} || 0,
+    HYPNOTOAD_REV        => 0,
+    HYPNOTOAD_STOP       => 0,
+    HYPNOTOAD_TEST       => 0,
+    MOJO_CONFIG          => $self->_path_to_mojo_config,
+    MOJO_REVERSE_PROXY   => $self->{hypnotoad}{proxy} || 0,
   );
 }
 
 sub _path_to_mojo_config {
-  catfile(Ubic::Settings->data_dir, 'tmp', $_[0]->full_name .'.conf');
+  catfile(Ubic::Settings->data_dir, 'tmp', $_[0]->full_name . '.conf');
 }
 
 sub _path_to_pid_file {
-  catfile(Ubic::Settings->data_dir, 'tmp', $_[0]->full_name .'.pid');
+  catfile(Ubic::Settings->data_dir, 'tmp', $_[0]->full_name . '.pid');
 }
 
 sub _read_pid {
@@ -223,11 +222,11 @@ sub _read_pid {
 }
 
 sub _write_mojo_config {
-  my $self = shift;
+  my $self     = shift;
   my $data_dir = Ubic::Settings->data_dir;
-  my $file = $self->_path_to_mojo_config;
-  my %config = %$self;
-  my $dumper = Data::Dumper->new([\%config]);
+  my $file     = $self->_path_to_mojo_config;
+  my %config   = %$self;
+  my $dumper   = Data::Dumper->new([\%config]);
 
   $config{hypnotoad}{pid_file} ||= $self->_path_to_pid_file;
 

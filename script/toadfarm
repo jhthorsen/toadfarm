@@ -4,10 +4,10 @@ use warnings;
 use File::Basename qw( basename );
 use Cwd qw( abs_path );
 
-$ENV{HOME} ||= '__NO_HOME__';
-$ENV{MOJO_CONFIG} ||= '';
+$ENV{HOME}                       ||= '__NO_HOME__';
+$ENV{MOJO_CONFIG}                ||= '';
 $ENV{TOADFARM_APPLICATION_CLASS} ||= 'Toadfarm';
-$ENV{TOADFARM_SILENT} ||= 0;
+$ENV{TOADFARM_SILENT}            ||= 0;
 
 sub help {
   return <<"HELP";
@@ -42,7 +42,7 @@ HELP
 sub read_pid {
   my $pid_file = $_[0]->{hypnotoad}{pid_file} or die "Cannot start without hypnotoad => pid_file in config file\n";
 
-  warn "pid_file=$pid_file" if $ENV{TOADFARM_SILENT} == -1;
+  warn "pid_file=$pid_file\n" if $ENV{TOADFARM_SILENT} == -1;
 
   return 0 unless -s $pid_file;
   return eval {
@@ -58,9 +58,9 @@ sub start {
   my $config = Mojolicious::Plugin::Config->new->load($ENV{MOJO_CONFIG}, {}, Mojolicious->new);
   my $pid = read_pid($config);
 
-  warn "pid=$pid" if $ENV{TOADFARM_SILENT} == -1;
+  warn "pid=$pid\n" if $ENV{TOADFARM_SILENT} == -1;
 
-  if($pid and kill 0, $pid) {
+  if ($pid and kill 0, $pid) {
     print "$ENV{HYPNOTOAD_APP} - running ($pid)\n" unless $ENV{TOADFARM_SILENT};
   }
   else {
@@ -71,22 +71,22 @@ sub start {
   return 0;
 }
 
-unless($ENV{MOJO_APP_LOADER}) {
+unless ($ENV{MOJO_APP_LOADER}) {
   $ENV{HYPNOTOAD_APP} = __FILE__;
-  my($start, @args);
+  my ($start, @args);
 
-  while(@ARGV) {
+  while (@ARGV) {
     my $arg = shift @ARGV;
-    if(-r $arg) {
+    if (-r $arg) {
       $ENV{MOJO_CONFIG} = $arg;
     }
-    elsif(-r "$ENV{HOME}/.toadfarm/$arg") {
+    elsif (-r "$ENV{HOME}/.toadfarm/$arg") {
       $ENV{MOJO_CONFIG} = "$ENV{HOME}/.toadfarm/$arg";
     }
-    elsif($arg eq '-a') {
+    elsif ($arg eq '-a') {
       $ENV{HYPNOTOAD_APP} = shift @ARGV or die "Usage: -a <app> ...\n";
 
-      if(!-x $ENV{HYPNOTOAD_APP}) {
+      if (!-x $ENV{HYPNOTOAD_APP}) {
         require File::Spec;
         for my $p (File::Spec->path) {
           next unless -x "$p/$ENV{HYPNOTOAD_APP}";
@@ -95,7 +95,7 @@ unless($ENV{MOJO_APP_LOADER}) {
         }
       }
 
-      if(-x $ENV{HYPNOTOAD_APP}) {
+      if (-x $ENV{HYPNOTOAD_APP}) {
         $ENV{MOJO_CONFIG} ||= sprintf '%s/.toadfarm/%s.conf', $ENV{HOME}, basename $ENV{HYPNOTOAD_APP};
       }
       else {
@@ -105,10 +105,10 @@ unless($ENV{MOJO_APP_LOADER}) {
         $ENV{HYPNOTOAD_APP} = __FILE__;
       }
     }
-    elsif($arg eq '--man') {
+    elsif ($arg eq '--man') {
       exec perldoc => 'Toadfarm';
     }
-    elsif($arg eq '--start') {
+    elsif ($arg eq '--start') {
       $start = 1;
     }
     else {
@@ -116,9 +116,9 @@ unless($ENV{MOJO_APP_LOADER}) {
     }
   }
 
-  if($ENV{MOJO_CONFIG}) {
+  if ($ENV{MOJO_CONFIG}) {
     $ENV{MOJO_CONFIG} = abs_path $ENV{MOJO_CONFIG};
-    warn "MOJO_CONFIG=$ENV{MOJO_CONFIG} hypnotoad @args $ENV{HYPNOTOAD_APP}" if $ENV{TOADFARM_SILENT} == -1;
+    warn "MOJO_CONFIG=$ENV{MOJO_CONFIG} hypnotoad @args $ENV{HYPNOTOAD_APP}\n" if $ENV{TOADFARM_SILENT} == -1;
   }
 
   exit start(@args) if $start;

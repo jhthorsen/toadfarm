@@ -1,15 +1,16 @@
+use Mojo::Base -strict;
 use Test::More;
 
-plan skip_all => 'Ubic is not installed' unless eval 'use Ubic; 1';
+plan skip_all => 'Ubic is not installed'   unless eval 'use Ubic; 1';
 plan skip_all => 'Need to set TEST_UBIC=1' unless $ENV{TEST_UBIC};
 
-my(@system, @kill);
+my (@system, @kill);
 
 {
   $ENV{$_} = 't/ubic' for qw( UBIC_SERVICE_DIR UBIC_DIR UBIC_DEFAULT_USER );
   $ENV{PATH} = "script:$ENV{PATH}";
   *Ubic::Service::Toadfarm::system = sub { @system = @_ };
-  *Ubic::Service::Toadfarm::kill = sub { @kill = @_ };
+  *Ubic::Service::Toadfarm::kill   = sub { @kill   = @_ };
   require Ubic::Service::Toadfarm;
 }
 
@@ -21,18 +22,11 @@ my(@system, @kill);
 delete $ENV{TEST123};
 
 my $log_file = 't/ubic/toadfarm.log';
-my $service = Ubic::Service::Toadfarm->new(
-                log => {
-                  file => $log_file,
-                },
-                hypnotoad => {
-                  listen => ['http://*:1345'],
-                  status_resource => '/status123',
-                },
-                env => {
-                  TEST123 => 123,
-                },
-              );
+my $service  = Ubic::Service::Toadfarm->new(
+  log       => {file    => $log_file,},
+  hypnotoad => {listen  => ['http://*:1345'], status_resource => '/status123',},
+  env       => {TEST123 => 123,},
+);
 
 {
   mkdir 't/ubic';
@@ -47,15 +41,10 @@ my $service = Ubic::Service::Toadfarm->new(
     $config,
     {
       name => 'test123',
-      env => {
-        TEST123 => 123,
-      },
-      hypnotoad => {
-        listen => ['http://*:1345'],
-        pid_file => 't/ubic/tmp/test123.pid',
-        status_resource => '/status123',
-      },
-      log => { file => 't/ubic/toadfarm.log' },
+      env  => {TEST123 => 123,},
+      hypnotoad =>
+        {listen => ['http://*:1345'], pid_file => 't/ubic/tmp/test123.pid', status_resource => '/status123',},
+      log => {file => 't/ubic/toadfarm.log'},
     },
     'generated config',
   );

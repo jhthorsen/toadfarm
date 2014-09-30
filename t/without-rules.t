@@ -1,11 +1,10 @@
-use strict;
-use warnings;
+use Mojo::Base -strict;
 use Test::More;
 use Test::Mojo;
 
 plan skip_all => 'Started from wrong directory' unless -x 't/bin/git';
 
-$ENV{PATH} = "t/bin:$ENV{PATH}";
+$ENV{PATH}        = "t/bin:$ENV{PATH}";
 $ENV{MOJO_CONFIG} = 't/without-rules.conf';
 my $t = Test::Mojo->new('Toadfarm');
 

@@ -1,5 +1,4 @@
-use strict;
-use warnings;
+use Mojo::Base -strict;
 use Test::More;
 use Test::Mojo;
 use Toadfarm;
@@ -22,7 +21,7 @@ my $t = Test::Mojo->new('Toadfarm');
 # This is super ugly, but fix http://www.cpantesters.org/cpan/report/9be9d476-e573-11e3-a4fa-b7e49121d1cf
 # $got->[1] = 'return 0 unless +($_[1]->tx->remote_port || '') =~ /(?-xism:8000)/;'
 # $expected->[1] = 'return 0 unless +($_[1]->tx->remote_port || '') =~ /(?^:8000)/;'
-for(@rules) {
+for (@rules) {
   s!/\(\?\^?[\w-]*:!/!g;
   s!\b\)/!/!g;
 }

@@ -26,27 +26,31 @@ Register an "around_dispatch" hook which will log the request.
 =cut
 
 sub register {
-  my($self, $app, $config) = @_;
+  my ($self, $app, $config) = @_;
   my $log = $app->log;
 
-  $app->hook(before_dispatch => sub {
-    my $c = shift;
+  $app->hook(
+    before_dispatch => sub {
+      my $c = shift;
 
-    $c->tx->req->env->{t0} = [gettimeofday];
-    $c->tx->on(finish => sub {
-      my $tx = shift;
-      my $req = $tx->req;
+      $c->tx->req->env->{t0} = [gettimeofday];
+      $c->tx->on(
+        finish => sub {
+          my $tx  = shift;
+          my $req = $tx->req;
 
-      $log->info(
-        sprintf '%s %s %s %s %.4fs',
-        $req->env->{identity} || $tx->remote_address,
-        $req->method,
-        $req->url->to_abs->userinfo(''),
-        $tx->res->code || '000',
-        tv_interval($req->env->{t0}),
+          $log->info(
+            sprintf '%s %s %s %s %.4fs',
+            $req->env->{identity} || $tx->remote_address,
+            $req->method,
+            $req->url->to_abs->userinfo(''),
+            $tx->res->code || '000',
+            tv_interval($req->env->{t0}),
+          );
+        }
       );
-    });
-  });
+    }
+  );
 }
 
 =head1 AUTHOR

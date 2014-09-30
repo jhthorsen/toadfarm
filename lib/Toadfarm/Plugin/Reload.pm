@@ -100,53 +100,54 @@ See L</SYNOPSIS> for C<%config> parameters.
 =cut
 
 sub register {
-  my($self, $app, $config) = @_;
+  my ($self, $app, $config) = @_;
   my $t0 = localtime;
 
   $self->{log} = $app->log;
   $self->_valid_config($config) or return;
 
-  $app->routes->any($config->{path})->to(cb => sub {
-    my $c = shift;
-    my $payload = $c->req->body_params->param('payload');
-    my $status = "Started: $t0\n\n";
-    my $args;
+  $app->routes->any($config->{path})->to(
+    cb => sub {
+      my $c       = shift;
+      my $payload = $c->req->body_params->param('payload');
+      my $status  = "Started: $t0\n\n";
+      my $args;
 
-    if($payload) {
-      $args = decode_json(Mojo::Util::encode('UTF-8', $payload));
-      $status = $self->_fork_and_reload($args) ? "ok\n" : "nok\n";
-    }
-    else {
-      for my $config (@{ $self->{repositories} }) {
-        $status .= "--- $config->{name}/$config->{branch}\n";
-        eval {
-          $self->_run(
-            { GIT_DIR => "$config->{path}/.git" },
-            $GIT => log => -3 => '--format=%s',
-            sub { $status .= "$_[0]\n" },
-          );
-          $status .= "\n";
-        } or do {
-          $self->{log}->error($@);
-        };
+      if ($payload) {
+        $args = decode_json(Mojo::Util::encode('UTF-8', $payload));
+        $status = $self->_fork_and_reload($args) ? "ok\n" : "nok\n";
       }
-    }
+      else {
+        for my $config (@{$self->{repositories}}) {
+          $status .= "--- $config->{name}/$config->{branch}\n";
+          eval {
+            $self->_run(
+              {GIT_DIR => "$config->{path}/.git"}, $GIT => log => -3 => '--format=%s',
+              sub { $status .= "$_[0]\n" },
+            );
+            $status .= "\n";
+          } or do {
+            $self->{log}->error($@);
+          };
+        }
+      }
 
-    $c->render(text => $status, format => 'text');
-  });
+      $c->render(text => $status, format => 'text');
+    }
+  );
 }
 
 sub _fork_and_reload {
-  my($self, $payload) = @_;
+  my ($self, $payload) = @_;
   my $manager_pid = getppid;
-  my $branch = $payload->{ref};
-  my $name = $payload->{repository}{name};
-  my $sha1 = $payload->{head_commit}{id};
-  my $refreshed = 0;
+  my $branch      = $payload->{ref};
+  my $name        = $payload->{repository}{name};
+  my $sha1        = $payload->{head_commit}{id};
+  my $refreshed   = 0;
   my $pid;
 
-  unless($branch and $name and $sha1) {
-    $self->{log}->warn("Skip reload on bad payload: " .encode_json($payload));
+  unless ($branch and $name and $sha1) {
+    $self->{log}->warn("Skip reload on bad payload: " . encode_json($payload));
     return;
   }
 
@@ -162,8 +163,8 @@ sub _fork_and_reload {
   # maybe i need to wait for github?
   sleep $ENV{TOADFARM_GITHUB_DELAY} if $ENV{TOADFARM_GITHUB_DELAY};
 
-  for my $config (@{ $self->{repositories} }) {
-    $config->{name} eq $name or next;
+  for my $config (@{$self->{repositories}}) {
+    $config->{name} eq $name     or next;
     $config->{branch} eq $branch or next;
 
     eval {
@@ -175,8 +176,8 @@ sub _fork_and_reload {
     };
   }
 
-  if($refreshed) {
-    $self->_run(kill => -USR2 => $manager_pid)
+  if ($refreshed) {
+    $self->_run(kill => -USR2 => $manager_pid);
   }
   else {
     $self->{log}->warn("Skip reload on name=$name and branch=$branch");
@@ -186,46 +187,51 @@ sub _fork_and_reload {
 }
 
 sub _refresh_repo {
-  my($self, $config, $sha1) = @_;
+  my ($self, $config, $sha1) = @_;
   my $log = $self->{log};
 
   chdir $config->{path} or die "chdir $config->{path}: $!";
   $self->_run($GIT => fetch => $config->{remote});
-  $self->_run($GIT => log => '--format=%H', '-n1', "$config->{remote}/$config->{branch}", sub {
-    return $self->{log}->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
-    $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$config->{branch}");
-  });
+  $self->_run(
+    $GIT => log => '--format=%H',
+    '-n1',
+    "$config->{remote}/$config->{branch}",
+    sub {
+      return $self->{log}->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
+      $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$config->{branch}");
+    }
+  );
 }
 
 sub _run {
-  my($self, @cmd) = @_;
+  my ($self, @cmd) = @_;
   my $env = ref $cmd[0] eq 'HASH' ? shift @cmd : {};
   my $cb = ref $cmd[-1] eq 'CODE' ? pop @cmd : sub { $self->{log}->info("<<< $_[0]") };
   my @res;
 
   local %ENV = %ENV;
   $ENV{$_} = $env->{$_} for keys %$env;
-  $env = join ', ', map { "$_=$env->{$_}" } sort keys %$env;
+  $env = join ', ', map {"$_=$env->{$_}"} sort keys %$env;
   $env = "[$env] " if $env;
 
   # TODO:
   $self->{log}->debug("${env}run(@cmd)");
   open my $CMD, '-|', @cmd or die "@cmd: $!";
-  while(<$CMD>) {
+  while (<$CMD>) {
     chomp;
     push @res, $cb->($_);
   }
 }
 
 sub _valid_config {
-  my($self, $config) = @_;
+  my ($self, $config) = @_;
   my $repositories = $config->{repositories};
 
-  if(!$config->{path}) {
+  if (!$config->{path}) {
     $self->{log}->error('Abort loading Reload: "path" missing in config');
     return;
   }
-  if(ref $repositories eq 'HASH') {
+  if (ref $repositories eq 'HASH') {
     $repositories = [
       map {
         $repositories->{$_}{name} = $_;
@@ -233,7 +239,7 @@ sub _valid_config {
       } keys %$repositories
     ];
   }
-  if(ref $repositories ne 'ARRAY' or !@$repositories) {
+  if (ref $repositories ne 'ARRAY' or !@$repositories) {
     $self->{log}->error('Abort loading Reload: "repositories" missing in config');
     return;
   }
