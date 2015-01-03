@@ -80,7 +80,7 @@ sub startup {
 
   # need to add the root app afterwards
   if(my $app = delete $self->{root_app}) {
-    $self->log->info("Mounting $app->[0] without condition");
+    $self->log->info("Mounting $app->[0] without conditions.");
     $self->routes->route('/')->detour(app => $app->[1]);
   }
 }
@@ -90,10 +90,6 @@ sub _start_apps {
   my $routes = $self->routes;
   my $config = $self->config;
   my $n = 0;
-
-  if($config->{log}{combined}) {
-    $self->log->info('All apps will log to ' .$config->{log}{file});
-  }
 
   while(@_) {
     my($name, $rules) = (shift @_, shift @_);
@@ -129,7 +125,7 @@ sub _start_apps {
     }
 
     if(@over) {
-      $app->log->info("Mounting $path with conditions");
+      $self->log->info("Mounting $path with conditions");
       unshift @over, "sub { my \$h = \$_[1]->req->headers;\n";
       push @over, "\$_[1]->req->url->base(Mojo::URL->new('$request_base'));" if $request_base;
       push @over, "return 1; }";
