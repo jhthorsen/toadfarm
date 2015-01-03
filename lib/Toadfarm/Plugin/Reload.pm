@@ -82,10 +82,9 @@ This is the path on disk to the local git repo.
 =cut
 
 use Mojo::Base 'Mojolicious::Plugin';
-use Mojo::JSON;
+use Mojo::JSON qw( decode_json encode_json );
 use Mojo::Util;
 
-my $JSON = Mojo::JSON->new;
 our $GIT = $ENV{GIT_EXE} || 'git';
 
 $ENV{TOADFARM_GITHUB_DELAY} ||= 2;
@@ -114,7 +113,7 @@ sub register {
     my $args;
 
     if($payload) {
-      $args = $JSON->decode(Mojo::Util::encode('UTF-8', $payload));
+      $args = decode_json(Mojo::Util::encode('UTF-8', $payload));
       $status = $self->_fork_and_reload($args) ? "ok\n" : "nok\n";
     }
     else {
@@ -147,7 +146,7 @@ sub _fork_and_reload {
   my $pid;
 
   unless($branch and $name and $sha1) {
-    $self->{log}->warn("Skip reload on bad payload: " .$JSON->encode($payload));
+    $self->{log}->warn("Skip reload on bad payload: " .encode_json($payload));
     return;
   }
 
