@@ -1,8 +1,8 @@
 Revision history for Toadfarm
 
 0.46
+       * Add support for base url in AccessLog (X-Request-Base)
        * Object-Oriented Mojo::JSON API is DEPRECATED
-       * Change log messages
 
 0.45     Thu Aug 28 11:51:07 2014
        * Fix toadfarm --start load config like Mojolicious

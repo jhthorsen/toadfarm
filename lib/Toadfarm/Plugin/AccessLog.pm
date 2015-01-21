@@ -38,12 +38,15 @@ sub register {
         finish => sub {
           my $tx  = shift;
           my $req = $tx->req;
+          my $url = $req->url->clone->to_abs;
+
+          $url->userinfo(undef);
+          unshift @{$url->path->parts}, @{$url->base->path->parts};
 
           $log->info(
             sprintf '%s %s %s %s %.4fs',
             $req->env->{identity} || $tx->remote_address,
-            $req->method,
-            $req->url->to_abs->userinfo(undef),
+            $req->method, $url,
             $tx->res->code || '000',
             tv_interval($req->env->{t0}),
           );
