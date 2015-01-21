@@ -43,7 +43,7 @@ sub register {
             sprintf '%s %s %s %s %.4fs',
             $req->env->{identity} || $tx->remote_address,
             $req->method,
-            $req->url->to_abs->userinfo(''),
+            $req->url->to_abs->userinfo(undef),
             $tx->res->code || '000',
             tv_interval($req->env->{t0}),
           );
