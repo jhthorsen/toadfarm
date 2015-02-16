@@ -34,7 +34,7 @@ sub register {
       my $c = shift;
 
       $c->tx->req->env->{t0} = [gettimeofday];
-      $c->tx->on(
+      $c->tx->once(
         finish => sub {
           my $tx  = shift;
           my $req = $tx->req;
