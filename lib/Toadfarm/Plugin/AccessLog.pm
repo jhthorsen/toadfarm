@@ -39,10 +39,6 @@ sub register {
 
       if (my $stream = Mojo::IOLoop->stream($tx->connection)) {
         Scalar::Util::weaken($tx);
-        $subscribers = $stream->subscribers('close');
-        unshift @$subscribers, sub { $reason ||= 'close' };
-        $stream->unsubscribe('close');
-        $stream->on(close => $_) for @$subscribers;
         $stream->on(timeout => sub { $reason ||= 'timeout' });
       }
 
@@ -54,7 +50,7 @@ sub register {
           my $code = $tx->res->code;
 
           unshift @{$url->path->parts}, @{$url->base->path->parts};
-          $code ||= $reason eq 'close' ? '499' : $reason eq 'timeout' ? '504' : '000';
+          $code ||= $reason eq 'timeout' ? '504' : '000';
           $url->userinfo(undef);
           $log->info(
             sprintf '%s %s %s %s %.4fs',
