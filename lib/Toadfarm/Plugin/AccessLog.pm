@@ -32,32 +32,32 @@ sub register {
 
   $app->hook(
     before_dispatch => sub {
-      my $tx     = $_[0]->tx;
-      my $reason = '';
+      my $tx = $_[0]->tx;
+      my ($req, $timeout, $url);
 
       $tx->req->env->{t0} = [gettimeofday];
 
       if (my $stream = Mojo::IOLoop->stream($tx->connection)) {
-        Scalar::Util::weaken($tx);
-        $stream->on(timeout => sub { $reason ||= 'timeout' });
+        $stream->on(timeout => sub { $timeout = 1 });
       }
 
-      $tx->once(
+      $tx->on(
         finish => sub {
           my $tx   = shift;
-          my $req  = $tx->req;
-          my $url  = $req->url->clone->to_abs;
           my $code = $tx->res->code;
 
+          $code ||= 504 if $timeout;
+          $code or return;
+          $req = $tx->req;
+          $url = $req->url->clone->to_abs->userinfo(undef);
+
           unshift @{$url->path->parts}, @{$url->base->path->parts};
-          $code ||= $reason eq 'timeout' ? '504' : '000';
-          $url->userinfo(undef);
+
           $log->info(
             sprintf '%s %s %s %s %.4fs',
             $req->env->{identity} || $tx->remote_address,
             $req->method, $url, $code, tv_interval($req->env->{t0}),
           );
-
         }
       );
     }

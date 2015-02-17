@@ -37,12 +37,7 @@ $t->app->routes->get(
   }
 );
 
-$t->app->routes->get(
-  '/stream/close' => sub {
-    my $c = shift->render_later;
-    Mojo::IOLoop->stream($c->tx->connection)->close;
-  }
-);
+$t->app->routes->get('/stream/close' => sub { shift->render_later });
 
 $t->get_ok('/with/identity')->status_is(200);
 $t->get_ok($t->tx->req->url->to_abs->userinfo('secret:user')->path('/yikes'))->status_is(404);
@@ -51,6 +46,16 @@ $t->get_ok('/with-request-base?X-Request-Base=http://thorsen.pm/prefix/')->statu
 
 {
   local $TODO = 'Not sure how to get this to fail and still be ok';
+  $t->ua->once(
+    start => sub {
+      my ($ua, $tx) = @_;
+      Mojo::IOLoop->timer(
+        0.02 => sub {
+          Mojo::IOLoop->stream($tx->connection)->close;
+        }
+      );
+    }
+  );
   $t->get_ok('/stream/close');
   $t->get_ok('/stream/timeout');
 }
@@ -68,15 +73,15 @@ while (<$FH>) {
   $log{without_identity} = $_ if m!info\W+\S+ GET http://[\w\.]+:\d+/yikes 404 [\d.]+s$!;
   $log{with_identity}    = $_ if m!info\W+user1 GET http://[\w\.]+:\d+/with/identity 200 [\d.]+s$!;
   $log{with_prefix}      = $_ if m!info.*X-Request-Base!;
-  $log{with_close}       = $_ if m!/close.*499!;
+  $log{with_close}       = $_ if m!/close\s\d+!;
   $log{with_timeout}     = $_ if m!/timeout.*504!;
 }
 
 like $log{with_identity},    qr{\buser1\b.*identity},                         'got access log line with identity';
 like $log{without_identity}, qr{GET.*yikes},                                  'got access log line without userinfo';
 like $log{with_prefix},      qr{http://thorsen\.pm/prefix/with-request-base}, 'got access log line base url prefix';
-like $log{with_close},       qr{GET.*/close\s499\s},                          'got client close';
 like $log{with_timeout},     qr{GET.*/timeout\s504\s},                        'got timeout';
+ok !$log{with_close}, 'do not log when client close' or diag $log{with_close};
 
 unlink $log_file unless $ENV{KEEP_LOG_FILE};
 done_testing;
