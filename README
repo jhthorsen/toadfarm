@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.46
+    0.47
 
 DESCRIPTION
     Toadfarm is wrapper around hypnotoad that allow you to mount many

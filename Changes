@@ -1,5 +1,10 @@
 Revision history for Toadfarm
 
+0.47     Tue Feb 17 20:58:34 2015
+       * AccessLog will not log twice
+       * AccessLog will not log without a status code
+       * AccessLog can log timed out requests
+
 0.46     Wed Jan 21 11:44:34 2015
        * Add support for base url in AccessLog (X-Request-Base)
        * Object-Oriented Mojo::JSON API is DEPRECATED

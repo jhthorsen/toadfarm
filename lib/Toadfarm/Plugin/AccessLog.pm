@@ -28,7 +28,6 @@ Register an "around_dispatch" hook which will log the request.
 sub register {
   my ($self, $app, $config) = @_;
   my $log = $app->log;
-  my $subscribers;
 
   $app->hook(
     before_dispatch => sub {
