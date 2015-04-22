@@ -1,6 +1,7 @@
 Revision history for perl distribution Toadfarm
 
 0.48 Not Released
+ - Remove Ubic::Service::Toadfarm
  - Add -w flag to keep toadfarm watcher running in foreground
 
 0.47 2015-02-17T20:58:34Z
