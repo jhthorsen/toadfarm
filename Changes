@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.48 Not Released
+ - Add -w flag to keep toadfarm watcher running in foreground
+
 0.47 2015-02-17T20:58:34Z
  - AccessLog will not log twice
  - AccessLog will not log without a status code

@@ -8,6 +8,7 @@ $ENV{HOME}                       ||= '__NO_HOME__';
 $ENV{MOJO_CONFIG}                ||= '';
 $ENV{TOADFARM_APPLICATION_CLASS} ||= 'Toadfarm';
 $ENV{TOADFARM_SILENT}            ||= 0;
+$ENV{TOADFARM_WATCH_INTERVAL}    ||= 2;
 
 sub help {
   return <<"HELP";
@@ -29,6 +30,7 @@ Default config file will be "\$HOME/.toadfarm/\$app.conf", where
 
 These options are available:
   -a <path>          Custom application (other than toadfarm)
+  -w 1               Keep a toadfarm manager in foreground.
   -f, --foreground   Keep manager process in foreground.
   -h, --help         Show this message.
       --man          Show manual
@@ -37,6 +39,14 @@ These options are available:
   -t, --test         Test application and exit.
 
 HELP
+}
+
+sub read_config {
+  $ENV{MOJO_CONFIG} or die "Path to config file is required as input\n";
+  local $ENV{MOJO_LOG_LEVEL} = 'info';
+  require Mojolicious::Plugin::Config;
+  require Mojolicious;
+  Mojolicious::Plugin::Config->new->load($ENV{MOJO_CONFIG}, {}, Mojolicious->new);
 }
 
 sub read_pid {
@@ -51,29 +61,9 @@ sub read_pid {
   };
 }
 
-sub start {
-  $ENV{MOJO_CONFIG} or die "Path to config file is required as input\n";
-  require Mojolicious::Plugin::Config;
-  require Mojolicious;
-  my $config = Mojolicious::Plugin::Config->new->load($ENV{MOJO_CONFIG}, {}, Mojolicious->new);
-  my $pid = read_pid($config);
-
-  warn "pid=$pid\n" if $ENV{TOADFARM_SILENT} == -1;
-
-  if ($pid and kill 0, $pid) {
-    print "$ENV{HYPNOTOAD_APP} - running ($pid)\n" unless $ENV{TOADFARM_SILENT};
-  }
-  else {
-    print "$ENV{HYPNOTOAD_APP} - starting\n" unless $ENV{TOADFARM_SILENT};
-    exec hypnotoad => @_ => $ENV{HYPNOTOAD_APP};
-  }
-
-  return 0;
-}
-
-unless ($ENV{MOJO_APP_LOADER}) {
+sub run {
+  my ($start, $watch, @args);
   $ENV{HYPNOTOAD_APP} = __FILE__;
-  my ($start, @args);
 
   while (@ARGV) {
     my $arg = shift @ARGV;
@@ -82,6 +72,9 @@ unless ($ENV{MOJO_APP_LOADER}) {
     }
     elsif (-r "$ENV{HOME}/.toadfarm/$arg") {
       $ENV{MOJO_CONFIG} = "$ENV{HOME}/.toadfarm/$arg";
+    }
+    elsif ($arg eq '-w') {
+      $watch = shift @ARGV;
     }
     elsif ($arg eq '-a') {
       $ENV{HYPNOTOAD_APP} = shift @ARGV or die "Usage: -a <app> ...\n";
@@ -122,11 +115,55 @@ unless ($ENV{MOJO_APP_LOADER}) {
   }
 
   exit start(@args) if $start;
+  exit watch($watch, @args) if $watch;
   exec hypnotoad => @args => $ENV{HYPNOTOAD_APP} if $ENV{MOJO_CONFIG};
   print help();
   exit 0;
 }
 
-# Start command line interface for application
+sub start {
+  my $pid = read_pid(read_config());
+
+  warn "pid=$pid\n" if $ENV{TOADFARM_SILENT} == -1;
+
+  if ($pid and kill 0, $pid) {
+    warn "$ENV{HYPNOTOAD_APP} - Running ($pid)\n" unless $ENV{TOADFARM_SILENT};
+  }
+  else {
+    warn "$ENV{HYPNOTOAD_APP} - Starting\n" unless $ENV{TOADFARM_SILENT};
+    exec hypnotoad => @_ => $ENV{HYPNOTOAD_APP};
+  }
+
+  return 0;
+}
+
+sub watch {
+  my ($watch, @args) = @_;
+  my $start;
+
+  $watch ||= $ENV{MOJO_CONFIG};
+  $start = sub {
+    warn "$ENV{HYPNOTOAD_APP} - Starting ($_[0])\n" unless $ENV{TOADFARM_SILENT};
+    system hypnotoad => @args, $ENV{HYPNOTOAD_APP};
+  };
+
+  local $SIG{USR2} = $start;                                                            # restart the process on USR2
+  local $SIG{TERM} = sub { system hypnotoad => -s => $ENV{HYPNOTOAD_APP}; exit $?; };
+
+  while (--$ENV{TOADFARM_WATCH_CYCLES}) {
+    my $pid = read_pid(read_config());
+    $start->("Was not running") unless $pid and kill 0, $pid;                           # not running
+  }
+  continue {
+    sleep $ENV{TOADFARM_WATCH_INTERVAL};
+  }
+
+  return 0;
+}
+
+# Run this script
+exit run() unless $ENV{MOJO_APP_LOADER};
+
+# Load application class from within hypnotoad
 require Mojolicious::Commands;
 Mojolicious::Commands->start_app($ENV{TOADFARM_APPLICATION_CLASS});
