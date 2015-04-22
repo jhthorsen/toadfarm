@@ -1,168 +1,167 @@
-Revision history for Toadfarm
+Revision history for perl distribution Toadfarm
 
-0.47     Tue Feb 17 20:58:34 2015
-       * AccessLog will not log twice
-       * AccessLog will not log without a status code
-       * AccessLog can log timed out requests
+0.47 2015-02-17T20:58:34Z
+ - AccessLog will not log twice
+ - AccessLog will not log without a status code
+ - AccessLog can log timed out requests
 
-0.46     Wed Jan 21 11:44:34 2015
-       * Add support for base url in AccessLog (X-Request-Base)
-       * Object-Oriented Mojo::JSON API is DEPRECATED
+0.46 2015-01-21T11:44:34Z
+ - Add support for base url in AccessLog (X-Request-Base)
+ - Object-Oriented Mojo::JSON API is DEPRECATED
 
-0.45     Thu Aug 28 11:51:07 2014
-       * Fix toadfarm --start load config like Mojolicious
+0.45 2014-08-28T11:51:07Z
+ - Fix toadfarm --start load config like Mojolicious
 
-0.44     Fri May 30 08:00:13 2014
-       * Compatible with Mojolicious 5.0
+0.44 2014-05-30T08:00:13Z
+ - Compatible with Mojolicious 5.0
 
-0.4301   Mon May 12 15:19:09 2014
-       * Fix t/mount-point.conf
+0.4301 2014-05-12T15:19:09Z
+ - Fix t/mount-point.conf
 
-0.43     Sun Mar 30 11:43:16 2014
-       * Improved documentation
-       * Add support for filtering on local_port
+0.43 2014-03-30T11:43:16Z
+ - Improved documentation
+ - Add support for filtering on local_port
 
-0.42     Tue Mar 25 16:11:39 2014
-       * Improved documentation
-       * Add support for filtering on remote_address
-       * Add support for filtering on remote_port
-       * Add support for custom mount point
+0.42 2014-03-25T16:11:39Z
+ - Improved documentation
+ - Add support for filtering on remote_address
+ - Add support for filtering on remote_port
+ - Add support for custom mount point
 
-0.41     Wed Mar 19 17:58:41 2014
-       * Add support for header regexp matching
-       * Fix not let MOJO_CONFIG be visible in parent processes
+0.41 2014-03-19T17:58:41Z
+ - Add support for header regexp matching
+ - Fix not let MOJO_CONFIG be visible in parent processes
 
-0.40     Tue Dec 31 10:11:07 2013
-       * Compatible with secrets() in Mojolicious 4.63
+0.40 2013-12-31T10:11:07Z
+ - Compatible with secrets() in Mojolicious 4.63
 
-0.3001   Wed Dec  4 15:16:56 2013
-       * Toadfarm could not really load application class in 0.30
+0.3001 2013-12-04T15:16:56Z
+ - Toadfarm could not really load application class in 0.30
 
-0.30     Wed Dec  4 14:52:20 2013
-       * Toadfarm can load application class
+0.30 2013-12-04T14:52:20Z
+ - Toadfarm can load application class
 
-0.29     Wed Dec  4 09:06:13 2013
-       * Skipping t/script.t on Win32
-       * Default config file from app name
+0.29 2013-12-04T09:06:13Z
+ - Skipping t/script.t on Win32
+ - Default config file from app name
 
-0.28     Tue Dec  3 21:18:06 2013
-       * Add extra (experimental) options to script/toadfarm
+0.28 2013-12-03T21:18:06Z
+ - Add extra (experimental) options to script/toadfarm
 
-0.27     Thu Nov 28 12:38:08 2013
-       * Able to load application classes
-       * Fix link to example etc directory
-         Merge pull request #2 from dsteinbrunner/patch-1
+0.27 2013-11-28T12:38:08Z
+ - Able to load application classes
+ - Fix link to example etc directory Merge pull request #2 from
+   dsteinbrunner/patch-1
 
-0.2602   Fri Nov 22 12:18:11 2013
-       * Clearning mojo environment variables
+0.2602 2013-11-22T12:18:11Z
+ - Clearning mojo environment variables
 
-0.2601   Fri Nov 22 11:05:54 2013
-       * Fix setting environment in ubic service
+0.2601 2013-11-22T11:05:54Z
+ - Fix setting environment in ubic service
 
-0.26     Fri Nov 22 09:07:04 2013
-       * Not compatible pid/config file change for ubic service
-       * Fix %ENV is localized
-       * "log" in config is no longer required
+0.26 2013-11-22T09:07:04Z
+ - Not compatible pid/config file change for ubic service
+ - Fix %ENV is localized
+ - "log" in config is no longer required
 
-0.25     Thu Nov 21 11:14:13 2013
-       * Fix really bad bug: MUST NOT LOG user:password from request URL.
+0.25 2013-11-21T11:14:13Z
+ - Fix really bad bug: MUST NOT LOG user:password from request URL.
 
-0.24     Thu Nov 21 10:01:34 2013
-       * Change ubic status will be "running" even if the server does not
-         respond to HTTP request.
+0.24 2013-11-21T10:01:34Z
+ - Change ubic status will be "running" even if the server does not respond
+   to HTTP request.
 
-0.23     Mon Nov 18 16:56:06 2013
-       * Need to write new config on ubic reload
+0.23 2013-11-18T16:56:06Z
+ - Need to write new config on ubic reload
 
-0.22     Mon Nov 18 15:15:43 2013
-       * Fix bug when passing %env to Ubic::Service::Toadfarm
+0.22 2013-11-18T15:15:43Z
+ - Fix bug when passing %env to Ubic::Service::Toadfarm
 
-0.21     Sat Nov 16 16:14:55 2013
-       * Add support for setting environment variables from Ubic service
+0.21 2013-11-16T16:14:55Z
+ - Add support for setting environment variables from Ubic service
 
-0.20     Thu Nov 14 17:13:38 2013
-       * Change format for AccessLog plugin:
-         1.2.3.4 GET http://... 200 0.001s
+0.20 2013-11-14T17:13:38Z
+ - Change format for AccessLog plugin: 1.2.3.4 GET http://... 200 0.001s
 
-0.19     Thu Nov 14 16:37:46 2013
-       * Will return ubic status with pid as well
+0.19 2013-11-14T16:37:46Z
+ - Will return ubic status with pid as well
 
-0.18     Tue Nov  5 19:38:21 2013
-       * Don't need to check with request if the process is not running
-       * The server should respond quickly
+0.18 2013-11-05T19:38:21Z
+ - Don't need to check with request if the process is not running
+ - The server should respond quickly
 
-0.1701   Mon Nov  4 19:54:35 2013
-       * Fix bad 00-basic.t
+0.1701 2013-11-04T19:54:35Z
+ - Fix bad 00-basic.t
 
-0.17     Sat Nov  2 17:16:24 2013
-       * Add status message to Ubic service
-       * Add support for custom status resource
+0.17 2013-11-02T17:16:24Z
+ - Add status message to Ubic service
+ - Add support for custom status resource
 
-0.1601   Thu Oct 31 20:12:43 2013
-       * Ubic is not bundled
+0.1601 2013-10-31T20:12:43Z
+ - Ubic is not bundled
 
-0.16     Wed Oct 30 20:13:38 2013
-       * Sub app inherit toadfarm config
+0.16 2013-10-30T20:13:38Z
+ - Sub app inherit toadfarm config
 
-0.15     Wed Oct 30 19:01:54 2013
-       * Allowing Ubic::Service::Toadfarm to start any hypnotoad
-         application.
+0.15 2013-10-30T19:01:54Z
+ - Allowing Ubic::Service::Toadfarm to start any hypnotoad application.
 
-0.14     Wed Oct 30 18:44:14 2013
-       * Add Ubic::Service::Toadfarm
+0.14 2013-10-30T18:44:14Z
+ - Add Ubic::Service::Toadfarm
 
-0.1301   Fri Sep  6 23:43:40 2013
-       * Fix repository url
+0.1301 2013-09-06T23:43:40Z
+ - Fix repository url
 
-0.13     Fri Sep  6 10:43:37 2013
-       * Add support for config
+0.13 2013-09-06T10:43:37Z
+ - Add support for config
 
-0.12     Wed Aug  7 15:34:15 2013
-       * Change from "git remote update ..." to "git fetch ..."
+0.12 2013-08-07T15:34:15Z
+ - Change from "git remote update ..." to "git fetch ..."
 
-0.11     Tue Jul 23 10:22:17 2013
-       * Add support for "secret" in config file
+0.11 2013-07-23T10:22:17Z
+ - Add support for "secret" in config file
 
-0.1001   Mon Jun 10 22:30:19 2013
-       * Capturing more system errors
+0.1001 2013-06-10T22:30:19Z
+ - Capturing more system errors
 
-0.10     Tue May 21 20:50:24 2013
-       * Add AccessLog plugin
+0.10 2013-05-21T20:50:24Z
+ - Add AccessLog plugin
 
-0.09     Tue May 21 01:13:10 2013
-       * Add support for multiple repositories with the same name
+0.09 2013-05-21T01:13:10Z
+ - Add support for multiple repositories with the same name
 
-0.0801   Sun May 19 14:46:40 2013
-       * render_json() and render_text() is deprecated
+0.0801 2013-05-19T14:46:40Z
+ - render_json() and render_text() is deprecated
 
-0.08     Thu May  9 12:30:49 2013
-       * Remove VERSION from Makefile.PL
-       * Fix mouting app without conditions
+0.08 2013-05-09T12:30:49Z
+ - Remove VERSION from Makefile.PL
+ - Fix mouting app without conditions
 
-0.07     Sun May  5 16:26:13 2013
-       * Improved status page for reload plugin
-       * Add support for custom error pages and assets
+0.07 2013-05-05T16:26:13Z
+ - Improved status page for reload plugin
+ - Add support for custom error pages and assets
 
-0.06     Thu May  2 00:18:17 2013
-       * Fix need to run chdir before git commands
-       * Fix argument parsing for script/toadfarm
+0.06 2013-05-02T00:18:17Z
+ - Fix need to run chdir before git commands
+ - Fix argument parsing for script/toadfarm
 
-0.05     Wed May  1 22:45:02 2013
-       * Add support for custom log level from config
-       * Fix major routing bug
+0.05 2013-05-01T22:45:02Z
+ - Add support for custom log level from config
+ - Fix major routing bug
 
-0.04     Wed May  1 19:56:25 2013
-       * Add Reload plugin
+0.04 2013-05-01T19:56:25Z
+ - Add Reload plugin
 
-0.03     Tue Apr 30 02:22:38 2013
-       * Add Ubuntu setup example
-       * Fix cannot pass MOJO_CONFIG to sub apps
-       * Accept log settings from config
+0.03 2013-04-30T02:22:38Z
+ - Add Ubuntu setup example
+ - Fix cannot pass MOJO_CONFIG to sub apps
+ - Accept log settings from config
 
-0.02     Mon Apr 29 21:36:48 2013
-       * Add $VERSION
-       * Add suppor for "plugins"
-       * Will not poke into mojolicious internals
+0.02 2013-04-29T21:36:48Z
+ - Add $VERSION
+ - Add suppor for "plugins"
+ - Will not poke into mojolicious internals
 
-0.01     Mon Apr 29 20:28:14 2013
-       * Toadfarm can dispatch based on headers
+0.01 2013-04-29T20:28:14Z
+ - Toadfarm can dispatch based on headers
+
