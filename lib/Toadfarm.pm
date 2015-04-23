@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.48
+0.49
 
 =head1 DESCRIPTION
 
@@ -50,7 +50,7 @@ use Mojo::Base 'Mojolicious';
 use Mojo::Util 'class_to_path';
 use File::Which;
 
-our $VERSION = '0.48';
+our $VERSION = '0.49';
 
 $ENV{MOJO_CONFIG} = $ENV{TOADFARM_CONFIG} if $ENV{TOADFARM_CONFIG};
 
