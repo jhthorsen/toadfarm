@@ -61,35 +61,32 @@ sub startup {
   # remember the config when hot reloading the app
   $ENV{TOADFARM_CONFIG} = delete $ENV{MOJO_CONFIG};
 
-  if ($config->{log}{file}) {
-    my $log = Mojo::Log->new;
-    $log->path($config->{log}{file});
-    $log->level($config->{log}{level} || 'info');
-    $self->log($log);
-  }
+  $self->{mounted} = 0;
+  $self->_setup_log($config->{log})                   if $config->{log}{file};
+  $self->_paths($config->{paths})                     if $config->{paths};
+  $self->secrets([$config->{secret}])                 if $config->{secret};
+  $self->secrets($config->{secrets})                  if $config->{secrets};
+  $self->_mount_apps(@{$config->{apps}})              if $config->{apps};
+  $self->_load_plugins(@{$config->{plugins}})         if $config->{plugins};
+  $self->_mount_root_app(@{delete $self->{root_app}}) if $self->{root_app};
+}
 
-  for my $type (qw/ renderer static /) {
-    my $paths = $config->{paths}{$type} or next;
-    $self->$type->paths($paths);
-  }
+sub _load_plugins {
+  my $self = shift;
 
-  $self->secrets([$config->{secret}])          if $config->{secret};
-  $self->secrets($config->{secrets})           if $config->{secrets};
-  $self->_start_apps(@{$config->{apps}})       if $config->{apps};
-  $self->_start_plugins(@{$config->{plugins}}) if $config->{plugins};
+  unshift @{$self->plugins->namespaces}, 'Toadfarm::Plugin';
 
-  # need to add the root app afterwards
-  if (my $app = delete $self->{root_app}) {
-    $self->log->info("Mounting $app->[0] without conditions.");
-    $self->routes->route('/')->detour(app => $app->[1]);
+  while (@_) {
+    my ($plugin, $config) = (shift @_, shift @_);
+    $self->log->info("Loading plugin $plugin");
+    $self->plugin($plugin, $config);
   }
 }
 
-sub _start_apps {
+sub _mount_apps {
   my $self   = shift;
   my $routes = $self->routes;
   my $config = $self->config;
-  my $n      = 0;
 
   while (@_) {
     my ($name, $rules) = (shift @_, shift @_);
@@ -129,8 +126,8 @@ sub _start_apps {
       unshift @over, "sub { my \$h = \$_[1]->req->headers;\n";
       push @over, "\$_[1]->req->url->base(Mojo::URL->new('$request_base'));" if $request_base;
       push @over, "return 1; }";
-      $routes->add_condition("toadfarm_condition_$n", => eval "@over" || die "@over: $@");
-      $routes->route($mount_point || '/')->detour(app => $app)->over("toadfarm_condition_$n");
+      $routes->add_condition("toadfarm_condition_$self->{mounted}", => eval "@over" || die "@over: $@");
+      $routes->route($mount_point || '/')->detour(app => $app)->over("toadfarm_condition_$self->{mounted}");
     }
     elsif ($mount_point) {
       $routes->route($mount_point)->detour(app => $app);
@@ -139,22 +136,35 @@ sub _start_apps {
       $self->{root_app} = [$path => $app];
     }
 
-    $n++;
+    $self->{mounted}++;
   }
 
   $self;
 }
 
-sub _start_plugins {
-  my $self = shift;
+sub _mount_root_app {
+  my ($self, $path, $app) = @_;
+  $self->log->info("Mounting $path without conditions.");
+  $self->routes->route('/')->detour(app => $app);
+}
 
-  unshift @{$self->plugins->namespaces}, 'Toadfarm::Plugin';
+sub _paths {
+  my ($self, $config) = @_;
 
-  while (@_) {
-    my ($plugin, $config) = (shift @_, shift @_);
-    $self->log->info("Loading plugin $plugin");
-    $self->plugin($plugin, $config);
+  for my $type (qw( renderer static )) {
+    my $paths = $config->{$type} or next;
+    $self->$type->paths($paths);
   }
+}
+
+sub _setup_log {
+  my ($self, $config) = @_;
+  my $log = Mojo::Log->new;
+
+  $self->config(log => $config);
+  $log->path($config->{path}) if $config->{path} ||= delete $config->{file};
+  $log->level($config->{level} || 'info');
+  $self->log($log);
 }
 
 sub _skip_if {

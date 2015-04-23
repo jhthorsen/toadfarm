@@ -1,8 +1,9 @@
 Revision history for perl distribution Toadfarm
 
 0.48 Not Released
- - Remove Ubic::Service::Toadfarm
+ - Add support for defining applications using DSL
  - Add -w flag to keep toadfarm watcher running in foreground
+ - Remove Ubic::Service::Toadfarm
 
 0.47 2015-02-17T20:58:34Z
  - AccessLog will not log twice
