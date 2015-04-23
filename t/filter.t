@@ -3,10 +3,9 @@ use Mojo::Util 'spurt';
 use Mojo::IOLoop;
 use Mojo::Server::Daemon;
 use Test::More;
-use Toadfarm;
 
-$ENV{MOJO_CONFIG} = '/tmp/filter.t.conf';
-$ENV{MOJO_MODE}   = 'production';
+BEGIN { $ENV{MOJO_MODE} = 'production' }
+use Toadfarm::Starter;
 
 plan skip_all => 'TEST_LIVE=1 is required' unless $ENV{TEST_LIVE} or $ENV{USER} eq 'jhthorsen';
 plan skip_all => 'MOJO_CONFIG /tmp/filter.t.conf exists' if -s $ENV{MOJO_CONFIG};
@@ -14,19 +13,10 @@ plan skip_all => 'MOJO_CONFIG /tmp/filter.t.conf exists' if -s $ENV{MOJO_CONFIG}
 my $allowed = Mojo::IOLoop->can('generate_port') ? Mojo::IOLoop->generate_port : Mojo::IOLoop::Server->generate_port;
 my $denied  = Mojo::IOLoop->can('generate_port') ? Mojo::IOLoop->generate_port : Mojo::IOLoop::Server->generate_port;
 
-spurt <<"CONFIG", $ENV{MOJO_CONFIG};
-{
-  apps => [
-    't::lib::App' => {
-      remote_address => '127.0.0.1',
-      local_port => '$allowed',
-    },
-  ],
-}
-CONFIG
+mount 't::lib::App' => {remote_address => '127.0.0.1', local_port => $allowed};
+start;
 
-$main::config = $ENV{MOJO_CONFIG};
-my $server = Mojo::Server::Daemon->new(app => Toadfarm->new, silent => 1);
+my $server = Mojo::Server::Daemon->new(app => app, silent => 1);
 my ($bytes, $client);
 
 $server->listen(["http://*:$allowed", "http://*:$denied"])->start;
@@ -73,8 +63,4 @@ sub local_address {
     return $1 if /inet addr\D+(\S+)/ and $1 ne '127.0.0.1';
   }
   return '1.2.3.4';
-}
-
-END {
-  unlink $main::config if $main::config;
 }
