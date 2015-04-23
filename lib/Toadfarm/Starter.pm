@@ -133,7 +133,7 @@ sub import {
 
   monkey_patch $caller, (
     app     => sub {$app},
-    logging => sub { $app->_setup_log(@_) },
+    logging => sub { $got{log}++; $app->_setup_log(@_) },
     mount   => sub { push @{$app->config->{apps}}, @_ == 2 ? @_ : ($_[0], {}); $app },
     plugin  => sub { push @{$app->config->{plugins}}, @_ == 2 ? @_ : ($_[0], {}); $app },
     secrets => sub { $got{secrets} = 1; $app->secrets([@_]) },
@@ -144,14 +144,28 @@ sub import {
         my $listen = ref $_[0] eq 'ARRAY' ? shift : undef;
         $config->{hypnotoad} = @_ > 1 ? {@_} : {%{$_[0]}} if @_;
         $config->{hypnotoad}{listen} = $listen if $listen;
+        $got{hypnotoad}++;
       }
 
       $app->moniker($class->_moniker) if $app->moniker eq 'toadfarm';
       $app->config->{hypnotoad}{pid_file} ||= $class->_pid_file($app);
       $app->secrets([Mojo::Util::md5_sum(rand . time . $$ . $0)]) unless $got{secrets};
-      $app->_mount_apps(@{$config->{apps}})             if $config->{apps};
-      $app->_load_plugins(@{$config->{plugins}})        if $config->{plugins};
-      $app->_mount_root_app(@{delete $app->{root_app}}) if $app->{root_app};
+      $app->_mount_apps(@{$config->{apps}})      if $config->{apps};
+      $app->_load_plugins(@{$config->{plugins}}) if $config->{plugins};
+
+      if (my $root_app = delete $app->{root_app}) {
+        if (@{$config->{apps} || []} == 2) {
+          my $plugins = $config->{plugins} || [];
+          $root_app->[1]->config(hypnotoad => $app->config('hypnotoad')) if $got{hypnotoad};
+          $root_app->[1]->log($app->log) if $got{log};
+          $root_app->[1]->plugin(shift(@$plugins), shift(@$plugins)) for @$plugins;
+          $root_app->[1]->secrets($app->secrets) if $root_app->[1]->secrets->[0] eq $root_app->[1]->moniker;
+          $app = $root_app->[1];
+        }
+        else {
+          $app->_mount_root_app(@$root_app);
+        }
+      }
 
       warn '$config=' . Mojo::Util::dumper($app->config) if DEBUG;
 
