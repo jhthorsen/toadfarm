@@ -16,4 +16,4 @@ pm_to_blib
 script/hypnotoad.pid
 *.old
 *.swp
-t/ubic
+local
