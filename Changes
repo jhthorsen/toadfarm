@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.48 Not Released
+0.48 2015-04-23T19:40:05+0200
  - Add support for defining applications using DSL
  - Remove Ubic::Service::Toadfarm
 
