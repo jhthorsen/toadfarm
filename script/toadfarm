@@ -30,7 +30,6 @@ Default config file will be "\$HOME/.toadfarm/\$app.conf", where
 
 These options are available:
   -a <path>          Custom application (other than toadfarm)
-  -w 1               Keep a toadfarm manager in foreground.
   -f, --foreground   Keep manager process in foreground.
   -h, --help         Show this message.
       --man          Show manual
@@ -62,7 +61,7 @@ sub read_pid {
 }
 
 sub run {
-  my ($start, $watch, @args);
+  my ($start, @args);
   $ENV{HYPNOTOAD_APP} = __FILE__;
 
   while (@ARGV) {
@@ -72,9 +71,6 @@ sub run {
     }
     elsif (-r "$ENV{HOME}/.toadfarm/$arg") {
       $ENV{MOJO_CONFIG} = "$ENV{HOME}/.toadfarm/$arg";
-    }
-    elsif ($arg eq '-w') {
-      $watch = shift @ARGV;
     }
     elsif ($arg eq '-a') {
       $ENV{HYPNOTOAD_APP} = shift @ARGV or die "Usage: -a <app> ...\n";
@@ -115,7 +111,6 @@ sub run {
   }
 
   exit start(@args) if $start;
-  exit watch($watch, @args) if $watch;
   exec hypnotoad => @args => $ENV{HYPNOTOAD_APP} if $ENV{MOJO_CONFIG};
   print help();
   exit 0;
@@ -132,30 +127,6 @@ sub start {
   else {
     warn "$ENV{HYPNOTOAD_APP} - Starting\n" unless $ENV{TOADFARM_SILENT};
     exec hypnotoad => @_ => $ENV{HYPNOTOAD_APP};
-  }
-
-  return 0;
-}
-
-sub watch {
-  my ($watch, @args) = @_;
-  my $start;
-
-  $watch ||= $ENV{MOJO_CONFIG};
-  $start = sub {
-    warn "$ENV{HYPNOTOAD_APP} - Starting ($_[0])\n" unless $ENV{TOADFARM_SILENT};
-    system hypnotoad => @args, $ENV{HYPNOTOAD_APP};
-  };
-
-  local $SIG{USR2} = $start;                                                            # restart the process on USR2
-  local $SIG{TERM} = sub { system hypnotoad => -s => $ENV{HYPNOTOAD_APP}; exit $?; };
-
-  while (--$ENV{TOADFARM_WATCH_CYCLES}) {
-    my $pid = read_pid(read_config());
-    $start->("Was not running") unless $pid and kill 0, $pid;                           # not running
-  }
-  continue {
-    sleep $ENV{TOADFARM_WATCH_INTERVAL};
   }
 
   return 0;
