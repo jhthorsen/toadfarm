@@ -15,6 +15,7 @@ L<Toadfarm::Command::stop> is a command for stopping a L<Toadfarm> application.
 =cut
 
 use Mojo::Base 'Mojolicious::Command';
+use Time::HiRes 'usleep';
 
 =head1 ATTRIBUTES
 
@@ -46,7 +47,7 @@ sub run {
     _exit("Hypnotoad server stopped.") unless $self->_pid;
   }
   continue {
-    sleep 1;
+    usleep 200e3;
   }
 
   _exit("Hypnotoad server failed to stop.", 1);

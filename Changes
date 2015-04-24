@@ -4,6 +4,7 @@ Revision history for perl distribution Toadfarm
  - Remove outdated documentation and examples
  - Add init-v example
  - Add crontab example
+ - Improved "stop" command speed
 
 0.50 2015-04-24T21:42:25+0200
  - Toadfarm DSL scripts can be used as init scripts

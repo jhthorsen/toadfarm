@@ -1,10 +1,11 @@
 use Mojo::Base -strict;
 use Mojo::Util 'spurt';
 use Test::More;
+use Time::HiRes;
 
 no warnings qw( once redefine );
 my ($exit, $sleep, $quit);
-*CORE::GLOBAL::sleep = sub { $sleep++ };
+*Time::HiRes::usleep = sub { $sleep++ };
 
 $SIG{QUIT} = sub { $quit++ };
 
