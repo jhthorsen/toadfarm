@@ -4,14 +4,16 @@ Toadfarm::Manual::RunningToadfarm - Command line options
 
 =head1 DESCRIPTION
 
-This manual goes through the command line options for C<toadfarm>.
+This manual goes through different options on how to start your
+L<Toadfarm> application.
 
 =head2 Basics
 
-You can start the application by running:
+You can see the different options by simply running your application with
+no options:
 
-  # Run the Toadfarm application with hypnotoad
-  $ /path/to/your-script start
+  $ /path/to/your-script
+  $ /path/to/your-script help
 
 =head2 Actions
 
@@ -19,7 +21,7 @@ In addition to all the default L<commands|Mojolicious::Commands/COMMANDS>,
 L<Toadfarm> adds some more:
 
 =over 4
-=
+
 =item * L<Toadfarm::Command::start>
 
   $ /path/to/your-script start
@@ -30,27 +32,57 @@ Will only start your application if not running.
 
   $ /path/to/your-script stop
 
-Will stop your application. Note that this command also
-waits for the application to stop, which might take
+Will stop your application. Note that this command waits for the
+application to stop, which could take
 L<several seconds|Mojo::Server::Hypnotoad/graceful_timeout>.
 
 =item * L<Toadfarm::Command::reload>
 
   $ /path/to/your-script reload
 
-Will either start the application or make it
-L<hot deploy|Mojo::Server::Hypnotoad/USR2>.
+Will either start the application or
+L<hot deploy|Mojo::Server::Hypnotoad/USR2> it. This means loading
+in new version of your application, without loosing any connections.
 
 =back
 
-=head2 Init-V
+=head2 Init
 
-Look at L<https://github.com/jhthorsen/toadfarm/tree/master/etc> for example
-resources which show how to start L<Toadfarm> on ubuntu.
+Your script can be used as an init-script. Example script:
+
+  #!/path/to/your/perl
+  ### BEGIN INIT INFO
+  # Provides:          toadfarm
+  # Required-Start:    $local_fs $network mysql postgresql
+  # Required-Stop:     $local_fs $network mysql postgresql
+  # Default-Start:     2 3 4 5
+  # Default-Stop:      0 1 6
+  # Short-Description: Toadfarm web application
+  ### END INIT INFO
+
+  use Toadfarm -dsl;
+  # ...
+  start;
+
+You can put the code above in C</etc/init.d/your-script>:
+
+  # Create a toadfarm script in init.d
+  $ sudo $EDITOR /etc/init.d/your-script
+
+  # Make it executable
+  $ sudo chmod +x /etc/init.d/your-script
+
+  # Make it start on boot
+  $ sudo update-rc.d your-script defaults;
 
 =head2 Crontab
 
-  * * * * * /usr/local/bin/toadfarm -a My::App --start 1>/tmp/toadfarm.cron.log 2>&1
+If you want to use crontab to start your script, you can do it with this line:
+
+  * * * * * /path/to/your-script start 1>/dev/null 2>/dev/null
+
+The trick here is to use "start" which will only start your server and not
+hot deploy it if it's already running.
 
 =head2 Other ways
 
@@ -60,6 +92,11 @@ as well:
   $ /path/to/your-script daemon --listen http://*:5000
   $ morbo /path/to/your-script
   $ hypnotoad /path/to/your-script
+
+=head1 SEE ALSO
+
+See also L<Toadfarm::Manual::Introduction> and
+L<Toadfarm::Manual::Config>.
 
 =head1 AUTHOR
 
