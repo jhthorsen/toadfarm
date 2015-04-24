@@ -14,6 +14,11 @@ sub help {
   return <<"HELP";
 usage: $0 [OPTIONS] [CONFIG_FILE]
 
+  # Control DSL scripts (Toadfarm::Starter)
+  toadfarm reload path/to/server.pl # start or hot deploy the server
+  toadfarm start path/to/server.pl  # start or do nothing if server is already running
+  toadfarm stop path/to/server.pl   # stop the server
+
   # Show manual page
   toadfarm --man
 
@@ -62,6 +67,14 @@ sub read_pid {
 
 sub run {
   my ($start, @args);
+
+  if (@ARGV and $ARGV[0] =~ m!^(reload|start|stop)$!) {
+    my $app = $ARGV[1] or die "Usage: $ARGV[0] /path/to/server.pl\n";
+    $ENV{TOADFARM_ACTION} = $ARGV[0];
+    exec perl => $ARGV[1] if $ARGV[0] eq 'start';
+    exec hypnotoad => ($ARGV[0] eq 'stop' ? ('-s') : ()) => $ARGV[1];
+  }
+
   $ENV{HYPNOTOAD_APP} = __FILE__;
 
   while (@ARGV) {

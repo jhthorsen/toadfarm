@@ -40,6 +40,8 @@ use File::Basename qw( basename dirname );
 use File::Spec;
 use Toadfarm;
 
+$ENV{TOADFARM_ACTION} ||= '';
+
 use constant DEBUG => $ENV{TOADFARM_DEBUG} ? 1 : 0;
 
 =head1 FUNCTIONS
@@ -149,9 +151,13 @@ sub import {
 
       $app->moniker($class->_moniker) if $app->moniker eq 'toadfarm';
       $app->config->{hypnotoad}{pid_file} ||= $class->_pid_file($app);
-      $app->secrets([Mojo::Util::md5_sum(rand . time . $$ . $0)]) unless $got{secrets};
-      $app->_mount_apps(@{$config->{apps}})      if $config->{apps};
-      $app->_load_plugins(@{$config->{plugins}}) if $config->{plugins};
+      $class->_start_if_not_running($config->{hypnotoad}{pid_file}) if $ENV{TOADFARM_ACTION} eq 'start';
+
+      if ($ENV{TOADFARM_ACTION} ne 'stop') {
+        $app->secrets([Mojo::Util::md5_sum(rand . time . $$ . $0)]) unless $got{secrets};
+        $app->_mount_apps(@{$config->{apps}})      if $config->{apps};
+        $app->_load_plugins(@{$config->{plugins}}) if $config->{plugins};
+      }
 
       if (my $root_app = delete $app->{root_app}) {
         if (@{$config->{apps} || []} == 2) {
@@ -174,6 +180,8 @@ sub import {
   );
 }
 
+sub _exit { say shift and exit 0 }
+
 sub _moniker {
   my $moniker = basename $0;
   $moniker =~ s!\W!_!g;
@@ -187,6 +195,24 @@ sub _pid_file {
 
   return File::Spec->catfile($dir, "$name.pid") if -w $dir;
   return File::Spec->catfile(File::Spec->tmpdir, "toadfarm-$name.pid");
+}
+
+sub _read_pid {
+  my $class = shift;
+  my $file = shift or die "config -> hypnotoad -> pid_file is not set!";
+  -e $file or return;
+  open my $PID, '<', $file or die "Unable to read pid_file $file: $!";
+  my $pid = join '', <$PID>;
+  return $pid =~ /(\d+)/ ? $1 : 0;
+}
+
+sub _start_if_not_running {
+  my $class = shift;
+  my $pid   = $class->_read_pid(shift);
+
+  _exit("Skip hot deployment for Hypnotoad server $pid.") if $pid and kill 0, $pid;
+  $ENV{TOADFARM_ACTION} = '';
+  exec hypnotoad => $0;
 }
 
 =head1 COPYRIGHT AND LICENSE
