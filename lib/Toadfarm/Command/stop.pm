@@ -6,8 +6,7 @@ Toadfarm::Command::stop - Stop a Toadfarm DSL script
 
 =head1 DESCRIPTION
 
-L<Toadfarm::Command::stop> is a command for stopping a L<Toadfarm::Starter>
-application.
+L<Toadfarm::Command::stop> is a command for stopping a L<Toadfarm> application.
 
 =head1 SYNOPSIS
 

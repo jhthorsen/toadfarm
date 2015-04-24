@@ -1,77 +1,62 @@
 =head1 NAME
 
-Toadfarm::Manual::Config - Config file format for Toadfarm
+Toadfarm::Manual::Config - Config format for Toadfarm apps
 
 =head1 DESCRIPTION
 
-This manual gives in-depth information about the config file format.
+This manual gives in-depth information about the config options that can
+be given to an application.
 
 =head2 Basics
 
-The basic structure is a pure Perl file, which defines a hash-ref:
+The basic structure of the application is shown below. This document
+covers the C<%config> part given to L<Toadfarm::Manual::DSL/mount>.
 
-  {
-    apps => [],
-    hynotoad => {},
-    log => {},
-    paths => {},
-    plugins => [],
-    secrets => [],
-  };
-
-Anything you put before the hash-ref is up to you.
+  #!/usr/bin/perl
+  use Toadfarm -dsl;
+  mount "MyApp" => \%config;
+  start;
 
 =head2 Apps
 
-The "apps" key holds a list of application/config pairs. The application can
-either be a full path to the application or a class name. The config is either
-HTTP headers to trigger on, or L</Special fields>.
+The L<mount|Toadfarm::Manual::DSL/mount> function is used to define the
+available apps that L<Toadfarm> should serve.
 
-The apps are processed in the order they are defined. This means that the
-first app that match a given rule will receive the request.
+The C<%config> is either HTTP headers to trigger on or L</Special fields>.
 
 The config example below contain all the special fields that you can use and
 a list of example headers to filter on. Each key (except "config") is used
 to filter the incoming request, and ALL the specified values must match
 for the request to get passed on to a given application.
 
-  {
-    apps => {
-      "/path/to/myproject/script/myapp" => {
+  mount "Some::Application" => {
 
-        # special fields
-        config => { some_key => "value" },
-        local_port => 8080,
-        mount_point => "/myapp",
-        remote_address => "127.0.0.1",
+    # headers
+    "Host"           => "example.com",
+    "User-Agent"     => qr{curl},
+    "X-Request-Base" => "http://example.com/whatever",
 
-        # headers
-        "Host" => "home.thorsen.pm",
-        "User-Agent" => qr{curl},
-        "X-Request-Base" => "http://home.thorsen.pm/whatever",
-      },
-      "Other::App" => {
-        # ...
-      },
-      # ...
-    },
-    # ...
+    # special fields
+    config         => {some_key => "value"},
+    local_port     => 8080,
+    mount_point    => "/myapp",
+    remote_address => "127.0.0.1",
   };
 
-Example HTTP request that will get sent to "myapp":
+Example HTTP request that will get sent to "Some::Application":
 
-  -- Connect (http:home.thorsen.pm:8080)
-  -- Client >>> Server (http://home.thorsen.pm/myapp)
+  -- Connect (http:example.com:8080)
+  -- Client >>> Server (http://example.com/myapp)
   GET /myapp HTTP/1.1
   Connection: keep-alive
   Content-Length: 0
   Accept-Encoding: gzip
-  Host: home.thorsen.pm
+  Host: example.com
   User-Agent: curl/7.32.0
-  X-Request-Base: http://home.thorsen.pm/whatever
+  X-Request-Base: http://example.com/whatever
 
 So if "User-Agent" is "Mojolicious (Perl)" instead, but all the other headers
-match, then the request will NOT be passed on to "myapp".
+match, then the request will NOT be passed on to "Some::Application".
 
 Got difficulties getting a request through to an application? Try removing
 rules until the request gets through.
@@ -113,71 +98,7 @@ L<Mojolicious::Plugin::RequestBase>.
 
 =back
 
-Additional fields might be added, but they will always be in lower case.
-
-=head2 Hypnotoad
-
-  {
-    hypnotoad => {
-      workers => 7,
-      listen => ['http://*:8080'],
-    },
-  }
-
-See L<Mojo::Server::Hypnotoad/SETTINGS> for more options.
-
-=head2 Log
-
-It is possible to get L<Toadfarm> to log for all your apps:
-
-  {
-    log => {
-      file => '/path/to/log/file.log',
-      level => 'debug', # debug, info, warn, ...
-      combined => 1,
-    },
-  }
-
-The trick here is the "combined" flag. It makes all the apps share the same
-L<Mojo::Log> object.
-
-=head2 Paths
-
-You can specify custom template and public file paths for Toadfarm. This is
-useful if you want your own error templates or serve other assets from
-L<Toadfarm>.
-
-  {
-    paths => {
-      renderer => [ '/my/custom/template/path' ],
-      static => [ '/my/custom/static/path' ],
-    },
-  };
-
-=head2 Plugins
-
-It is possible to load plugins into the core of L<Toadfarm>.
-
-  {
-    plugins => [
-      "Some::Plugin" => @config_arguments,
-    ],
-  };
-
-L<Toadfarm> comes with two plugins: L<Toadfarm::Plugin::AccessLog> and
-L<Toadfarm::Plugin::Reload>, but you can also use other plugins from
-L<CPAN|https://metacpan.org/search?q=Mojolicious%3A%3APlugin>.
-
-=head2 Secrets
-
-Specifying secrets for your app is really important if you are using
-L<sesssion|Mojolicious::Controller/session>.
-
-  {
-    secrets => ['my super secret'],
-  }
-
-See also L<Mojolicious/secrets>.
+Additional special fields might be added, but they will always be in lower case.
 
 =head1 AUTHOR
 

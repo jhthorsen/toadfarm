@@ -10,19 +10,81 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 DESCRIPTION
 
-Toadfarm is wrapper around L<hypnotoad|Mojo::Server::Hypnotoad> that allow
-you to mount many L<Mojolicious> applications inside one hypnotoad server.
+Toadfarm is a module for configuring and starting your L<Mojolicious>
+applications. You can either combine multiple applications in one script,
+or just use it as a init script.
 
-The L<Mojolicious::Plugin::Mount> plugin is useful if your applications
-are hard coupled, while Toadfarm provide functionality to route requests
-to a standalone application based on HTTP headers instead. This is
-functionality that you expect from a reverse proxy, such as Nginx.
+Core features:
+
+=over 4
+
+=item *
+
+Wrapper around L<hypnotoad|Mojo::Server::Hypnotoad> that makes your
+application L<Sys-V|https://www.debian-administration.org/article/28/Making_scripts_run_at_boot_time_with_Debian>
+compatible.
+
+=item *
+
+Advanced routing and virtual host configuration. Also support routing
+from behind another web server, such as L<nginx|http://nginx.com/>.
+This feature is very much like L<Mojolicious::Plugin::Mount> on steroids.
+
+=item *
+
+Hijacking log messages to a common log file. There's also plugin,
+L<Toadfarm::Plugin::AccessLog>, that allow you to log the requests sent
+to your server.
+
+=back
+
+=head1 SYNOPSIS
+
+=head2 Script
+
+Here is an example script that set up logging and mount some applications
+under different domains, as well as loading in some custom plugins.
+
+See L<Toadfarm::Manual::DSL> for more information about the different functions.
+
+  #!/usr/bin/perl
+  use Toadfarm -dsl;
+
+  logging {
+    combined => 1,
+    file     => "/var/log/toadfarm/app.log",
+    level    => "info",
+  };
+
+  mount "MyApp"        => {"Host" => "myapp.example.com"};
+  mount "/path/to/app" => {"Host" => "example.com", mount_point => "/other"};
+  mount "Catch::All::App";
+
+  plugin "Toadfarm::Plugin::AccessLog";
+
+  start; # need to be at the last line
+
+=head2 Usage
+
+You don't have to put L</Script> in init.d, but it will work with standard
+start/stop actions.
+
+  $ /etc/init.d/your-script reload
+  $ /etc/init.d/your-script start
+  $ /etc/init.d/your-script stop
+
+You can also start the application with normal L<Mojolicious> commands:
+
+  $ morbo /etc/init.d/your-script
+  $ /etc/init.d/your-script daemon
 
 =head1 DOCUMENTATION INDEX
 
 =over 4
 
 =item * L<Toadfarm::Manual::Intro> - Introduction.
+
+=item * L<Toadfarm::Manual::DSL> - Domain specific language for Toadfarm.
 
 =item * L<Toadfarm::Manual::Config> - Config file format.
 
@@ -47,12 +109,55 @@ functionality that you expect from a reverse proxy, such as Nginx.
 =cut
 
 use Mojo::Base 'Mojolicious';
-use Mojo::Util 'class_to_path';
+use Mojo::Util qw( class_to_path monkey_patch );
+use Cwd 'abs_path';
+use File::Basename qw( basename dirname );
+use File::Spec;
 use File::Which;
+use constant DEBUG => $ENV{TOADFARM_DEBUG} ? 1 : 0;
 
 our $VERSION = '0.49';
 
-$ENV{MOJO_CONFIG} = $ENV{TOADFARM_CONFIG} if $ENV{TOADFARM_CONFIG};
+BEGIN {
+  $ENV{TOADFARM_ACTION} //= $ENV{MOJO_APP_LOADER} ? 'load' : (@ARGV and $ARGV[0] =~ /^(reload|start|stop)$/) ? $1 : '';
+  $ENV{MOJO_CONFIG} = $ENV{TOADFARM_CONFIG} if $ENV{TOADFARM_CONFIG};
+}
+
+sub import {
+  return unless grep {/^-dsl/} @_;
+
+  my $class  = shift;
+  my $caller = caller;
+  my $app    = Toadfarm->new;
+  my %got;
+
+  $_->import for qw(strict warnings utf8);
+  feature->import(':5.10');
+
+  unshift @{$app->commands->namespaces}, 'Toadfarm::Command';
+
+  monkey_patch $caller, (
+    app     => sub {$app},
+    logging => sub { $got{log}++; $app->_setup_log(@_) },
+    mount   => sub { push @{$app->config->{apps}}, @_ == 2 ? @_ : ($_[0], {}); $app },
+    plugin  => sub { push @{$app->config->{plugins}}, @_ == 2 ? @_ : ($_[0], {}); $app },
+    secrets => sub { $got{secrets} = 1; $app->secrets([@_]) },
+    start => sub {
+      if (@_) {
+        my $listen = ref $_[0] eq 'ARRAY' ? shift : undef;
+        $app->config->{hypnotoad} = @_ > 1 ? {@_} : {%{$_[0]}} if @_;
+        $app->config->{hypnotoad}{listen} = $listen if $listen;
+        $got{hypnotoad}++;
+      }
+
+      $app->moniker($class->_moniker) if $app->moniker eq 'toadfarm';
+      $app->config->{hypnotoad}{pid_file} ||= $class->_pid_file($app);
+      $app = $class->_setup_app($app, \%got) if $ENV{TOADFARM_ACTION} eq 'load';
+      warn '$config=' . Mojo::Util::dumper($app->config) if DEBUG;
+      $app->start;
+    },
+  );
+}
 
 sub startup {
   my $self = shift;
@@ -71,6 +176,8 @@ sub startup {
   $self->_mount_root_app(@{delete $self->{root_app}}) if $self->{root_app};
 }
 
+sub _exit { say shift and exit 0 }
+
 sub _load_plugins {
   my $self = shift;
 
@@ -81,6 +188,12 @@ sub _load_plugins {
     $self->log->info("Loading plugin $plugin");
     $self->plugin($plugin, $config);
   }
+}
+
+sub _moniker {
+  my $moniker = basename $0;
+  $moniker =~ s!\W!_!g;
+  $moniker;
 }
 
 sub _mount_apps {
@@ -155,6 +268,40 @@ sub _paths {
     my $paths = $config->{$type} or next;
     $self->$type->paths($paths);
   }
+}
+
+sub _pid_file {
+  my ($class, $app) = @_;
+  my $name = basename $0;
+  my $dir  = dirname abs_path $0;
+
+  return File::Spec->catfile($dir, "$name.pid") if -w $dir;
+  return File::Spec->catfile(File::Spec->tmpdir, "toadfarm-$name.pid");
+}
+
+sub _setup_app {
+  my ($class, $app, $got) = @_;
+  my $config = $app->config;
+
+  $app->secrets([Mojo::Util::md5_sum(rand . time . $$ . $0)]) unless $got->{secrets};
+  $app->_mount_apps(@{$config->{apps}})      if $config->{apps};
+  $app->_load_plugins(@{$config->{plugins}}) if $config->{plugins};
+
+  if (my $root_app = delete $app->{root_app}) {
+    if (@{$config->{apps} || []} == 2) {
+      my $plugins = $config->{plugins} || [];
+      $root_app->[1]->config(hypnotoad => $app->config('hypnotoad')) if $got->{hypnotoad};
+      $root_app->[1]->log($app->log) if $got->{log};
+      $root_app->[1]->plugin(shift(@$plugins), shift(@$plugins)) for @$plugins;
+      $root_app->[1]->secrets($app->secrets) if $root_app->[1]->secrets->[0] eq $root_app->[1]->moniker;
+      return $root_app->[1];
+    }
+    else {
+      $app->_mount_root_app(@$root_app);
+    }
+  }
+
+  return $app;
 }
 
 sub _setup_log {

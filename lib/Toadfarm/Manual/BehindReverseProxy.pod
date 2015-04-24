@@ -27,23 +27,20 @@ from the request URL that the Mojolicious route dispatcher will see.
     }
   }
 
-=head2 Toadfarm config
+=head2 Toadfarm script
 
 The magic part here is the "X-Request-Base" HTTP header which is set by
-C<nginx>.
+C<nginx>. In addition, you need to set C<proxy> to "1" so
+L<Mojo::Server::Daemon> can behave correctly.
 
-  {
-    apps => [
-      '/home/www/project1/script/app1' => {
-        'X-Request-Base' => 'http://domain.com/myapp',
-      },
-    ],
-    hypnotoad => {
-      workers => 8,
-      pid_file => '/tmp/toadfarm.pid',
-      listen => [ "http://*:8080" ],
-    },
+  #!/usr/bin/perl
+  use Toadfarm -dsl;
+
+  mount "/home/www/project1/script/app1" => {
+    "X-Request-Base" => "http://domain.com/myapp",
   };
+
+  start [ "http://*:8080" ], proxy => 1, workers => 8;
 
 =head1 SEE ALSO
 

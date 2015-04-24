@@ -10,6 +10,9 @@ $ENV{TOADFARM_APPLICATION_CLASS} ||= 'Toadfarm';
 $ENV{TOADFARM_SILENT}            ||= 0;
 $ENV{TOADFARM_WATCH_INTERVAL}    ||= 2;
 
+warn "toadfarm is deprecated. You probably want to see https://metacpan.org/pod/Toadfarm for updates"
+  unless $ENV{TOADFARM_SILENT};
+
 sub help {
   return <<"HELP";
 usage: $0 [OPTIONS] [CONFIG_FILE]

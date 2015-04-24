@@ -15,9 +15,11 @@ my $cmd = Toadfarm::Command::stop->new;
 eval { $cmd->run };
 like $@, qr{pid_file is not set}, 'pid_file is not set';
 
-use Toadfarm::Starter;
-start;
-$cmd->app(app);
+{
+  use Toadfarm -dsl;
+  start;
+  $cmd->app(app);
+}
 
 eval { $cmd->run };
 like $@, qr{not running}, 'not running';

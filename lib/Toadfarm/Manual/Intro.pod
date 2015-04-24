@@ -6,45 +6,46 @@ Toadfarm::Manual::Intro - Introduction to Toadfarm
 
 This manual aims to give an introduction to how to set up C<toadfarm>.
 
-=head2 Config
+=head2 Script
 
-First you need to create a configuration file to describe when an application
-will be triggered. The config file is in plain Perl format and need to
-contain a list of application you want to run and a set of HTTP headers to
-trigger a given application.
+First you need to create a basic script to describe when an application
+will be triggered. This is a plain Perl script which allow you to pull in
+any trick you like form the Perl toolbox.
 
 Example:
 
-  {
-    apps => [
-      '/home/web/project1/script/app1' => {
-        'X-Request-Base' => 'http://mydomain.com/whatever',
-      },
-      '/home/web/project2/script/app2' => {
-        'Host' => 'mydomain.com',
-      },
-    ],
-  }
+  #!/usr/bin/perl
+  use Toadfarm -dsl;
 
-The config above will pass the request on to C<app1> when the
+  mount "/home/web/project1/script/app1" => {
+    "X-Request-Base" => "http://mydomain.com/whatever"
+  };
+
+  mount "Web::App2" => {
+    "Host" => "mydomain.com",
+  };
+
+  start;
+
+The script above will pass the request on to C<app1> when the
 "X-Request-Base" header is set to "http://mydomain.com/whatever".
-Or it will pass the request on to C<app2> if the "Host" header is
-set to "mydomain.com".
+Or it will pass the request on to C<Web::App2> if the "Host" header
+is set to "mydomain.com".
 
-You can save the content of the file anywhere, but the suggested location is
-C<$HOME/.toadfarm/toadfarm.conf>.
+You can save the content of the file anywhere and run it as any other
+L<Mojolicious> application.
 
 Note: There are other special fields to trigger on, besides HTTP headers. See
 L<Toadfarm::Manual::Config/Apps> for more details.
 
 =head2 Start Toadfarm
 
-After you have saved the config file, you can start L<Toadfarm>:
+After you have saved the config file, you can start the L<Toadfarm> application:
 
-  $ toadfarm $HOME/.toadfarm/toadfarm.conf
+  $ /path/to/your-script start
 
-After this, you should see C<toadfarm> running and the applications can be
-accessed from "http://yourdomain.com:8080".
+After this, you should see C<your-script> running and the applications can be
+accessed from L<http://localhost:8080>.
 
 =head2 Further reading
 

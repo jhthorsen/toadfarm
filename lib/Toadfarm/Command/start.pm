@@ -6,8 +6,7 @@ Toadfarm::Command::start - Start a Toadfarm DSL script
 
 =head1 DESCRIPTION
 
-L<Toadfarm::Command::start> is a command for starting a L<Toadfarm::Starter>
-application.
+L<Toadfarm::Command::start> is a command for starting a L<Toadfarm> application.
 
 =head1 SYNOPSIS
 

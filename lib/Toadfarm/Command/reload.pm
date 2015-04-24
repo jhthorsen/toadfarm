@@ -6,7 +6,7 @@ Toadfarm::Command::reload - Reload a Toadfarm DSL script
 
 =head1 DESCRIPTION
 
-L<Toadfarm::Command::reload> is a command for reloading a L<Toadfarm::Starter>
+L<Toadfarm::Command::reload> is a command for reloading a L<Toadfarm>
 application.
 
 =head1 SYNOPSIS

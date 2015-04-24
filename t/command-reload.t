@@ -10,9 +10,11 @@ require Toadfarm::Command::reload;
 *Toadfarm::Command::reload::_exit = sub { $exit = $_[1]; die "$_[0]\n"; };
 my $cmd = Toadfarm::Command::reload->new;
 
-use Toadfarm::Starter;
-start;
-$cmd->app(app);
+{
+  use Toadfarm -dsl;
+  start;
+  $cmd->app(app);
+}
 
 $? = 256;
 eval { $cmd->run };

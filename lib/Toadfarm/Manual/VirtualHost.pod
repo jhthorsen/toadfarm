@@ -10,28 +10,23 @@ as virtual host router.
 This is especially useful if already have a CDN (like L<http://cloudflare.com>)
 in front.
 
-=head2 Config
+=head2 Script
 
 The magic part here is the "Host" HTTP header which is sent by the browser,
 and will route to the correct application.
 
-  {
-    apps => [
-      '/home/www/project1/script/app1' => {
-        Host => 'app1.mydomain.com',
-      },
-      '/home/www/project2/script/app2' => {
-        Host => 'app2.mydomain.com',
-      },
-    ],
-    hypnotoad => {
-      workers => 8,
-      pid_file => '/tmp/toadfarm.pid',
-      listen => [
-        "http://*:8080",
-      ],
-    },
+  #!/usr/bin/perl
+  use Toadfarm -dsl;
+
+  mount "/home/www/project1/script/app1" => {
+    Host => "example.com",
   };
+
+  mount "/home/www/project2/script/app2" => {
+    Host => "your-other-domain.com",
+  };
+
+  start ["http://*:8080"], workers => 8;
 
 Note: Defining a default app might be an idea, in case the a browser doesn't
 set the "Host" header.

@@ -5,7 +5,7 @@ use Mojo::Server::Daemon;
 use Test::More;
 
 BEGIN { $ENV{MOJO_MODE} = 'production' }
-use Toadfarm::Starter;
+use Toadfarm -dsl;
 
 plan skip_all => 'TEST_LIVE=1 is required' unless $ENV{TEST_LIVE} or $ENV{USER} eq 'jhthorsen';
 plan skip_all => 'MOJO_CONFIG /tmp/filter.t.conf exists' if -s $ENV{MOJO_CONFIG};

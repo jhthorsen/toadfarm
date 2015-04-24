@@ -14,9 +14,11 @@ my $cmd = Toadfarm::Command::start->new;
 eval { $cmd->run };
 like $@, qr{pid_file is not set}, 'pid_file is not set';
 
-use Toadfarm::Starter;
-start;
-$cmd->app(app);
+{
+  use Toadfarm -dsl;
+  start;
+  $cmd->app(app);
+}
 
 $? = 256;
 eval { $cmd->run };
