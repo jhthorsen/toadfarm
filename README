@@ -2,19 +2,71 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.49
+    0.50
 
 DESCRIPTION
-    Toadfarm is wrapper around hypnotoad that allow you to mount many
-    Mojolicious applications inside one hypnotoad server.
+    Toadfarm is a module for configuring and starting your Mojolicious
+    applications. You can either combine multiple applications in one
+    script, or just use it as a init script.
 
-    The Mojolicious::Plugin::Mount plugin is useful if your applications are
-    hard coupled, while Toadfarm provide functionality to route requests to
-    a standalone application based on HTTP headers instead. This is
-    functionality that you expect from a reverse proxy, such as Nginx.
+    Core features:
+
+    *   Wrapper around hypnotoad that makes your application Sys-V
+        <https://www.debian-administration.org/article/28/Making_scripts_run
+        _at_boot_time_with_Debian> compatible.
+
+    *   Advanced routing and virtual host configuration. Also support
+        routing from behind another web server, such as nginx
+        <http://nginx.com/>. This feature is very much like
+        Mojolicious::Plugin::Mount on steroids.
+
+    *   Hijacking log messages to a common log file. There's also plugin,
+        Toadfarm::Plugin::AccessLog, that allow you to log the requests sent
+        to your server.
+
+SYNOPSIS
+  Script
+    Here is an example script that set up logging and mount some
+    applications under different domains, as well as loading in some custom
+    plugins.
+
+    See Toadfarm::Manual::DSL for more information about the different
+    functions.
+
+      #!/usr/bin/perl
+      use Toadfarm -dsl;
+
+      logging {
+        combined => 1,
+        file     => "/var/log/toadfarm/app.log",
+        level    => "info",
+      };
+
+      mount "MyApp"        => {"Host" => "myapp.example.com"};
+      mount "/path/to/app" => {"Host" => "example.com", mount_point => "/other"};
+      mount "Catch::All::App";
+
+      plugin "Toadfarm::Plugin::AccessLog";
+
+      start; # need to be at the last line
+
+  Usage
+    You don't have to put "Script" in init.d, but it will work with standard
+    start/stop actions.
+
+      $ /etc/init.d/your-script reload
+      $ /etc/init.d/your-script start
+      $ /etc/init.d/your-script stop
+
+    You can also start the application with normal Mojolicious commands:
+
+      $ morbo /etc/init.d/your-script
+      $ /etc/init.d/your-script daemon
 
 DOCUMENTATION INDEX
     *   Toadfarm::Manual::Intro - Introduction.
+
+    *   Toadfarm::Manual::DSL - Domain specific language for Toadfarm.
 
     *   Toadfarm::Manual::Config - Config file format.
 

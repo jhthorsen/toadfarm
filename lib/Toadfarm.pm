@@ -6,7 +6,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.49
+0.50
 
 =head1 DESCRIPTION
 
@@ -116,7 +116,7 @@ use File::Spec;
 use File::Which;
 use constant DEBUG => $ENV{TOADFARM_DEBUG} ? 1 : 0;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 
 BEGIN {
   $ENV{TOADFARM_ACTION} //= $ENV{MOJO_APP_LOADER} ? 'load' : (@ARGV and $ARGV[0] =~ /^(reload|start|stop)$/) ? $1 : '';
