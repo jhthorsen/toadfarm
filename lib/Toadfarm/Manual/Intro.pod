@@ -15,7 +15,7 @@ any trick you like form the Perl toolbox.
 Example:
 
   #!/usr/bin/perl
-  use Toadfarm -dsl;
+  use Toadfarm -init;
 
   mount "/home/web/project1/script/app1" => {
     "X-Request-Base" => "http://mydomain.com/whatever"

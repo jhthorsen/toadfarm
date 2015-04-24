@@ -17,7 +17,7 @@ eval { $cmd->run };
 like $@, qr{pid_file is not set}, 'pid_file is not set';
 
 {
-  use Toadfarm -dsl;
+  use Toadfarm -init;
   start;
   $cmd->app(app);
 }

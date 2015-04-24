@@ -34,7 +34,7 @@ C<nginx>. In addition, you need to set C<proxy> to "1" so
 L<Mojo::Server::Daemon> can behave correctly.
 
   #!/usr/bin/perl
-  use Toadfarm -dsl;
+  use Toadfarm -init;
 
   mount "/home/www/project1/script/app1" => {
     "X-Request-Base" => "http://domain.com/myapp",

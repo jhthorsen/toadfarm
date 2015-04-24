@@ -3,7 +3,7 @@ use Test::Mojo;
 use Test::More;
 
 $ENV{TOADFARM_ACTION} = 'load';
-use Toadfarm -dsl;
+use Toadfarm -init;
 app->config->{foo} = 1;    # should not override 123 below
 logging {combined => 1, level => 'debug'};
 secrets 'super-secret';

@@ -60,7 +60,7 @@ Your script can be used as an init-script. Example script:
   # Short-Description: Toadfarm web application
   ### END INIT INFO
 
-  use Toadfarm -dsl;
+  use Toadfarm -init;
   # ...
   start;
 

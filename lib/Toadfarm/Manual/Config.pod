@@ -13,7 +13,7 @@ The basic structure of the application is shown below. This document
 covers the C<%config> part given to L<Toadfarm::Manual::DSL/mount>.
 
   #!/usr/bin/perl
-  use Toadfarm -dsl;
+  use Toadfarm -init;
   mount "MyApp" => \%config;
   start;
 

@@ -11,7 +11,7 @@ require Toadfarm::Command::reload;
 my $cmd = Toadfarm::Command::reload->new;
 
 {
-  use Toadfarm -dsl;
+  use Toadfarm -init;
   start;
   $cmd->app(app);
 }

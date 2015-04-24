@@ -48,7 +48,7 @@ under different domains, as well as loading in some custom plugins.
 See L<Toadfarm::Manual::DSL> for more information about the different functions.
 
   #!/usr/bin/perl
-  use Toadfarm -dsl;
+  use Toadfarm -init;
 
   logging {
     combined => 1,
@@ -124,7 +124,7 @@ BEGIN {
 }
 
 sub import {
-  return unless grep {/^-dsl/} @_;
+  return unless grep {/^(-dsl|-init)/} @_;
 
   my $class  = shift;
   my $caller = caller;

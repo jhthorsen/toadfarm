@@ -34,7 +34,7 @@ SYNOPSIS
     functions.
 
       #!/usr/bin/perl
-      use Toadfarm -dsl;
+      use Toadfarm -init;
 
       logging {
         combined => 1,

@@ -16,7 +16,7 @@ The magic part here is the "Host" HTTP header which is sent by the browser,
 and will route to the correct application.
 
   #!/usr/bin/perl
-  use Toadfarm -dsl;
+  use Toadfarm -init;
 
   mount "/home/www/project1/script/app1" => {
     Host => "example.com",
