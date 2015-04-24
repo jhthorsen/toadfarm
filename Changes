@@ -1,7 +1,7 @@
 Revision history for perl distribution Toadfarm
 
 0.50 Not Released
- - Toadfarm can start, stop and reload DSL based scripts
+ - Toadfarm DSL scripts can be used as init scripts
 
 0.49 2015-04-23T19:59:52+0200
  - Allow single application in DSL to be the only application

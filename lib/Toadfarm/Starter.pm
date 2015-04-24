@@ -14,6 +14,9 @@ This package and the DSL is EXPERIMENTAL.
 
 =head1 SYNOPSIS
 
+=head2 Script
+
+  #!/usr/bin/perl
   use Toadfarm::Starter;
 
   logging {
@@ -22,14 +25,22 @@ This package and the DSL is EXPERIMENTAL.
     level    => "info",
   };
 
-  mount "MyApp" => {"Host" => "myapp.example.com"};
-  mount "Some::Other::App" => {"Host" => "example.com", mount_point => "/other"};
+  mount "MyApp"        => {"Host" => "myapp.example.com"};
+  mount "/path/to/app" => {"Host" => "example.com", mount_point => "/other"};
+  mount "Catch::All::App";
 
   plugin "Toadfarm::Plugin::AccessLog";
 
-  secrets "super-secret";
+  start; # need to be at the last line
 
-  start;
+=head2 Usage
+
+You don't have to put L</Script> in init.d, but it will work with standard
+start/stop actions.
+
+  $ /etc/init.d/your-script reload
+  $ /etc/init.d/your-script start
+  $ /etc/init.d/your-script stop
 
 =cut
 
@@ -40,9 +51,11 @@ use File::Basename qw( basename dirname );
 use File::Spec;
 use Toadfarm;
 
-$ENV{TOADFARM_ACTION} ||= '';
-
 use constant DEBUG => $ENV{TOADFARM_DEBUG} ? 1 : 0;
+
+BEGIN {
+  $ENV{TOADFARM_ACTION} //= $ENV{MOJO_APP_LOADER} ? 'load' : (@ARGV and $ARGV[0] =~ /^(reload|start|stop)$/) ? $1 : '';
+}
 
 =head1 FUNCTIONS
 
@@ -127,11 +140,13 @@ Will export the sugar defined under L</FUNCTIONS>.
 sub import {
   my $class  = shift;
   my $caller = caller;
-  my $app    = Toadfarm->new(dsl => 1, argv => [@ARGV]);
+  my $app    = Toadfarm->new;
   my %got;
 
   $_->import for qw(strict warnings utf8);
   feature->import(':5.10');
+
+  unshift @{$app->commands->namespaces}, 'Toadfarm::Command';
 
   monkey_patch $caller, (
     app     => sub {$app},
@@ -140,41 +155,17 @@ sub import {
     plugin  => sub { push @{$app->config->{plugins}}, @_ == 2 ? @_ : ($_[0], {}); $app },
     secrets => sub { $got{secrets} = 1; $app->secrets([@_]) },
     start => sub {
-      my $config = $app->config;
-
       if (@_) {
         my $listen = ref $_[0] eq 'ARRAY' ? shift : undef;
-        $config->{hypnotoad} = @_ > 1 ? {@_} : {%{$_[0]}} if @_;
-        $config->{hypnotoad}{listen} = $listen if $listen;
+        $app->config->{hypnotoad} = @_ > 1 ? {@_} : {%{$_[0]}} if @_;
+        $app->config->{hypnotoad}{listen} = $listen if $listen;
         $got{hypnotoad}++;
       }
 
       $app->moniker($class->_moniker) if $app->moniker eq 'toadfarm';
       $app->config->{hypnotoad}{pid_file} ||= $class->_pid_file($app);
-      $class->_start_if_not_running($config->{hypnotoad}{pid_file}) if $ENV{TOADFARM_ACTION} eq 'start';
-
-      if ($ENV{TOADFARM_ACTION} ne 'stop') {
-        $app->secrets([Mojo::Util::md5_sum(rand . time . $$ . $0)]) unless $got{secrets};
-        $app->_mount_apps(@{$config->{apps}})      if $config->{apps};
-        $app->_load_plugins(@{$config->{plugins}}) if $config->{plugins};
-      }
-
-      if (my $root_app = delete $app->{root_app}) {
-        if (@{$config->{apps} || []} == 2) {
-          my $plugins = $config->{plugins} || [];
-          $root_app->[1]->config(hypnotoad => $app->config('hypnotoad')) if $got{hypnotoad};
-          $root_app->[1]->log($app->log) if $got{log};
-          $root_app->[1]->plugin(shift(@$plugins), shift(@$plugins)) for @$plugins;
-          $root_app->[1]->secrets($app->secrets) if $root_app->[1]->secrets->[0] eq $root_app->[1]->moniker;
-          $app = $root_app->[1];
-        }
-        else {
-          $app->_mount_root_app(@$root_app);
-        }
-      }
-
+      $app = $class->_setup_app($app, \%got) if $ENV{TOADFARM_ACTION} eq 'load';
       warn '$config=' . Mojo::Util::dumper($app->config) if DEBUG;
-
       $app->start;
     },
   );
@@ -197,22 +188,29 @@ sub _pid_file {
   return File::Spec->catfile(File::Spec->tmpdir, "toadfarm-$name.pid");
 }
 
-sub _read_pid {
-  my $class = shift;
-  my $file = shift or die "config -> hypnotoad -> pid_file is not set!";
-  -e $file or return;
-  open my $PID, '<', $file or die "Unable to read pid_file $file: $!";
-  my $pid = join '', <$PID>;
-  return $pid =~ /(\d+)/ ? $1 : 0;
-}
+sub _setup_app {
+  my ($class, $app, $got) = @_;
+  my $config = $app->config;
 
-sub _start_if_not_running {
-  my $class = shift;
-  my $pid   = $class->_read_pid(shift);
+  $app->secrets([Mojo::Util::md5_sum(rand . time . $$ . $0)]) unless $got->{secrets};
+  $app->_mount_apps(@{$config->{apps}})      if $config->{apps};
+  $app->_load_plugins(@{$config->{plugins}}) if $config->{plugins};
 
-  _exit("Skip hot deployment for Hypnotoad server $pid.") if $pid and kill 0, $pid;
-  $ENV{TOADFARM_ACTION} = '';
-  exec hypnotoad => $0;
+  if (my $root_app = delete $app->{root_app}) {
+    if (@{$config->{apps} || []} == 2) {
+      my $plugins = $config->{plugins} || [];
+      $root_app->[1]->config(hypnotoad => $app->config('hypnotoad')) if $got->{hypnotoad};
+      $root_app->[1]->log($app->log) if $got->{log};
+      $root_app->[1]->plugin(shift(@$plugins), shift(@$plugins)) for @$plugins;
+      $root_app->[1]->secrets($app->secrets) if $root_app->[1]->secrets->[0] eq $root_app->[1]->moniker;
+      return $root_app->[1];
+    }
+    else {
+      $app->_mount_root_app(@$root_app);
+    }
+  }
+
+  return $app;
 }
 
 =head1 COPYRIGHT AND LICENSE
