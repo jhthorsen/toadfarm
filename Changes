@@ -1,6 +1,7 @@
 Revision history for perl distribution Toadfarm
 
 0.53 Not Released
+ - Can generate local config file pr. app
  - Try to improve cpan testers result
  - Add note about previous Toadfarm version
  - Add note about plenv/perlbrew to RunningToadfarm

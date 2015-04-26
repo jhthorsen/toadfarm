@@ -56,8 +56,18 @@ See L<Toadfarm::Manual::DSL> for more information about the different functions.
     level    => "info",
   };
 
-  mount "MyApp"        => {"Host" => "myapp.example.com"};
-  mount "/path/to/app" => {"Host" => "example.com", mount_point => "/other"};
+  mount "MyApp"  => {
+    Host   => "myapp.example.com",
+    config => {
+      config_parameter_for_myapp => "foo"
+    },
+  };
+
+  mount "/path/to/app" => {
+    Host        => "example.com",
+    mount_point => "/other",
+  };
+
   mount "Catch::All::App";
 
   plugin "Toadfarm::Plugin::AccessLog";
@@ -235,7 +245,17 @@ sub _mount_apps {
     my $server      = Mojo::Server->new;
     my $path        = $name;
     my $mount_point = delete $rules->{mount_point};
-    my ($app, $request_base, @over, @error);
+    my ($app, $request_base, $tmp, @over, @error);
+
+    local $ENV{MOJO_CONFIG} = $ENV{MOJO_CONFIG};
+
+    if (ref $rules->{config} eq 'HASH') {
+      require File::Temp;
+      my %config = (%{$self->config}, %{$rules->{config}});
+      $tmp = File::Temp->new;
+      Mojo::Util::spurt(Mojo::Util::dumper(\%config), $tmp->filename);
+      $ENV{MOJO_CONFIG} = $tmp->filename;
+    }
 
     $path = File::Which::which($path) || class_to_path($path) unless -r $path;
     $app ||= eval { $server->load_app($path) }  or push @error, $@;

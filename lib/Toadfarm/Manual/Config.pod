@@ -70,7 +70,9 @@ Fields that are defined in the list below are special fields.
 =item * config => \%hash
 
 This config param will override any L<config|Mojolicious/config> parameters
-already known in the target application.
+already known in the target application. It will also generate a temporary
+config file which is available as C<MOJO_CONFIG|Mojolicious::Plugin::Config/file>
+to the target application.
 
 Note: These config params are set I<after> L<startup()|Mojolicious/startup>
 is called. (This will hopefully be changed/fixed in future release of Toadfarm)
