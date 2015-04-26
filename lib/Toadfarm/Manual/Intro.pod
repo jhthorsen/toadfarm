@@ -52,17 +52,6 @@ accessed from L<http://localhost:8080>.
 See L<Toadfarm::Manual::RunningToadfarm> for more command line options, and
 L<Toadfarm::Manual::Config> for full list of config file options.
 
-=head2 Listen to standard ports
-
-Setting up an iptables rules will allow Toadfarm to listen to port 8080, while
-still receiving traffic on the default port. This is a good idea security wise,
-since it will not require Toadfarm to be started as "root".
-
-  $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
-  $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 8443
-
-Note: You need to replace "eth0" with the appropriate interface.
-
 =head1 SEE ALSO
 
 L<Toadfarm::Manual::Config>.

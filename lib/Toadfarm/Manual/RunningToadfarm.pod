@@ -93,6 +93,25 @@ as well:
   $ morbo /path/to/your-script
   $ hypnotoad /path/to/your-script
 
+=head2 Listen to standard HTTP ports
+
+Setting up an iptables rules will allow Toadfarm to listen to port 8080, while
+still receiving traffic on the default port. This way you can start and run
+C<toadfarm> as a normal user instead of "root".
+
+  $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
+  $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 8443
+
+(You need to replace "eth0" with the appropriate interface)
+
+Note that you can also start C<toadfarm> as root to listen to port 80, but run
+the workers as a non-priviledged user:
+
+  #/usr/bin/env perl
+  use Toadfarm -init;
+  # ...
+  start ["http://*:80"], user => "some-www-user";
+
 =head1 SEE ALSO
 
 See also L<Toadfarm::Manual::Intro> and L<Toadfarm::Manual::Config>.
