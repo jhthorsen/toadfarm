@@ -60,8 +60,11 @@ Your script can be used as an init-script. Example script:
   # Short-Description: Toadfarm web application
   ### END INIT INFO
 
+  # Change to a less priviledged user
+  exec qw( /usr/bin/sudo -u www-user ), $0 => @ARGV if $> == 0;
+
   use Toadfarm -init;
-  # ...
+  # logging, mount, plugins, ...
   start;
 
 You can put the code above in C</etc/init.d/your-script>:
@@ -112,20 +115,9 @@ C<toadfarm> as a normal user instead of "root".
 
 (You need to replace "eth0" with the appropriate interface)
 
-Note that you can also start C<toadfarm> as root to listen to port 80, but run
-the workers as a non-priviledged user:
-
-  #/usr/bin/env perl
-  use Toadfarm -init;
-  # ...
-  start ["http://*:80"], group => "www", user => "some-www-user";
-
-Changing user has one implication: The workers will not use some-www-user's
-secondary groups. So if "some-www-user" is part of the "www" and "db" groups,
-then the process will only be run as "some-www-user" part of the "www" group.
-
-Also remember that I<without> specifying C<group> the process run with root's
-current groups.
+Note that you should never start C<toadfarm> as "root" because of security
+considerations and that changing user/group will probably be deprecated in
+L<Mojo::Server>.
 
 =head1 SEE ALSO
 

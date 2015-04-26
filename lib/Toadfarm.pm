@@ -193,6 +193,7 @@ sub import {
       $app = $class->_setup_app($app, \%got) if $action eq 'load';
       Mojo::UserAgent::Server->app($app);
       warn '$config=' . Mojo::Util::dumper($app->config) if DEBUG;
+      $class->_die_on_insecure($app) unless $ENV{TOADFARM_INSECURE};
       $app->start;
     },
   );
@@ -213,6 +214,14 @@ sub startup {
   $self->_mount_apps(@{$config->{apps}})              if $config->{apps};
   $self->_load_plugins(@{$config->{plugins}})         if $config->{plugins};
   $self->_mount_root_app(@{delete $self->{root_app}}) if $self->{root_app};
+}
+
+sub _die_on_insecure {
+  my ($class, $app) = @_;
+
+  die "Cannot change user without TOADFARM_INSECURE=1"   if $app->config->{hypnotoad}{user};
+  die "Cannot change group without TOADFARM_INSECURE=1"  if $app->config->{hypnotoad}{group};
+  die "Cannot run as 'root' without TOADFARM_INSECURE=1" if $> == 0 or $< == 0;
 }
 
 sub _exit { say shift and exit 0 }
