@@ -109,7 +109,7 @@ sub register {
   $app->routes->any($config->{path})->to(
     cb => sub {
       my $c       = shift;
-      my $payload = $c->req->body_params->param('payload');
+      my $payload = $c->req->body;
       my $status  = "Started: $t0\n\n";
       my $args;
 
