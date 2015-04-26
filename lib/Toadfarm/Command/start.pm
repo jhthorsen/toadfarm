@@ -39,20 +39,25 @@ sub run {
   my $pid     = $self->_pid;
   my $timeout = 5;
 
-  return _exit("Hypnotoad server already running $pid.") if $pid and kill 0, $pid;
+  $self->_exit("Hypnotoad server already running $pid.") if $pid and kill 0, $pid;
   local $ENV{TOADFARM_ACTION} = 'load';
   system hypnotoad => $0;
-  _exit("Hypnotoad server failed to start. (@{[$?>>8]})", $?) if $?;
+  $self->_exit("Hypnotoad server failed to start. (@{[$?>>8]})", $?) if $?;
 
   while ($timeout--) {
     my $pid = $self->_pid or next;
-    _exit("Hypnotoad server started $pid.") if $pid and kill 0, $pid;
+    $self->_exit("Hypnotoad server started $pid.") if $pid and kill 0, $pid;
   }
   continue {
     sleep 1;
   }
 
-  _exit("Hypnotoad server failed to start.", 3);
+  $self->_exit("Hypnotoad server failed to start.", 3);
+}
+
+sub _exit {
+  say $_[1];
+  exit($_[2] || 0);
 }
 
 sub _pid {
@@ -62,11 +67,6 @@ sub _pid {
   open my $PID, '<', $file or die "Unable to read pid_file $file: $!\n";
   my $pid = join '', <$PID>;
   return $pid =~ /(\d+)/ ? $1 : 0;
-}
-
-sub _exit {
-  say $_[0];
-  exit($_[1] || 0);
 }
 
 =head1 COPYRIGHT AND LICENSE

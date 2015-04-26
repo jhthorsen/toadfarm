@@ -7,7 +7,7 @@ my ($exit, $sleep, @system);
 *CORE::GLOBAL::system = sub { @system = @_; };
 
 require Toadfarm::Command::reload;
-*Toadfarm::Command::reload::_exit = sub { $exit = $_[1]; die "$_[0]\n"; };
+*Toadfarm::Command::reload::_exit = sub { $exit = $_[2]; die "$_[1]\n"; };
 my $cmd = Toadfarm::Command::reload->new;
 
 {

@@ -15,7 +15,7 @@ application.
 
 =cut
 
-use Mojo::Base 'Mojolicious::Command';
+use Mojo::Base 'Toadfarm::Command::start';
 
 =head1 ATTRIBUTES
 
@@ -39,12 +39,7 @@ sub run {
   my $self = shift;
   local $ENV{TOADFARM_ACTION} = 'load';
   system hypnotoad => $0;
-  _exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
-}
-
-sub _exit {
-  say $_[0];
-  exit($_[1] || 0);
+  $self->_exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
 }
 
 =head1 COPYRIGHT AND LICENSE

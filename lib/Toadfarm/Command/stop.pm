@@ -14,7 +14,7 @@ L<Toadfarm::Command::stop> is a command for stopping a L<Toadfarm> application.
 
 =cut
 
-use Mojo::Base 'Mojolicious::Command';
+use Mojo::Base 'Toadfarm::Command::start';
 use Time::HiRes 'usleep';
 
 =head1 ATTRIBUTES
@@ -40,31 +40,17 @@ sub run {
   my $signal  = uc(shift || 'QUIT');
   my $timeout = ($self->app->config->{hypnotoad}{graceful_timeout} || 20) + 5;
 
-  _exit("Hypnotoad server not running.") unless my $pid = $self->_pid;
+  $self->_exit("Hypnotoad server not running.") unless my $pid = $self->_pid;
   kill $signal, $pid or die "Could not send SIG$signal to $pid: $!\n";
 
   while ($timeout--) {
-    _exit("Hypnotoad server stopped.") unless $self->_pid;
+    $self->_exit("Hypnotoad server stopped.") unless $self->_pid;
   }
   continue {
     usleep 200e3;
   }
 
-  _exit("Hypnotoad server failed to stop.", 1);
-}
-
-sub _pid {
-  my $self = shift;
-  my $file = $self->app->config->{hypnotoad}{pid_file} or die "config -> hypnotoad -> pid_file is not set!";
-  return 0 unless -e $file;
-  open my $PID, '<', $file or die "Unable to read pid_file $file: $!";
-  my $pid = join '', <$PID>;
-  return $pid =~ /(\d+)/ ? $1 : 0;
-}
-
-sub _exit {
-  say $_[0];
-  exit($_[1] || 0);
+  $self->_exit("Hypnotoad server failed to stop.", 1);
 }
 
 =head1 COPYRIGHT AND LICENSE

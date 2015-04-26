@@ -10,7 +10,7 @@ my ($exit, $sleep, $quit);
 $SIG{QUIT} = sub { $quit++ };
 
 require Toadfarm::Command::stop;
-*Toadfarm::Command::stop::_exit = sub { $exit = $_[1]; die "$_[0]\n"; };
+*Toadfarm::Command::stop::_exit = sub { $exit = $_[2]; die "$_[1]\n"; };
 my $cmd = Toadfarm::Command::stop->new;
 
 eval { $cmd->run };

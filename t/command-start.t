@@ -8,7 +8,7 @@ my ($exit, $sleep, @system);
 *CORE::GLOBAL::sleep = sub { $sleep++ };
 
 require Toadfarm::Command::start;
-*Toadfarm::Command::start::_exit = sub { $exit = $_[1]; die "$_[0]\n"; };
+*Toadfarm::Command::start::_exit = sub { $exit = $_[2]; die "$_[1]\n"; };
 my $cmd = Toadfarm::Command::start->new;
 
 eval { $cmd->run };
