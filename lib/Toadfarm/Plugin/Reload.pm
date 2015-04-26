@@ -7,8 +7,9 @@ Toadfarm::Plugin::Reload - Reload toadfarm with new code
 =head1 DESCRIPTION
 
 This L<Mojolicious> plugin allows the L</Toadfarm> server to restart when a
-resource is hit with a special JSON payload. The payload needs to be compatible with
-the L<post-receive-hook|https://help.github.com/articles/post-receive-hooks> github use.
+resource is hit with a special JSON payload. The payload needs to be compatible
+with the L<post-receive-hook|https://help.github.com/articles/post-receive-hooks>
+github use.
 
 =head1 SETUP
 
@@ -21,35 +22,33 @@ Go to "https://github.com/YOUR-USERNAME/YOUR-REPO/settings/hooks" to set it up.
 
 =item *
 
-The WebHook URL needs to be "http://yourserver.com/some/secret/path" and should not trigger
-any of the mounted apps.
-See L<CONFIG|/path> below for details.
+The WebHook URL needs to be "http://yourserver.com/some/secret/path" and
+should not trigger any of the mounted apps.
 
 =back
 
-=head1 CONFIG
+=head1 SYNOPSIS
 
-This is a config template for L<Toadfarm>:
+  #!/usr/bin/env perl
+  use Toadfarm -init;
 
-  {
-    apps => [...],
-    plugins => [
-      Reload => {
-        path => '/some/secret/path',
-        repositories => [
-          {
-            name => 'cool-repo',
-            branch => 'some-branch',
-            path => '/path/to/cool-repo',
-            remote => 'whatever', # defaults to "origin"
-          },
-        ],
+  # mount applications, set up logging, ...
+
+  plugin "Toadfarm::Plugin::Reload" => {
+    path         => "/some/private/path",
+    repositories => [
+      {
+        name   => "cool-repo",
+        branch => "some-branch",
+        path   => "/path/to/cool-repo",
+        remote => "whatever",           # default="origin"
       },
-      # ...
     ],
-  }
+  };
 
-Details:
+  start;
+
+Configuration details:
 
 =over 4
 
@@ -68,9 +67,20 @@ This should contain a mapping between github repository names and local settings
 
 =item * branch
 
-This needs to match the branch which you push to github. It should be something
-like "production", and not "master" - unless you want every push to master to
-reload the server.
+The name of the branch on github that you push production code to.
+
+Tip: Instead of using "master", you might want to use "production" or "release"
+instead. The reason for this is that it will prevent the server from reloading
+each time you push to "master":
+
+  # Work
+  $ git push origin master
+  $ git push origin master
+  $ git push origin master
+  # Make a new release
+  $ git tag 0.31
+  $ git push origin release
+  # This plugin will cause hypnotoad to hot deploy
 
 =item * path
 

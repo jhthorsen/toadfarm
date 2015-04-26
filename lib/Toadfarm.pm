@@ -33,7 +33,7 @@ This feature is very much like L<Mojolicious::Plugin::Mount> on steroids.
 =item *
 
 Hijacking log messages to a common log file. There's also plugin,
-L<Toadfarm::Plugin::AccessLog>, that allow you to log the requests sent
+L<Toadfarm::Plugin::AccessLog>, that allows you to log the requests sent
 to your server.
 
 =back
@@ -42,7 +42,7 @@ to your server.
 
 =head2 Script
 
-Here is an example script that set up logging and mount some applications
+Here is an example script that sets up logging and mounts some applications
 under different domains, as well as loading in some custom plugins.
 
 See L<Toadfarm::Manual::DSL> for more information about the different functions.
@@ -62,7 +62,7 @@ See L<Toadfarm::Manual::DSL> for more information about the different functions.
 
   plugin "Toadfarm::Plugin::AccessLog";
 
-  start; # need to be at the last line
+  start; # needs to be at the last line
 
 =head2 Usage
 

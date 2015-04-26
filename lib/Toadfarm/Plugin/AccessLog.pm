@@ -4,13 +4,24 @@ package Toadfarm::Plugin::AccessLog;
 
 Toadfarm::Plugin::AccessLog - Log requests
 
+=head1 SYNOPSIS
+
+  #!/usr/bin/env perl
+  use Toadfarm -init;
+  # mount applications, set up logging, ...
+  plugin "Toadfarm::Plugin::AccessLog";
+  start;
+
 =head1 DESCRIPTION
 
 This module will log the request with "info" log level. The log format
 is subject for change. For now it is:
 
-    $remote_address $http_method $url $status_code
-    1.2.3.4 GET http://localhost/favicon.ico 200
+  $remote_address $http_method $url $status_code
+  1.2.3.4 GET http://localhost/favicon.ico 200
+
+See also L<Mojolicious::Plugin::AccessLog> if you think this plugin is too
+limiting.
 
 =cut
 
