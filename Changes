@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.53 Not Released
+0.53 2015-04-26T14:07:33+0200
  - Can generate local config file pr. app
  - Try to improve cpan testers result
  - Add note about previous Toadfarm version
