@@ -2,17 +2,18 @@ use Mojo::Base -strict;
 use Test::Mojo;
 use Test::More;
 
-$ENV{TOADFARM_ACTION} = 'load';
-use Toadfarm -init;
-app->config->{foo} = 1;    # should not override 123 below
-logging {combined => 1, level => 'debug'};
-secrets 'super-secret';
-mount 't::lib::Test' => {'Host' => 'te.st', 'config' => {bar => 123}};
-mount 't::lib::Test' => {'X-Request-Base' => 'http://localhost:1234/yikes', 'config' => {foo => 123}};
-plugin 't::lib::Plugin' => ['yikes'];
-start ['http://*:5000'], proxy => 1;
+{
+  use Toadfarm -test;
+  app->config->{foo} = 1;    # should not override 123 below
+  logging {combined => 1, level => 'debug'};
+  secrets 'super-secret';
+  mount 't::lib::Test' => {'Host' => 'te.st', 'config' => {bar => 123}};
+  mount 't::lib::Test' => {'X-Request-Base' => 'http://localhost:1234/yikes', 'config' => {foo => 123}};
+  plugin 't::lib::Plugin' => ['yikes'];
+  start ['http://*:5000'], proxy => 1;
+}
 
-my $t = Test::Mojo->new(app);
+my $t = Test::Mojo->new;
 
 isa_ok($t->app, 'Toadfarm');
 is $t->app->moniker, 'dsl_basic_t', 'moniker';

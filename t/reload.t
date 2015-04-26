@@ -10,7 +10,7 @@ plan skip_all => 'Git is required' unless -x '/usr/bin/git' and -d '.git';
 
 my $PID         = $$;
 my $LAST_COMMIT = qx{/usr/bin/git log --format=%H -n1 origin/master};
-my ($t, $got_signal, $chdir);
+my ($got_signal, $chdir);
 
 chomp $LAST_COMMIT;
 
@@ -20,7 +20,7 @@ $SIG{USR1}        = sub { $chdir++ };
 $SIG{USR2}        = sub { $got_signal++; Mojo::IOLoop->stop; };
 
 {
-  use Toadfarm -init;
+  use Toadfarm -test;
 
   no warnings qw( redefine once );
   *Toadfarm::Plugin::Reload::getppid = sub {$PID};
@@ -30,16 +30,15 @@ $SIG{USR2}        = sub { $got_signal++; Mojo::IOLoop->stop; };
     1;
   };
 
-  $ENV{TOADFARM_ACTION} = 'load';
   plugin "Toadfarm::Plugin::Reload" => {
     path         => '/super/private/secret/path',
     repositories => {toadfarm => {branch => 'master', path => $ENV{PWD}, remote => 'origin'}}
   };
-  start;
 
-  $t = Test::Mojo->new(app);
+  start;
 }
 
+my $t = Test::Mojo->new;
 $ENV{TOADFARM_GITHUB_DELAY} = 0;
 
 {

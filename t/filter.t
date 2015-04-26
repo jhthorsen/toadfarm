@@ -5,7 +5,6 @@ use Mojo::Server::Daemon;
 use Test::More;
 
 BEGIN { $ENV{MOJO_MODE} = 'production' }
-use Toadfarm -init;
 
 plan skip_all => 'TEST_LIVE=1 is required' unless $ENV{TEST_LIVE} or $ENV{USER} eq 'jhthorsen';
 plan skip_all => 'MOJO_CONFIG /tmp/filter.t.conf exists' if -s $ENV{MOJO_CONFIG};
@@ -13,9 +12,11 @@ plan skip_all => 'MOJO_CONFIG /tmp/filter.t.conf exists' if -s $ENV{MOJO_CONFIG}
 my $allowed = Mojo::IOLoop->can('generate_port') ? Mojo::IOLoop->generate_port : Mojo::IOLoop::Server->generate_port;
 my $denied  = Mojo::IOLoop->can('generate_port') ? Mojo::IOLoop->generate_port : Mojo::IOLoop::Server->generate_port;
 
-$ENV{TOADFARM_ACTION} = 'load';
-mount 't::lib::App' => {remote_address => '127.0.0.1', local_port => $allowed};
-start;
+{
+  use Toadfarm -test;
+  mount 't::lib::App' => {remote_address => '127.0.0.1', local_port => $allowed};
+  start;
+}
 
 my $server = Mojo::Server::Daemon->new(app => app, silent => 1);
 my ($bytes, $client);

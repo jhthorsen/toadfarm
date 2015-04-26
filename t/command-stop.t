@@ -5,9 +5,10 @@ use Time::HiRes;
 
 no warnings qw( once redefine );
 my ($exit, $sleep, $quit);
-*Time::HiRes::usleep = sub { $sleep++ };
+*Time::HiRes::usleep = sub ($) { $sleep++ };
 
 $SIG{QUIT} = sub { $quit++ };
+plan skip_all => 'Fail to send SIGQUIT' unless kill QUIT => $$ and $quit;
 
 require Toadfarm::Command::stop;
 *Toadfarm::Command::stop::_exit = sub { $exit = $_[2]; die "$_[1]\n"; };
@@ -28,7 +29,7 @@ like $@, qr{not running}, 'not running';
 spurt $$ => app->config->{hypnotoad}{pid_file};
 eval { $cmd->run };
 like $@,   qr{failed to stop}, 'failed to stop';
-is $quit,  1,                  'signal sent';
+is $quit,  2,                  'signal sent';
 is $sleep, 25,                 'slept';
 
 $SIG{QUIT} = sub { unlink app->config->{hypnotoad}{pid_file} };

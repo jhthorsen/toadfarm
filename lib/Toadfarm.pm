@@ -124,16 +124,17 @@ BEGIN {
 }
 
 sub import {
-  return unless grep {/^(-dsl|-init)/} @_;
+  return unless grep {/^(-dsl|-init|-test)/} @_;
 
   my $class  = shift;
   my $caller = caller;
   my $app    = Toadfarm->new;
+  my $action = $ENV{TOADFARM_ACTION};
   my %got;
 
+  $action = 'load' if grep {/^-test/} @_ or $ENV{TOADFARM_ACTION} eq 'test';
   $_->import for qw(strict warnings utf8);
   feature->import(':5.10');
-
   unshift @{$app->commands->namespaces}, 'Toadfarm::Command';
 
   monkey_patch $caller, (
@@ -152,7 +153,8 @@ sub import {
 
       $app->moniker($class->_moniker) if $app->moniker eq 'toadfarm';
       $app->config->{hypnotoad}{pid_file} ||= $class->_pid_file($app);
-      $app = $class->_setup_app($app, \%got) if $ENV{TOADFARM_ACTION} eq 'load';
+      $app = $class->_setup_app($app, \%got) if $action eq 'load';
+      Mojo::UserAgent::Server->app($app);
       warn '$config=' . Mojo::Util::dumper($app->config) if DEBUG;
       $app->start;
     },
