@@ -102,7 +102,15 @@ You can also start the application with normal L<Mojolicious> commands:
 
 =item * L<Toadfarm::Plugin::AccessLog>
 
+Log each request that hit your application.
+
 =item * L<Toadfarm::Plugin::Reload>
+
+Reload Hypnotoad with a L<GitHub push hook|https://help.github.com/articles/about-webhooks/>.
+
+=item * L<Mojolicious::Plugin::SizeLimit>
+
+Kill Hypnotoad workers if they grow too large.
 
 =back
 
