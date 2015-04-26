@@ -120,6 +120,10 @@ the workers as a non-priviledged user:
   # ...
   start ["http://*:80"], user => "some-www-user";
 
+Changing user has one implication: The workers will not use some-www-user's
+secondary groups. So if "some-www-user" is part of the "www" and "db" groups,
+then the process will only be run as "some-www-user" part of the "www" group.
+
 =head1 SEE ALSO
 
 See also L<Toadfarm::Manual::Intro> and L<Toadfarm::Manual::Config>.
