@@ -46,7 +46,7 @@ in new version of your application, without losing any connections.
 
 =back
 
-=head2 Init
+=head2 Init script
 
 Your script can be used as an init-script. Example script:
 
@@ -75,7 +75,15 @@ You can put the code above in C</etc/init.d/your-script>:
   # Make it start on boot
   $ sudo update-rc.d your-script defaults;
 
-=head2 Crontab
+Remember that the hashbang can be anything, so if you have L<Toadfarm>
+and L<Mojolicious> running under L<plenv|https://github.com/tokuhirom/plenv>
+or L<Perlbrew|http://perlbrew.pl/> you need to change the hashbang part to
+something like:
+
+  #!/home/USERNAME/.plenv/versions/5.21.11/bin/perl5.21.11
+  #!/home/USERNAME/perl5/perlbrew/perls/perl-5.16.0/bin/perl
+
+=head2 Cron
 
 If you want to use crontab to start your script, you can do it with this line:
 

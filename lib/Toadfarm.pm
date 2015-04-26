@@ -73,6 +73,8 @@ start/stop actions.
   $ /etc/init.d/your-script start
   $ /etc/init.d/your-script stop
 
+See also L<Toadfarm::Manual::RunningToadfarm/Init script> for more details.
+
 You can also start the application with normal L<Mojolicious> commands:
 
   $ morbo /etc/init.d/your-script

@@ -2,7 +2,8 @@ Revision history for perl distribution Toadfarm
 
 0.53 Not Released
  - Try to improve cpan testers result
- - Add notes about previous Toadfarm versions
+ - Add note about previous Toadfarm version
+ - Add note about plenv/perlbrew to RunningToadfarm
  - Move "Listen to standard HTTP ports" documentation to RunningToadfarm
 
 0.52 2015-04-26T10:10:31+0200
