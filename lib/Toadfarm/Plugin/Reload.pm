@@ -6,8 +6,8 @@ Toadfarm::Plugin::Reload - Reload toadfarm with new code
 
 =head1 DESCRIPTION
 
-This L<Mojolicious> plugin allow the L</Toadfarm> server to restart when a
-resource is hit with a special JSON payload. The payload need to be compatible with
+This L<Mojolicious> plugin allows the L</Toadfarm> server to restart when a
+resource is hit with a special JSON payload. The payload needs to be compatible with
 the L<post-receive-hook|https://help.github.com/articles/post-receive-hooks> github use.
 
 =head1 SETUP
@@ -17,11 +17,12 @@ the L<post-receive-hook|https://help.github.com/articles/post-receive-hooks> git
 =item *
 
 You need to set up a post receive hook on github to make this reloader work.
-Go to "https://github.com/jhthorsen/YOUR-REPO/settings/hooks" to set it up.
+Go to "https://github.com/YOUR-USERNAME/YOUR-REPO/settings/hooks" to set it up.
 
 =item *
 
-The WebHook URL need to be "http://yourserver.com/some/secret/path".
+The WebHook URL needs to be "http://yourserver.com/some/secret/path" and should not trigger
+any of the mounted apps.
 See L<CONFIG|/path> below for details.
 
 =back
@@ -55,7 +56,7 @@ Details:
 =item * path
 
 This should be the path part of the URL to POST data to reload the server.
-Make this something semi secret to avoid random requests:
+Make this something semi-secret to avoid random public requests:
 
   perl -le'print join "/", "", "reload", (time.$$.rand(9999999)) =~ /(\w\w)/g'
 
@@ -67,7 +68,7 @@ This should contain a mapping between github repository names and local settings
 
 =item * branch
 
-This need to match the branch which you push to github. It should be something
+This needs to match the branch which you push to github. It should be something
 like "production", and not "master" - unless you want every push to master to
 reload the server.
 
