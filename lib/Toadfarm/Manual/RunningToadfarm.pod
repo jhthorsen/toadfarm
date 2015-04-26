@@ -103,7 +103,7 @@ as well:
 
 =head2 Listen to standard HTTP ports
 
-Setting up an iptables rules will allow Toadfarm to listen to port 8080, while
+Setting up iptables rules will allow Toadfarm to listen to port 8080, while
 still receiving traffic on the default port. This way you can start and run
 C<toadfarm> as a normal user instead of "root".
 
