@@ -1,12 +1,12 @@
 Revision history for perl distribution Toadfarm
 
-0.53 Not Released
+0.53 2015-04-26T10:10:31+0200
  - Fix documentation #6 #8
  - Fix Toadfarm::Plugin::Reload #5
    https://developer.github.com/webhooks/#payloads
  - Can find hypnotoad, even if not in $PATH
 
-0.52 Not Released
+0.52 2015-04-26T10:10:31+0200
  - Replaced -dsl with -init
 
 0.51 2015-04-24T22:40:22+0200

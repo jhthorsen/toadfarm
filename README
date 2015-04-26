@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.51
+    0.52
 
 DESCRIPTION
     Toadfarm is a module for configuring and starting your Mojolicious
@@ -21,12 +21,12 @@ DESCRIPTION
         Mojolicious::Plugin::Mount on steroids.
 
     *   Hijacking log messages to a common log file. There's also plugin,
-        Toadfarm::Plugin::AccessLog, that allow you to log the requests sent
-        to your server.
+        Toadfarm::Plugin::AccessLog, that allows you to log the requests
+        sent to your server.
 
 SYNOPSIS
   Script
-    Here is an example script that set up logging and mount some
+    Here is an example script that sets up logging and mounts some
     applications under different domains, as well as loading in some custom
     plugins.
 
@@ -48,7 +48,7 @@ SYNOPSIS
 
       plugin "Toadfarm::Plugin::AccessLog";
 
-      start; # need to be at the last line
+      start; # needs to be at the last line
 
   Usage
     You don't have to put "Script" in init.d, but it will work with standard
