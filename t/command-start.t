@@ -28,7 +28,8 @@ $? = 0;
 eval { $cmd->run };
 like $@, qr{failed to start\.$}, 'failed to start';
 is $sleep, 5, 'slept';
-is_deeply(\@system, ['hypnotoad', $0], 'system');
+ok -e $system[0], 'found hypnotoad';
+is $system[1], $0, 'hypnotoad $0';
 
 spurt $$ => app->config->{hypnotoad}{pid_file};
 $? = 0;

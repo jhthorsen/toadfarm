@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.53 Not Released
+ - Can find hypnotoad, even if not in $PATH
+
 0.52 Not Released
  - Replaced -dsl with -init
 

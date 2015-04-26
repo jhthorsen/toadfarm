@@ -15,6 +15,8 @@ L<Toadfarm::Command::start> is a command for starting a L<Toadfarm> application.
 =cut
 
 use Mojo::Base 'Mojolicious::Command';
+use File::Basename 'dirname';
+use File::Spec;
 
 =head1 ATTRIBUTES
 
@@ -41,7 +43,7 @@ sub run {
 
   $self->_exit("Hypnotoad server already running $pid.") if $pid and kill 0, $pid;
   local $ENV{TOADFARM_ACTION} = 'load';
-  system hypnotoad => $0;
+  system $self->_hypnotoad, $0;
   $self->_exit("Hypnotoad server failed to start. (@{[$?>>8]})", $?) if $?;
 
   while ($timeout--) {
@@ -58,6 +60,17 @@ sub run {
 sub _exit {
   say $_[1];
   exit($_[2] || 0);
+}
+
+sub _hypnotoad {
+  my $self = shift;
+
+  for my $p (File::Spec->path, dirname($^X)) {
+    my $exe = File::Spec->catfile($p, 'hypnotoad');
+    return $exe if -r $exe;
+  }
+
+  die "Cannot find 'hypnotoad' in \$PATH.";
 }
 
 sub _pid {
