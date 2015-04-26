@@ -58,6 +58,13 @@ Used to load a L<Mojolicious::Plugin>. In addition to the default
 L<Mojolicious::Plugin> namespace, this application will also
 search in the C<Toadfarm::Plugin::> namespace.
 
+=head2 run_as
+
+  run_as $uid;
+  run_as $username;
+
+Use "sudo" (might change) to force the script to be run as a given user.
+
 =head2 secrets
 
   secrets @str;

@@ -60,10 +60,8 @@ Your script can be used as an init-script. Example script:
   # Short-Description: Toadfarm web application
   ### END INIT INFO
 
-  # Change to a less priviledged user
-  exec qw( /usr/bin/sudo -u www-user ), $0 => @ARGV if $> == 0;
-
   use Toadfarm -init;
+  run_as "www-data";
   # logging, mount, plugins, ...
   start;
 

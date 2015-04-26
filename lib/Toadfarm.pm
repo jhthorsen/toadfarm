@@ -179,8 +179,9 @@ sub import {
     logging => sub { $got{log}++; $app->_setup_log(@_) },
     mount   => sub { push @{$app->config->{apps}}, @_ == 2 ? @_ : ($_[0], {}); $app },
     plugin  => sub { push @{$app->config->{plugins}}, @_ == 2 ? @_ : ($_[0], {}); $app },
+    run_as  => \&_run_as,
     secrets => sub { $got{secrets} = 1; $app->secrets([@_]) },
-    start => sub {
+    start   => sub {
       if (@_) {
         my $listen = ref $_[0] eq 'ARRAY' ? shift : undef;
         $app->config->{hypnotoad} = @_ > 1 ? {@_} : {%{$_[0]}} if @_;
@@ -335,6 +336,30 @@ sub _pid_file {
 
   return File::Spec->catfile($dir, "$name.pid") if -w $dir;
   return File::Spec->catfile(File::Spec->tmpdir, "toadfarm-$name.pid");
+}
+
+sub _run_as {
+  my $user = shift || die "Usage: run_as('username')";
+  my ($exit, $uid, @sudo);
+
+  $uid = $user =~ m!^\d+$! ? $user : scalar getpwnam $user;
+  die "Could not find uid for user $user\n" unless $uid;
+  return 1 if $uid == $>;
+
+  for my $p (File::Spec->path) {
+    $sudo[0] = File::Spec->catfile($p, 'sudo');
+    next unless -x $sudo[0];
+    push @sudo, '-n', -u => "#$uid", $^X;
+    last;
+  }
+
+  die "Cannot change to uid=$uid: 'sudo' was not found.\n" unless @sudo > 1;
+  push @sudo, -I => $INC[0] if $ENV{TOADFARM_ACTION} eq 'test';
+  push @sudo, File::Spec->rel2abs($0), @ARGV;
+  warn "[Toadfarm] system @sudo\n" if DEBUG;
+  system @sudo;
+  die "Could not run '@sudo' exit=$exit\n" if $exit = $? >> 8;
+  exit $?;
 }
 
 sub _setup_app {

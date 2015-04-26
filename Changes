@@ -1,6 +1,7 @@
 Revision history for perl distribution Toadfarm
 
 0.54 Not Released
+ - Add run_as()
  - Unable to change user/group without setting TOADFARM_INSECURE=1
  - Unable to start as root without setting TOADFARM_INSECURE=1
 
