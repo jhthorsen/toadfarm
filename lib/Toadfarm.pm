@@ -114,6 +114,23 @@ Kill Hypnotoad workers if they grow too large.
 
 =back
 
+=head1 PREVIOUS VERSIONS
+
+L<Toadfarm> prior to version 0.49 used to be a configuration file loaded in
+by the C<toadfarm> script. This resulted in all the executables to be named
+C<toadfarm> instead of something descriptive. It also felt a bit awkward to
+take over C<MOJO_CONFIG> and use all the crazy hacks to start C<hypnotoad>.
+
+It also didn't work well as an init script, so there still had to be a
+seperate solution for that.
+
+The new L<Toadfarm> DSL aim to solve all of these issues. This means that
+if you decide to still use any C<MOJO_CONFIG>, it should be for the
+applications loaded from inside C<Toadfarm> and not the startup script.
+
+Note that the old solution still works, but a warning tells you to change
+to the new L<DSL|Toadfarm::Manual::DSL> based API.
+
 =cut
 
 use Mojo::Base 'Mojolicious';
