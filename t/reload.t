@@ -14,25 +14,37 @@ my ($t, $got_signal, $chdir);
 
 chomp $LAST_COMMIT;
 
-*Toadfarm::Plugin::Reload::getppid = sub {$PID};
-*Toadfarm::Plugin::Reload::chdir = sub {
-  CORE::chdir($_[0]) or return;
-  kill 'USR1', $PID;
-  1;
-};
-
 $ENV{PATH}        = "t/bin:$ENV{PATH}";
 $ENV{MOJO_CONFIG} = 't/reload.conf';
 $SIG{USR1}        = sub { $chdir++ };
 $SIG{USR2}        = sub { $got_signal++; Mojo::IOLoop->stop; };
 
-$t = Test::Mojo->new('Toadfarm');
+{
+  use Toadfarm -init;
+
+  no warnings qw( redefine once );
+  *Toadfarm::Plugin::Reload::getppid = sub {$PID};
+  *Toadfarm::Plugin::Reload::chdir = sub {
+    CORE::chdir($_[0]) or return;
+    kill 'USR1', $PID;
+    1;
+  };
+
+  $ENV{TOADFARM_ACTION} = 'load';
+  plugin "Toadfarm::Plugin::Reload" => {
+    path         => '/super/private/secret/path',
+    repositories => {toadfarm => {branch => 'master', path => $ENV{PWD}, remote => 'origin'}}
+  };
+  start;
+
+  $t = Test::Mojo->new(app);
+}
 
 $ENV{TOADFARM_GITHUB_DELAY} = 0;
 
 {
   diag 'Reloading';
-  $t->post_ok('/bad-path', {}, form => {payload => payload('refs/heads/master')})->status_is(200)->content_is("ok\n");
+  $t->post_ok('/super/private/secret/path', {}, payload('refs/heads/master'))->status_is(200)->content_is("ok\n");
 
   Mojo::IOLoop->timer(
     2,
@@ -49,7 +61,7 @@ $ENV{TOADFARM_GITHUB_DELAY} = 0;
 
 {
   diag 'Skip reloading';
-  $t->post_ok('/bad-path', {}, form => {payload => payload('refs/heads/foo/bar')})->status_is(200)->content_is("ok\n");
+  $t->post_ok('/super/private/secret/path', {}, payload('refs/heads/foo/bar'))->status_is(200)->content_is("ok\n");
 
   Mojo::IOLoop->timer(0.5, sub { Mojo::IOLoop->stop; });
   Mojo::IOLoop->start;
@@ -59,13 +71,13 @@ $ENV{TOADFARM_GITHUB_DELAY} = 0;
 
 {
   diag 'Bad payload';
-  $t->post_ok('/bad-path', {}, form => {payload => payload('')})->status_is(200)->content_is("nok\n");
+  $t->post_ok('/super/private/secret/path', {}, payload(''))->status_is(200)->content_is("nok\n");
 }
 
 {
   diag 'Status';
-  $t->get_ok('/bad-path')->status_is(200)->content_like(qr{^--- toadfarm/master\n}m)->content_like(qr{^Started: \w+}m)
-    ->content_like(qr{\n\n$}s);
+  $t->get_ok('/super/private/secret/path')->status_is(200)->content_like(qr{^--- toadfarm/master\n}m)
+    ->content_like(qr{^Started: \w+}m)->content_like(qr{\n\n$}s);
 }
 
 #=============================================================================
