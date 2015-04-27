@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.55 Not Released
+0.55 2015-04-27T07:52:44+0200
  - Add support for Mojolicious::Plugin::SetUserGroup
 
 0.54 2015-04-26T23:32:44+0200

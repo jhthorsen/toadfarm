@@ -2,7 +2,7 @@ NAME
     Toadfarm - One Mojolicious app to rule them all
 
 VERSION
-    0.54
+    0.55
 
 DESCRIPTION
     Toadfarm is a module for configuring and starting your Mojolicious
@@ -102,6 +102,11 @@ PLUGINS
     *   Mojolicious::Plugin::SizeLimit
 
         Kill Hypnotoad workers if they grow too large.
+
+    *   Mojolicious::Plugin::SetUserGroup
+
+        Start as root, run workers as less user. See also "Listen to
+        standard HTTP ports" in Toadfarm::Manual::RunningToadfarm.
 
 PREVIOUS VERSIONS
     Toadfarm prior to version 0.49 used to be a configuration file loaded in
