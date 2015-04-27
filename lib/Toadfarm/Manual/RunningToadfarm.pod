@@ -113,9 +113,13 @@ C<toadfarm> as a normal user instead of "root".
 
 (You need to replace "eth0" with the appropriate interface)
 
-Note that you should never start C<toadfarm> as "root" because of security
-considerations and that changing user/group will probably be deprecated in
-L<Mojo::Server>.
+You need to use L<Mojolicious::Plugin::SetUserGroup> if you want to start
+L<Toadfarm> as root and then change to a less priviledged used in the workers.
+Example:
+
+  # logging, mount, ...
+  plugin SetUserGroup => {user => "www-data"};
+  start ["http://*:80"];
 
 =head1 SEE ALSO
 

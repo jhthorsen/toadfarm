@@ -16,6 +16,12 @@ like $@, qr{Cannot change group without TOADFARM_INSECURE=1}, 'Cannot change gro
 if ($> == 0) {
   eval { start ['http://*:80'], group => undef, user => undef };
   like $@, qr{Cannot run as 'root' without TOADFARM_INSECURE=1}, 'Cannot run as root';
+
+  eval "package Mojolicious::Plugin::SetUserGroup; use Mojo::Base 'Mojolicious::Plugin'; sub register {}; 1" or die $@;
+  plugin 'SetUserGroup';
+  eval { start ['http://*:80'], group => undef, user => undef };
+  $@ ||= '';
+  is $@, '', 'Can start as root when SetUserGroup is loaded';
 }
 
 done_testing;

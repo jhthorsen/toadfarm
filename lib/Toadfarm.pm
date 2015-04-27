@@ -124,6 +124,11 @@ Reload Hypnotoad with a L<GitHub push hook|https://help.github.com/articles/abou
 
 Kill Hypnotoad workers if they grow too large.
 
+=item * L<Mojolicious::Plugin::SetUserGroup>
+
+Start as root, run workers as less user. See also
+L<Toadfarm::Manual::RunningToadfarm/Listen to standard HTTP ports>.
+
 =back
 
 =head1 PREVIOUS VERSIONS
@@ -219,10 +224,14 @@ sub startup {
 
 sub _die_on_insecure {
   my ($class, $app) = @_;
+  my $config = $app->config;
+  my $plugins = $config->{plugins} || [];
 
-  die "Cannot change user without TOADFARM_INSECURE=1"   if $app->config->{hypnotoad}{user};
-  die "Cannot change group without TOADFARM_INSECURE=1"  if $app->config->{hypnotoad}{group};
-  die "Cannot run as 'root' without TOADFARM_INSECURE=1" if $> == 0 or $< == 0;
+  die "Cannot change user without TOADFARM_INSECURE=1"  if $config->{hypnotoad}{user};
+  die "Cannot change group without TOADFARM_INSECURE=1" if $config->{hypnotoad}{group};
+  die "Cannot run as 'root' without TOADFARM_INSECURE=1"
+    if +($> == 0 or $< == 0)
+    and !grep {/\bSetUserGroup$/} @$plugins;
 }
 
 sub _exit { say shift and exit 0 }
