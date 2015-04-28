@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.56 Not Released
+ - Will not run t/run-as.t unless TOADFARM_SUDO_TEST=1
+
 0.55 2015-04-27T07:52:44+0200
  - Add support for Mojolicious::Plugin::SetUserGroup
 
