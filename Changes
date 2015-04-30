@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.57 Not Released
+0.57 2015-04-30T23:24:53+0200
  - Fix './toadfarm.pl daemon' by setting a default TOADFARM_ACTION value
 
 0.56 2015-04-28T17:36:26+0200
