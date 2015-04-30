@@ -161,7 +161,7 @@ use constant DEBUG => $ENV{TOADFARM_DEBUG} ? 1 : 0;
 our $VERSION = '0.56';
 
 BEGIN {
-  $ENV{TOADFARM_ACTION} //= $ENV{MOJO_APP_LOADER} ? 'load' : (@ARGV and $ARGV[0] =~ /^(reload|start|stop)$/) ? $1 : '';
+  $ENV{TOADFARM_ACTION} //= (@ARGV and $ARGV[0] =~ /^(reload|start|stop)$/) ? $1 : 'load';
   $ENV{MOJO_CONFIG} = $ENV{TOADFARM_CONFIG} if $ENV{TOADFARM_CONFIG};
 }
 
@@ -171,10 +171,8 @@ sub import {
   my $class  = shift;
   my $caller = caller;
   my $app    = Toadfarm->new;
-  my $action = $ENV{TOADFARM_ACTION};
   my %got;
 
-  $action = 'load' if grep {/^-test/} @_ or $ENV{TOADFARM_ACTION} eq 'test';
   $_->import for qw(strict warnings utf8);
   feature->import(':5.10');
   unshift @{$app->commands->namespaces}, 'Toadfarm::Command';
@@ -196,7 +194,7 @@ sub import {
 
       $app->moniker($class->_moniker) if $app->moniker eq 'toadfarm';
       $app->config->{hypnotoad}{pid_file} ||= $class->_pid_file($app);
-      $app = $class->_setup_app($app, \%got) if $action eq 'load';
+      $app = $class->_setup_app($app, \%got) if $ENV{TOADFARM_ACTION};
       Mojo::UserAgent::Server->app($app);
       warn '$config=' . Mojo::Util::dumper($app->config) if DEBUG;
       $class->_die_on_insecure($app) unless $ENV{TOADFARM_INSECURE};

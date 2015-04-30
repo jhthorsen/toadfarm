@@ -42,7 +42,6 @@ sub run {
   my $timeout = 5;
 
   $self->_exit("Hypnotoad server already running $pid.") if $pid and kill 0, $pid;
-  local $ENV{TOADFARM_ACTION} = 'load';
   system $self->_hypnotoad, $0;
   $self->_exit("Hypnotoad server failed to start. (@{[$?>>8]})", $?) if $?;
 

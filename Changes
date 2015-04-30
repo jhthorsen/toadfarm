@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.57 Not Released
+ - Fix './toadfarm.pl daemon' by setting a default TOADFARM_ACTION value
+
 0.56 2015-04-28T17:36:26+0200
  - Will not run t/run-as.t unless TOADFARM_SUDO_TEST=1
 

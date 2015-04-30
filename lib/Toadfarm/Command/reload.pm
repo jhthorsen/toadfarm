@@ -37,7 +37,6 @@ Run command.
 
 sub run {
   my $self = shift;
-  local $ENV{TOADFARM_ACTION} = 'load';
   system $self->_hypnotoad, $0;
   $self->_exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
 }
