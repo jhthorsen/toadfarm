@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.59 Not Released
+0.59 2015-05-02T01:50:42+0200
  - Fix sudo to run with -H
  - Fix matching X-Request-Base with a regex
  - Fix "/" in matching HTTP header regex
