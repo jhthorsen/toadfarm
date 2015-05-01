@@ -421,6 +421,7 @@ sub _skip_if {
     return;
   }
   elsif (ref $value eq 'Regexp') {
+    $value =~ s,(?<!\\)/,\\/,g;
     return sprintf "return 0 unless +($format || '') =~ /(%s)/;", $k, $value;
   }
   else {
