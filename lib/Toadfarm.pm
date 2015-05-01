@@ -153,6 +153,7 @@ to the new L<DSL|Toadfarm::Manual::DSL> based API.
 use Mojo::Base 'Mojolicious';
 use Mojo::Util qw( class_to_path monkey_patch );
 use Cwd 'abs_path';
+use Data::Dumper ();
 use File::Basename qw( basename dirname );
 use File::Spec;
 use File::Which;
@@ -270,7 +271,14 @@ sub _mount_apps {
       require File::Temp;
       my %config = (%{$self->config}, %{$rules->{config}});
       $tmp = File::Temp->new;
-      Mojo::Util::spurt(Mojo::Util::dumper(\%config), $tmp->filename);
+      Mojo::Util::spurt(
+        do {
+          local $Data::Dumper::Terse    = 1;
+          local $Data::Dumper::Deepcopy = 1;
+          Data::Dumper::Dumper(\%config);
+        },
+        $tmp->filename
+      );
       $ENV{MOJO_CONFIG} = $tmp->filename;
     }
 
