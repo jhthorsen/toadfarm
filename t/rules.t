@@ -1,7 +1,7 @@
 use Mojo::Base -strict;
 use Test::More;
 use Test::Mojo;
-use Toadfarm;
+use Toadfarm -init;
 
 my @rules;
 
@@ -15,26 +15,25 @@ my @rules;
   };
 }
 
-$ENV{MOJO_CONFIG} = 't/rules.conf';
-my $t = Test::Mojo->new('Toadfarm');
+mount 't::lib::Test' => {
+  'config'         => {bar => 123},
+  'mount_point'    => '/foo',
+  'remote_address' => '10.10.10.10',
+  'remote_port'    => qr{8000},
+  'Host'           => 'te.st',
+  'X-Request-Base' => 'http:/domain.com/foo',
+};
+start;
 
-# This is super ugly, but fix http://www.cpantesters.org/cpan/report/9be9d476-e573-11e3-a4fa-b7e49121d1cf
-# $got->[1] = 'return 0 unless +($_[1]->tx->remote_port || '') =~ /(?-xism:8000)/;'
-# $expected->[1] = 'return 0 unless +($_[1]->tx->remote_port || '') =~ /(?^:8000)/;'
-for (@rules) {
-  s!/\(\?\^?[\w-]*:!/!g;
-  s!\b\)/!/!g;
-}
-
-is_deeply(
-  \@rules,
-  [
-    "return 0 unless +(\$_[1]->tx->remote_address || '') eq '10.10.10.10';",
-    "return 0 unless +(\$_[1]->tx->remote_port || '') =~ /8000/;",
-    "return 0 unless +(\$h->header('Host') || '') eq 'te.st';",
-    "return 0 unless +(\$h->header('X-Request-Base') || '') eq 'http:/domain.com/foo';",
-  ],
-  'got correct rules',
+my @match = (
+  qr{return 0 unless \+\(\$h->header\('Host'\) \|\| ''\) eq 'te\.st';},
+  qr{return 0 unless \+\(\$_\[1\]->tx->remote_port \|\| ''\) \=\~ \/\D*8000\D*\/;},
+  qr{return 0 unless \+\(\$_\[1\]->tx->remote_address \|\| ''\) eq '10\.10\.10\.10';},
+  qr{return 0 unless \+\(\$h->header\('X-Request-Base'\) \|\| ''\) eq 'http:\/domain\.com\/foo';},
 );
+
+for my $r (sort { length $a <=> length $b } @rules) {
+  like $r, shift(@match), $r;
+}
 
 done_testing;

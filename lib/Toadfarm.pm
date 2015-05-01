@@ -310,8 +310,8 @@ sub _mount_apps {
 
     if (@over) {
       $self->log->info("Mounting $path with conditions");
-      unshift @over, "sub { my \$h = \$_[1]->req->headers;\n";
-      push @over, "\$_[1]->req->url->base(Mojo::URL->new('$request_base'));" if $request_base;
+      unshift @over, "sub { my \$h = \$_[1]->req->headers;\nlocal \$1;";
+      push @over, "\$_[1]->req->url->base(Mojo::URL->new(\$1 || '$request_base'));" if $request_base;
       push @over, "return 1; }";
       $routes->add_condition("toadfarm_condition_$self->{mounted}", => eval "@over" || die "@over: $@");
       $routes->route($mount_point || '/')->detour(app => $app)->over("toadfarm_condition_$self->{mounted}");
@@ -421,7 +421,7 @@ sub _skip_if {
     return;
   }
   elsif (ref $value eq 'Regexp') {
-    return sprintf "return 0 unless +($format || '') =~ /%s/;", $k, $value;
+    return sprintf "return 0 unless +($format || '') =~ /(%s)/;", $k, $value;
   }
   else {
     return sprintf "return 0 unless +($format || '') eq '%s';", $k, $value;

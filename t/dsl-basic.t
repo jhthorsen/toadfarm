@@ -8,7 +8,7 @@ use Test::More;
   logging {combined => 1, level => 'debug'};
   secrets 'super-secret';
   mount 't::lib::Test' => {'Host' => 'te.st', 'config' => {bar => 123}};
-  mount 't::lib::Test' => {'X-Request-Base' => 'http://localhost:1234/yikes', 'config' => {foo => 123}};
+  mount 't::lib::Test' => {'X-Request-Base' => qr{^http:\/\/localhost:1234\/yikes}, 'config' => {foo => 123}};
   plugin 't::lib::Plugin' => ['yikes'];
   start ['http://*:5000'], proxy => 1;
 }
