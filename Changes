@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.59 Not Released
+ - Fix sudo to run with -H
+
 0.58 2015-05-01T13:28:24+0200
  - Fix creating config with references
 

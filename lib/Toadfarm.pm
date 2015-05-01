@@ -364,11 +364,12 @@ sub _run_as {
   for my $p (File::Spec->path) {
     $sudo[0] = File::Spec->catfile($p, 'sudo');
     next unless -x $sudo[0];
-    push @sudo, '-n', -u => "#$uid", $^X;
+    push @sudo, qw( -H -n -u ), "#$uid";
     last;
   }
 
   die "Cannot change to uid=$uid: 'sudo' was not found.\n" unless @sudo > 1;
+  push @sudo, $^X;
   push @sudo, -I => $INC[0] if $ENV{TOADFARM_ACTION} eq 'test';
   push @sudo, File::Spec->rel2abs($0), @ARGV;
   warn "[Toadfarm] system @sudo\n" if DEBUG;
