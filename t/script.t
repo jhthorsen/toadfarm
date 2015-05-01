@@ -62,6 +62,7 @@ no warnings 'once';
   eval { main::run() };
   like $@, qr{exit}, 'exit start()';
   is_deeply \@exec, [], 'already running';
+  unlink '/tmp/t-t-toadfarm-test.pid';
 }
 
 {
