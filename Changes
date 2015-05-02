@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.60 Not Released
+0.60 2015-05-02T09:32:44+0200
  - Fix t/rules.t
  - Fix 'Use of "rand" without parentheses is ambiguous'
 
