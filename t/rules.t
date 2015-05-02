@@ -32,8 +32,18 @@ my @match = (
   qr{return 0 unless \+\(\$h->header\('X-Request-Base'\) \|\| ''\) eq 'http:\/domain\.com\/foo';},
 );
 
-for my $r (sort { length $a <=> length $b } @rules) {
-  like $r, shift(@match), $r;
+RULE:
+for my $r (@rules) {
+  for my $i (0 .. @match - 1) {
+    next unless $r =~ $match[$i];
+    ok 1, $r;
+    splice @match, $i, 1, ();
+    next RULE;
+  }
+  ok 0, $r;
 }
+
+is int(@match), 0, 'all rules matched';
+ok 0, "not matched $_" for @match;
 
 done_testing;
