@@ -382,7 +382,7 @@ sub _setup_app {
   my ($class, $app, $got) = @_;
   my $config = $app->config;
 
-  $app->secrets([Mojo::Util::md5_sum(rand . time . $$ . $0)]) unless $got->{secrets};
+  $app->secrets([Mojo::Util::md5_sum($$ . $0 . time . rand)]) unless $got->{secrets};
   $app->_mount_apps(@{$config->{apps}})      if $config->{apps};
   $app->_load_plugins(@{$config->{plugins}}) if $config->{plugins};
 

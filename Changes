@@ -1,7 +1,8 @@
 Revision history for perl distribution Toadfarm
 
-0.5901 Not Released
+0.60 Not Released
  - Fix t/rules.t
+ - Fix 'Use of "rand" without parentheses is ambiguous'
 
 0.59 2015-05-02T01:50:42+0200
  - Fix sudo to run with -H
