@@ -364,7 +364,7 @@ sub _run_as {
   for my $p (File::Spec->path) {
     $sudo[0] = File::Spec->catfile($p, 'sudo');
     next unless -x $sudo[0];
-    push @sudo, qw( -H -n -u ), "#$uid";
+    push @sudo, qw( -i -n -u ), "#$uid";
     last;
   }
 
