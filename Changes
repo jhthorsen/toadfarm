@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.61 Not Released
+0.61 2015-05-04T17:12:07+0200
  - Fix "Permission denied" when running "sudo" without -i
 
 0.60 2015-05-02T09:32:44+0200
