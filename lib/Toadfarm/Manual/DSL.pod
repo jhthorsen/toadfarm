@@ -46,7 +46,7 @@ request.
 See L<Toadfarm::Manual::Config> for details on C<%config>.
 
 An application without L<%config> is considered to be a "catch all"
-application, meaning that it will get all the requests that does not
+application, meaning that it will get all the requests that do not
 match any of the above.
 
 =head2 plugin
@@ -84,7 +84,7 @@ release.
 Used to start the application. Both C<@listen> and C<%config> are optional,
 but will be used to specify the L<Mojo::Server::Hypnotoad/SETTINGS>.
 
-These three examples does the same thing:
+These three examples do the same thing:
 
   # 1.
   start proxy => 1;
