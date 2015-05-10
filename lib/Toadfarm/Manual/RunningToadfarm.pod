@@ -42,7 +42,7 @@ L<several seconds|Mojo::Server::Hypnotoad/graceful_timeout>.
 
 Will either start the application or
 L<hot deploy|Mojo::Server::Hypnotoad/USR2> it. This means loading
-in new version of your application, without losing any connections.
+in a new version of your application, without losing any connections.
 
 =back
 

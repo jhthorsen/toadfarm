@@ -10,7 +10,7 @@ This manual aims to give an introduction to how to set up C<toadfarm>.
 
 First you need to create a basic script to describe when an application
 will be triggered. This is a plain Perl script which allow you to pull in
-any trick you like form the Perl toolbox.
+any trick you like from the Perl toolbox.
 
 Example:
 
