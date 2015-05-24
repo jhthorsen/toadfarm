@@ -51,6 +51,10 @@ in a new version of your application, without losing any connections.
 Your script can be used as an init-script. Example script:
 
   #!/path/to/your/perl
+
+  eval 'exec /path/to/your/perl -S $0 ${1+"$@"}'
+      if 0; # not running under some shell
+
   ### BEGIN INIT INFO
   # Provides:          toadfarm
   # Required-Start:    $local_fs $network mysql postgresql
