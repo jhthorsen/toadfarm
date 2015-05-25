@@ -85,6 +85,10 @@ each time you push to "master":
   $ git push origin release
   # This plugin will cause hypnotoad to hot deploy
 
+Note: The local branch will have the name "toadfarm_reload_branch". The reason
+for this is to avoid killing commits done manually in the local branch. This
+is of course a very bad workflow, and should be avoided.
+
 =item * path
 
 This is the path on disk to the local git repo.
