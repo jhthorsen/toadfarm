@@ -23,11 +23,16 @@ Go to "https://github.com/YOUR-USERNAME/YOUR-REPO/settings/hooks" to set it up.
 =item *
 
 The WebHook URL needs to be "http://yourserver.com/some/private/path" and
-should not trigger any of the mounted apps. One way to do this is to specify
+should not trigger any of the mounted apps, e.g. with
+L<virtual hosts|Toadfarm::Manual::VirtualHost>, the hostname part of the
+WebHook URL needs to be unique from the mounted apps. This can be achieved by
+simply using an IP address instead of a hostname or exempting the GitHub-Hookshot
+User-Agent from the mount configuration.
 
-  "User-Agent" => qr{^(?:(?!GitHub-Hookshot).)*$}
-
-in the mount configuration.
+  mount 'My::App' => {
+    "Host" => qr{^(www.)?example.com$},
+    "User-Agent" => qr{^(?:(?!GitHub-Hookshot).)*$},
+  };
 
 =back
 
