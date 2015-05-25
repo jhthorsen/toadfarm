@@ -4,9 +4,7 @@ use Test::Mojo;
 use Cwd;
 use utf8;
 
-plan skip_all => $^O unless $^O =~ /linux/i;
-plan skip_all => 'Started from wrong directory' unless -x 't/bin/git';
-plan skip_all => 'Git is required' unless -x '/usr/bin/git' and -d '.git';
+plan skip_all => 'TEST_RELOAD=1' unless $ENV{TEST_RELOAD} or -e '.test-all';
 
 my $PID         = $$;
 my $LAST_COMMIT = qx{/usr/bin/git log --format=%H -n1 origin/master};
