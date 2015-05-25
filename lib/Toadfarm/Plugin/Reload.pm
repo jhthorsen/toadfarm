@@ -23,7 +23,8 @@ Go to "https://github.com/YOUR-USERNAME/YOUR-REPO/settings/hooks" to set it up.
 =item *
 
 The WebHook URL needs to be "http://yourserver.com/some/secret/path" and
-should not trigger any of the mounted apps.
+should not trigger any of the mounted apps, e.g. with Virtual Hosting, the
+webhook URL host should be unique from the mounted apps.
 
 =back
 
