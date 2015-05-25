@@ -2,6 +2,7 @@ Revision history for perl distribution Toadfarm
 
 0.62 Not Released
  - Fix init script recipe in Toadfarm::Manual::RunningToadfarm
+ - Improved Reload plugin documentation, regarding WebHook URL #15
  - Will not run t/reload.t without TEST_RELOAD=1 #13
 
 0.61 2015-05-04T17:12:07+0200
