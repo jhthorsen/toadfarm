@@ -209,7 +209,7 @@ sub _refresh_repo {
     "$config->{remote}/$config->{branch}",
     sub {
       return $self->{log}->error("Invalid commit: $_[0] ne $sha1") unless $_[0] eq $sha1;
-      $self->_run($GIT => checkout => -f => -B => toadfarm_reload_branch => "$config->{remote}/$config->{branch}");
+      $self->_run($GIT => checkout => -f => -B => $config->{branch} => "$config->{remote}/$config->{branch}");
     }
   );
 }
