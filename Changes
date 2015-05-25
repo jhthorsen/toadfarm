@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.63 Not Released
+0.63 2015-05-25T18:00:26+0200
  - Fix MANIFEST.SKIP to skip .test-all
 
 0.62 2015-05-25T13:26:12+0200
