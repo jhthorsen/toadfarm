@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.64 Not Released
+ - Fix single app need to have Toadfarm::Command as well
+
 0.63 2015-05-25T18:00:26+0200
  - Fix MANIFEST.SKIP to skip .test-all
 

@@ -393,6 +393,7 @@ sub _setup_app {
       $root_app->[1]->log($app->log) if $got->{log};
       $root_app->[1]->plugin(shift(@$plugins), shift(@$plugins)) for @$plugins;
       $root_app->[1]->secrets($app->secrets) if $root_app->[1]->secrets->[0] eq $root_app->[1]->moniker;
+      push @{$root_app->[1]->commands->namespaces}, 'Toadfarm::Command';
       return $root_app->[1];
     }
     else {
