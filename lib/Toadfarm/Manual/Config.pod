@@ -32,7 +32,7 @@ for the request to get passed on to a given application.
   mount "Some::Application" => {
 
     # headers
-    "Host"           => "example.com",
+    "Host"           => qr{^(www.)?example.com$},
     "User-Agent"     => qr{curl},
     "X-Request-Base" => "http://example.com/whatever",
 
