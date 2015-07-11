@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.65 2015-07-11T13:38:53+0200
+ - Fix failing tests without "hypnotoad" in $PATH
+
 0.64 2015-06-12T12:03:45+0200
  - Fix single app need to have Toadfarm::Command as well
 

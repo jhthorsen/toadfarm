@@ -10,6 +10,8 @@ require Toadfarm::Command::reload;
 *Toadfarm::Command::reload::_exit = sub { $exit = $_[2]; die "$_[1]\n"; };
 my $cmd = Toadfarm::Command::reload->new;
 
+plan skip_all => $@ unless eval { $cmd->_hypnotoad };
+
 {
   use Toadfarm -init;
   start;

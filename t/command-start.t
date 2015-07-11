@@ -11,6 +11,8 @@ require Toadfarm::Command::start;
 *Toadfarm::Command::start::_exit = sub { $exit = $_[2]; die "$_[1]\n"; };
 my $cmd = Toadfarm::Command::start->new;
 
+plan skip_all => $@ unless eval { $cmd->_hypnotoad };
+
 eval { $cmd->run };
 like $@, qr{pid_file is not set}, 'pid_file is not set';
 
