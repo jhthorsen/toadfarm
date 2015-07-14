@@ -2,6 +2,8 @@ use Mojo::Base -strict;
 use Test::More;
 use Test::Mojo;
 
+plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
+
 {
   use Toadfarm -test;
   mount 't::lib::Test' => {mount_point => '/bar'};

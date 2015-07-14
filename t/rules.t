@@ -3,6 +3,8 @@ use Test::More;
 use Test::Mojo;
 use Toadfarm -init;
 
+plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
+
 my @rules;
 
 {

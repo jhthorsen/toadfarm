@@ -3,6 +3,8 @@ use Mojo::Util 'spurt';
 use Test::More;
 use Time::HiRes;
 
+plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
+
 no warnings qw( once redefine );
 my ($exit, $sleep, $quit);
 *Time::HiRes::usleep = sub ($) { $sleep++ };

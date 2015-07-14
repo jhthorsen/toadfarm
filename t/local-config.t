@@ -3,6 +3,8 @@ use Test::Mojo;
 use Test::More;
 use File::Spec;
 
+plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
+
 $ENV{MOJO_CONFIG} = File::Spec->rel2abs(File::Spec->catfile(qw( t config.conf )));
 plan skip_all => 'MOJO_CONFIG is not readable' unless -r $ENV{MOJO_CONFIG};
 

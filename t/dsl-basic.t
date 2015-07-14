@@ -2,6 +2,8 @@ use Mojo::Base -strict;
 use Test::Mojo;
 use Test::More;
 
+plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
+
 {
   use Toadfarm -test;
   app->config->{foo} = 1;    # should not override 123 below

@@ -2,6 +2,8 @@ use Mojo::Base -strict;
 use Mojo::Util 'spurt';
 use Test::More;
 
+plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
+
 no warnings qw( once redefine );
 my ($exit, $sleep, @system);
 *CORE::GLOBAL::system = sub { @system = @_; };
