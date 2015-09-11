@@ -283,8 +283,8 @@ sub _mount_apps {
     }
 
     $path = File::Which::which($path) || class_to_path($path) unless -r $path;
-    $app ||= eval { $server->load_app($path) }  or push @error, $@;
-    $app ||= eval { $server->build_app($name) } or push @error, $@;
+    $app ||= eval { $server->build_app($name) } or push @error, $@ if $name =~ /^[\w:]+$/;
+    $app ||= eval { $server->load_app($path) } or push @error, $@;
 
     if (!$app) {
       die join "\n", @error;

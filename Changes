@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.67 Not Released
+ - Avoid warning when loading application class
+
 0.66 2015-07-14T17:39:06+0200
  - Cannot run tests as "root"
 
