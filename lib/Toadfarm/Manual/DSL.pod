@@ -95,7 +95,7 @@ These three examples do the same thing:
 
 =head1 SEE ALSO
 
-See also L<Toadfarm::Manual::Introduction>.
+See also L<Toadfarm::Manual::Intro>.
 
 =head1 AUTHOR
 
