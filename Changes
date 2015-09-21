@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.67 Not Released
+0.67 2015-09-21T21:09:13+0200
  - Avoid warning when loading application class
 
 0.66 2015-07-14T17:39:06+0200
