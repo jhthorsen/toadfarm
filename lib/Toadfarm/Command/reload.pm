@@ -42,10 +42,13 @@ Run command.
 sub run {
   my $self = shift;
 
-  system $self->_hypnotoad, $0;    # start or hot reload
-
-  return $self->_tail(grep { !/^--tail/ } @_) if grep {/^--tail/} @_;
-  return $self->_exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
+  if (grep {/^--tail/} @_) {
+    exec $self->_hypnotoad, $0 unless fork;    # start or hot reload
+    return $self->_tail(grep { !/^--tail/ } @_);
+  }
+  else {
+    return $self->_exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
+  }
 }
 
 =head1 COPYRIGHT AND LICENSE
