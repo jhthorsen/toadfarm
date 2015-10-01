@@ -14,20 +14,17 @@ by the L<Toadfarm> application.
   $ /path/to/script.pl tail
   $ /path/to/script.pl tail -n 10 -f -q
 
-C<-n> is the number of lines to go back, C<-f> will follow the log and
-C<-q> will not print the log file name.
-
-If you like th full power of the C<tail> application instead, you can
-do:
-
-  $ tail -f $(/path/to/script.pl tail -n 0)
+The tail command will start tailig from the end of file. Any options
+passed after the "tail" command will issue C<tail> to be started
+instead, with the given arguments.
 
 =cut
 
 use Mojo::Base 'Toadfarm::Command::start';
 use Time::HiRes 'usleep';
 
-use constant BUF_SIZE => 4096;    # can probably be any number
+use constant BUF_SIZE => 4096;                       # can probably be any number
+use constant TAIL_EXE => $ENV{TAIL_EXE} || 'tail';
 
 our $VERSION = '0.01';
 
@@ -51,60 +48,26 @@ Run command.
 
 sub run { shift->_tail(@_) }
 
-sub _print {
-  shift;
-  print @_;
-}
-
 sub _tail {
   my $self     = shift;
   my $log_file = $self->app->log->path;
-  my $pos      = 0;
-  my @lines;
 
-  $self->{opts}{f} = 0;
-  $self->{opts}{n} = 10;
-  $self->{opts}{q} = 0;
-
-  while (@_) {
-    my $opt = shift;
-    $self->{opts}{$opt} = $opt =~ /^(-n)/ ? shift || 1 : 1;
-  }
+  $self->_exit('Unknown log file.', 2) unless $log_file;
+  exec TAIL_EXE, @_, $log_file if @_;
 
   # open and go to end of file
   open my $LOG, '<', $log_file or die "Cannot tail $log_file: $!\n";
-  sysseek $LOG, 0, 2;
-  $pos = $self->{pos} = tell $LOG;
+  my $pos = -s $log_file;
+  warn "\$ tail -f $log_file\n";
 
-  $self->_print("$log_file\n") unless $self->{opts}{q};
-  $self->_exit unless $self->{opts}{n};
-
-  # go back n-lines
   while (1) {
-    my $p = $pos - BUF_SIZE;
-    $pos = 0 if $p < 0;
-    sysseek $LOG, 0, $pos;
-    sysread $LOG, my $buf, BUF_SIZE;
-    my @buf = split /\r?\n/, $buf;
-    unshift @lines, @buf;
-    last if @lines >= $self->{opts}{n} or $pos == 0;
-  }
-
-  @lines = splice @lines, -$self->{opts}{n} if @lines > $self->{opts}{n};
-  $self->_print("$_\n") for @lines;
-  sysseek $LOG, 0, 2;
-
-TAIL: {
-    sysseek $LOG, $self->{pos}, 0 if $self->{opts}{f};
+    seek $LOG, $pos, 0;
     while (<$LOG>) {
       local $| = 1;
-      next unless /\r?\n$/;
-      $self->_print($_);
-      $self->{pos} = tell $LOG;
+      print $_;
+      $pos = tell $LOG;
     }
-    last TAIL unless $self->{opts}{f};
     usleep 500e3;
-    next TAIL;
   }
 
   $self->_exit;
