@@ -59,6 +59,8 @@ sub _tail {
   open my $LOG, '<', $log_file or die "Cannot tail $log_file: $!\n";
   my $pos = -s $log_file;
   warn "\$ tail -f $log_file\n";
+  $SIG{$_} = sub { print "\n"; $self->_exit }
+    for qw( INT TERM );
 
   while (1) {
     seek $LOG, $pos, 0;
