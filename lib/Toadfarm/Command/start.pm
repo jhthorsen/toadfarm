@@ -57,7 +57,7 @@ sub run {
 }
 
 sub _exit {
-  say $_[1];
+  say $_[1] if $_[1];
   exit($_[2] || 0);
 }
 

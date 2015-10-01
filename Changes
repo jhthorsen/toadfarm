@@ -1,5 +1,9 @@
 Revision history for perl distribution Toadfarm
 
+0.68 Not Released
+ - Add "tail" command
+ - Add "--tail" to reload command
+
 0.67 2015-09-21T21:09:13+0200
  - Avoid warning when loading application class
 

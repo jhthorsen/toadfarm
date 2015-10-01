@@ -12,10 +12,14 @@ application.
 =head1 SYNOPSIS
 
   $ /path/to/script.pl reload
+  $ /path/to/script.pl reload --tail <args>
+
+C<--tail> will pass the call L<Toadfarm::Command::tail> after issuing
+start/reload on C<script.pl>.
 
 =cut
 
-use Mojo::Base 'Toadfarm::Command::start';
+use Mojo::Base 'Toadfarm::Command::tail';
 
 =head1 ATTRIBUTES
 
@@ -37,8 +41,11 @@ Run command.
 
 sub run {
   my $self = shift;
-  system $self->_hypnotoad, $0;
-  $self->_exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
+
+  system $self->_hypnotoad, $0;    # start or hot reload
+
+  return $self->_tail(@_) if grep {/^--tail/};
+  return $self->_exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
 }
 
 =head1 COPYRIGHT AND LICENSE
