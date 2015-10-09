@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.68 Not Released
+0.68 2015-10-09T19:04:19+0200
  - Add "tail" command
  - Add "--tail" to reload command
  - Add proper inheritance of secrets to child apps
