@@ -172,7 +172,7 @@ sub import {
   my $class  = shift;
   my $caller = caller;
   my $app    = Toadfarm->new;
-  my %got;
+  my $tf     = $app->config->{tf} ||= {};    # internal
 
   $_->import for qw(strict warnings utf8);
   feature->import(':5.10');
@@ -180,22 +180,21 @@ sub import {
 
   monkey_patch $caller, (
     app     => sub {$app},
-    logging => sub { $got{log}++; $app->_setup_log(@_) },
+    logging => sub { $tf->{logging}++; $app->_setup_log(@_) },
     mount   => sub { push @{$app->config->{apps}}, @_ == 2 ? @_ : ($_[0], {}); $app },
     plugin  => sub { push @{$app->config->{plugins}}, @_ == 2 ? @_ : ($_[0], {}); $app },
     run_as  => \&_run_as,
-    secrets => sub { $got{secrets} = 1; $app->secrets([@_]) },
+    secrets => sub { $tf->{secrets}++; $app->secrets([@_]) },
     start   => sub {
       if (@_) {
         my $listen = ref $_[0] eq 'ARRAY' ? shift : undef;
         $app->config->{hypnotoad} = @_ > 1 ? {@_} : {%{$_[0]}} if @_;
         $app->config->{hypnotoad}{listen} = $listen if $listen;
-        $got{hypnotoad}++;
       }
 
       $app->moniker($class->_moniker) if $app->moniker eq 'toadfarm';
       $app->config->{hypnotoad}{pid_file} ||= $class->_pid_file($app);
-      $app = $class->_setup_app($app, \%got) if $ENV{TOADFARM_ACTION};
+      $app = $class->_setup_app($app) if $ENV{TOADFARM_ACTION};
       Mojo::UserAgent::Server->app($app);
       warn '$config=' . Mojo::Util::dumper($app->config) if DEBUG;
       $class->_die_on_insecure($app) unless $ENV{TOADFARM_INSECURE};
@@ -286,12 +285,10 @@ sub _mount_apps {
     $app ||= eval { $server->build_app($name) } or push @error, $@ if $name =~ /^[\w:]+$/;
     $app ||= eval { $server->load_app($path) } or push @error, $@;
 
-    if (!$app) {
-      die join "\n", @error;
-    }
-    if ($config->{log}{combined}) {
-      $app->log($self->log);
-    }
+    die join "\n", @error unless $app;
+    $app->log($self->log)         if $config->{log}{combined};
+    $app->secrets($self->secrets) if $config->{tf}{secrets};
+
     if (ref $rules->{config} eq 'HASH') {
       my $local = delete $rules->{config};
       $app->config->{$_} = $local->{$_} for keys %$local;
@@ -379,20 +376,20 @@ sub _run_as {
 }
 
 sub _setup_app {
-  my ($class, $app, $got) = @_;
+  my ($class, $app) = @_;
   my $config = $app->config;
 
-  $app->secrets([Mojo::Util::md5_sum($$ . $0 . time . rand)]) unless $got->{secrets};
+  $app->secrets([Mojo::Util::md5_sum($$ . $0 . time . rand)]) unless $config->{tf}{secrets};
   $app->_mount_apps(@{$config->{apps}})      if $config->{apps};
   $app->_load_plugins(@{$config->{plugins}}) if $config->{plugins};
 
   if (my $root_app = delete $app->{root_app}) {
     if (@{$config->{apps} || []} == 2) {
       my $plugins = $config->{plugins} || [];
-      $root_app->[1]->config(hypnotoad => $app->config('hypnotoad')) if $got->{hypnotoad};
-      $root_app->[1]->log($app->log) if $got->{log};
+      $root_app->[1]->config(hypnotoad => $config->{hypnotoad}) if $config->{hypnotoad};
+      $root_app->[1]->log($app->log) if $config->{tf}{logging};
       $root_app->[1]->plugin(shift(@$plugins), shift(@$plugins)) for @$plugins;
-      $root_app->[1]->secrets($app->secrets) if $root_app->[1]->secrets->[0] eq $root_app->[1]->moniker;
+      $root_app->[1]->secrets($app->secrets);
       push @{$root_app->[1]->commands->namespaces}, 'Toadfarm::Command';
       return $root_app->[1];
     }
