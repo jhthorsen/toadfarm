@@ -47,6 +47,7 @@ sub run {
     return $self->_tail(grep { !/^--tail/ } @_);
   }
   else {
+    system $self->_hypnotoad, $0;              # start or hot reload
     return $self->_exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
   }
 }
