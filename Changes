@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.70 Not Released
+ - Skip command-tail.t: ualarm is not implementeed on MSWin32
+
 0.69 2015-10-28T12:41:41+0100
  - Fix "reload" command
 
