@@ -2,7 +2,7 @@ use Mojo::Base -strict;
 use Test::More;
 use File::Temp;
 use IO::Handle;
-use Time::HiRes 'ualarm';
+use Time::HiRes ();
 
 plan skip_all => 'ualarm is not implementeed on MSWin32' if $^O eq 'MSWin32';
 plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
@@ -31,12 +31,12 @@ like $@, qr{^tail -n 10 $path}, 'tail started';
 
 my $n = 0;
 $SIG{ALRM} = sub {
-  ualarm 100e3;
+  Time::HiRes::ualarm(100e3);
   return print $temp "# xyz\n" unless $n++;
   kill INT => $$;
 };
 $temp->autoflush(1);
-ualarm 100e3;
+Time::HiRes::ualarm(100e3);
 $exit = 42;
 eval { $cmd->run; };
 like $@,  qr{^EXIT}, 'tail -f';
