@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.71 Not Released
+0.71 2015-11-30T10:24:31+0100
  - Add command "status"
  - Command "start" and "stop" includes moniker in output
  - Fix t/command-tail.t on MSWin32
