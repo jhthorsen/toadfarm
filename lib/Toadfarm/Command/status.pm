@@ -56,6 +56,7 @@ sub run {
 
   my ($pid) = Mojo::Util::slurp($pid_file) =~ /(\d+)/;
   unless ($pid and kill 0, $pid) {
+    $pid ||= 0;
     return $self->_exit("$moniker ($pid) is not running, but PID file exists.", 1);
   }
 
