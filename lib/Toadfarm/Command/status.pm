@@ -39,22 +39,22 @@ Run command.
 
 sub run {
   my ($self, @args) = @_;
-  my $moniker = $self->app->moniker;
-  my $file    = $self->app->config->{hypnotoad}{pid_file};
+  my $moniker  = $self->app->moniker;
+  my $pid_file = $self->app->config->{hypnotoad}{pid_file};
 
   # 0 program is running or service is OK
   # 1 program is dead and /var/run pid file exists
   # 3 program is not running
   # 4 program or service status is unknown
 
-  unless ($file) {
+  unless ($pid_file) {
     return $self->_exit("$moniker has invalid config: /hypnotoad/pid_file is not set.", 4);
   }
-  unless (-e $file) {
+  unless (-e $pid_file) {
     return $self->_exit("$moniker is not running: No PID file.", 3);
   }
 
-  my ($pid) = Mojo::Util::slurp($file) =~ /(\d+)/;
+  my ($pid) = Mojo::Util::slurp($pid_file) =~ /(\d+)/;
   unless ($pid and kill 0, $pid) {
     return $self->_exit("$moniker ($pid) is not running, but PID file exists.", 1);
   }

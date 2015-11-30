@@ -40,7 +40,8 @@ Run command.
 =cut
 
 sub run {
-  my $self = shift;
+  my $self    = shift;
+  my $moniker = $self->app->moniker;
 
   if (grep {/^--tail/} @_) {
     exec $self->_hypnotoad, $0 unless fork;    # start or hot reload
@@ -48,8 +49,11 @@ sub run {
   }
   else {
     system $self->_hypnotoad, $0;              # start or hot reload
-    return $self->_exit("Hypnotoad server failed to reload. (@{[$?>>8]})", $?) if $?;
+    my $exit = $? >> 8;
+    return $self->_exit("$moniker failed to reload. ($exit)", $exit) if $exit;
   }
+
+  return $self->_exit;
 }
 
 =head1 COPYRIGHT AND LICENSE

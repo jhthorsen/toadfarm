@@ -4,13 +4,13 @@ use Test::More;
 
 plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
 
+$ENV{TOADFARM_NO_EXIT} = 1;
 no warnings qw( once redefine );
 my ($exit, $sleep, @system);
 *CORE::GLOBAL::system = sub { @system = @_; };
 *CORE::GLOBAL::sleep = sub { $sleep++ };
 
 require Toadfarm::Command::start;
-*Toadfarm::Command::start::_exit = sub { $exit = $_[2]; die "$_[1]\n"; };
 my $cmd = Toadfarm::Command::start->new;
 
 plan skip_all => $@ unless eval { $cmd->_hypnotoad };
@@ -24,21 +24,18 @@ like $@, qr{pid_file is not set}, 'pid_file is not set';
   $cmd->app(app);
 }
 
-$? = 256;
-eval { $cmd->run };
-like $@, qr{failed to start\. \(1\)$}, 'failed to start. (1)';
+$? = 256;    # mock system() return value
+like $cmd->run, qr{failed to start\. \(1\)$}, 'failed to start. (1)';
 
-$? = 0;
-eval { $cmd->run };
-like $@, qr{failed to start\.$}, 'failed to start';
+$? = 0;      # mock system() return value
+like $cmd->run, qr{failed to start\.$}, 'failed to start';
 is $sleep, 5, 'slept';
 ok -e $system[0], 'found hypnotoad';
 is $system[1], $0, 'hypnotoad $0';
 
 spurt $$ => app->config->{hypnotoad}{pid_file};
-$? = 0;
-eval { $cmd->run };
-like $@, qr{already running $$}, 'already running';
+$? = 0;      # mock system() return value
+like $cmd->run, qr{ \($$\) already running.}, 'already running';
 
 done_testing;
 

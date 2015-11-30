@@ -38,25 +38,28 @@ Run command.
 
 sub run {
   my ($self, @args) = @_;
+  my $moniker = $self->app->moniker;
   my $pid     = $self->_pid;
   my $timeout = 5;
 
-  $self->_exit("Hypnotoad server already running $pid.") if $pid and kill 0, $pid;
+  return $self->_exit("$moniker ($pid) already running.") if $pid and kill 0, $pid;
+
   system $self->_hypnotoad, $0;
-  $self->_exit("Hypnotoad server failed to start. (@{[$?>>8]})", $?) if $?;
+  return $self->_exit("$moniker failed to start. (@{[$?>>8]})", $?) if $?;
 
   while ($timeout--) {
     my $pid = $self->_pid or next;
-    $self->_exit("Hypnotoad server started $pid.") if $pid and kill 0, $pid;
+    return $self->_exit("$moniker ($pid) started.") if $pid and kill 0, $pid;
   }
   continue {
     sleep 1;
   }
 
-  $self->_exit("Hypnotoad server failed to start.", 3);
+  return $self->_exit("$moniker failed to start.", 3);
 }
 
 sub _exit {
+  return do { $! = $_[2]; $_[1] || '' } if $ENV{TOADFARM_NO_EXIT};
   say $_[1] if $_[1];
   exit($_[2] || 0);
 }
@@ -73,9 +76,11 @@ sub _hypnotoad {
 }
 
 sub _pid {
-  my $self = shift;
-  my $file = $self->app->config->{hypnotoad}{pid_file} or die "config -> hypnotoad -> pid_file is not set!\n";
-  return 0 unless -e $file;
+  my $self    = shift;
+  my $moniker = $self->app->moniker;
+  my $file    = $self->app->config->{hypnotoad}{pid_file}
+    or die "$moniker has invalid config: /hypnotoad/pid_file is not set.\n";
+  return 0 unless $file and -e $file;
   open my $PID, '<', $file or die "Unable to read pid_file $file: $!\n";
   my $pid = join '', <$PID>;
   return $pid =~ /(\d+)/ ? $1 : 0;

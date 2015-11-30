@@ -52,7 +52,7 @@ sub _tail {
   my $self     = shift;
   my $log_file = $self->app->log->path;
 
-  $self->_exit('Unknown log file.', 2) unless $log_file;
+  return $self->_exit('Unknown log file.', 2) unless $log_file;
   exec TAIL_EXE, @_, $log_file if @_;
 
   # open and go to end of file
@@ -72,7 +72,7 @@ sub _tail {
     usleep 500e3;
   }
 
-  $self->_exit;
+  return $self->_exit;
 }
 
 =head1 COPYRIGHT AND LICENSE

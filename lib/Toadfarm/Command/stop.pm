@@ -38,19 +38,20 @@ Run command.
 sub run {
   my $self    = shift;
   my $signal  = uc(shift || 'QUIT');
+  my $moniker = $self->app->moniker;
   my $timeout = ($self->app->config->{hypnotoad}{graceful_timeout} || 20) + 5;
 
-  $self->_exit("Hypnotoad server not running.") unless my $pid = $self->_pid;
+  return $self->_exit("$moniker not running.") unless my $pid = $self->_pid;
   kill $signal, $pid or die "Could not send SIG$signal to $pid: $!\n";
 
   while ($timeout--) {
-    $self->_exit("Hypnotoad server stopped.") unless $self->_pid;
+    return $self->_exit("$moniker ($pid) stopped.") unless $self->_pid;
   }
   continue {
     usleep 200e3;
   }
 
-  $self->_exit("Hypnotoad server failed to stop.", 1);
+  return $self->_exit("$moniker ($pid) failed to stop.", 1);
 }
 
 =head1 COPYRIGHT AND LICENSE

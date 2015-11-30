@@ -2,6 +2,7 @@ Revision history for perl distribution Toadfarm
 
 0.71 Not Released
  - Add command "status"
+ - Command "start" and "stop" includes moniker in output
 
 0.70 2015-11-27T11:51:04+0100
  - Skip command-tail.t: ualarm is not implementeed on MSWin32
