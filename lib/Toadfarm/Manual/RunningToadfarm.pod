@@ -12,8 +12,8 @@ L<Toadfarm> application.
 You can see the different options by simply running your application with
 no options:
 
-  $ /path/to/your-script
-  $ /path/to/your-script help
+  $ /path/to/your-toadfarm-script
+  $ /path/to/your-toadfarm-script help
 
 =head2 Actions
 
@@ -96,6 +96,30 @@ If you want to use crontab to start your script, you can do it with this line:
 
 The trick here is to use "start" which will only start your server and not
 hot deploy it if it's already running.
+
+=head2 Docker
+
+A L<Toadfarm> powered script can be run inside a
+L<docker|https://www.docker.com> container and allow hot reloading. Here is
+an example C<Docker> file:
+
+  FROM perl:5.22.1
+  COPY . /usr/src/myapp
+  WORKDIR /usr/src/myapp
+  CMD [ "perl", "./your-toadfarm-script", "start", "--tail", "-f" ]
+
+Note that "--tail" and "-f" is after L<start|Toadfarm::Command::start>,
+which will keep the script in foreground, even though your Mojolicious
+application has forked.
+
+The file can be built and started using these commands:
+
+  $ sudo docker build -t my-perl-app .
+  $ sudo docker run -it --rm --name my-running-app my-perl-app
+
+Later if you want to reload the application, you can do:
+
+  $ sudo docker exec -it my-perl-app "perl ./your-toadfarm-script reload"
 
 =head2 Other ways
 

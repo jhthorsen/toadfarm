@@ -11,10 +11,11 @@ L<Toadfarm::Command::start> is a command for starting a L<Toadfarm> application.
 =head1 SYNOPSIS
 
   $ /path/to/script.pl start
+  $ /path/to/script.pl start --tail <args>
 
 =cut
 
-use Mojo::Base 'Mojolicious::Command';
+use Mojo::Base 'Toadfarm::Command::tail';
 use File::Basename 'dirname';
 use File::Spec;
 
@@ -44,24 +45,25 @@ sub run {
 
   return $self->_exit("$moniker ($pid) already running.") if $pid and kill 0, $pid;
 
-  system $self->_hypnotoad, $0;
-  return $self->_exit("$moniker failed to start. (@{[$?>>8]})", $?) if $?;
-
-  while ($timeout--) {
-    my $pid = $self->_pid or next;
-    return $self->_exit("$moniker ($pid) started.") if $pid and kill 0, $pid;
+  if (grep {/^--tail/} @args) {
+    exec $self->_hypnotoad, $0 unless fork;
+    return $self->_tail(grep { !/^--tail/ } @args);
   }
-  continue {
-    sleep 1;
+  else {
+    system $self->_hypnotoad, $0;
+    my $exit = $? >> 8;
+    return $self->_exit("$moniker failed to start. ($exit)", $exit) if $exit;
+
+    while ($timeout--) {
+      my $pid = $self->_pid or next;
+      return $self->_exit("$moniker ($pid) started.") if $pid and kill 0, $pid;
+    }
+    continue {
+      sleep 1;
+    }
   }
 
   return $self->_exit("$moniker failed to start.", 3);
-}
-
-sub _exit {
-  return do { $! = $_[2]; $_[1] || '' } if $ENV{TOADFARM_NO_EXIT};
-  say $_[1] if $_[1];
-  exit($_[2] || 0);
 }
 
 sub _hypnotoad {

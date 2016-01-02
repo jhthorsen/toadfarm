@@ -1,5 +1,9 @@
 Revision history for perl distribution Toadfarm
 
+0.72 Not Released
+ - Add support for "start --tail"
+ - Documented how to run toadfarm inside docker
+
 0.71 2015-11-30T10:24:31+0100
  - Add command "status"
  - Command "start" and "stop" includes moniker in output
@@ -255,7 +259,7 @@ Revision history for perl distribution Toadfarm
 
 0.02 2013-04-29T21:36:48Z
  - Add $VERSION
- - Add suppor for "plugins"
+ - Add support for "plugins"
  - Will not poke into mojolicious internals
 
 0.01 2013-04-29T20:28:14Z

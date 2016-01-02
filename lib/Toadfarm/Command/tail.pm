@@ -20,7 +20,7 @@ instead, with the given arguments.
 
 =cut
 
-use Mojo::Base 'Toadfarm::Command::start';
+use Mojo::Base 'Mojolicious::Command';
 use Time::HiRes 'usleep';
 
 use constant BUF_SIZE => 4096;                       # can probably be any number
@@ -47,6 +47,12 @@ Run command.
 =cut
 
 sub run { shift->_tail(@_) }
+
+sub _exit {
+  return do { $! = $_[2]; $_[1] || '' } if $ENV{TOADFARM_NO_EXIT};
+  say $_[1] if $_[1];
+  exit($_[2] || 0);
+}
 
 sub _tail {
   my $self     = shift;
