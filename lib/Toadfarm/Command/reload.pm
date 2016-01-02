@@ -19,7 +19,7 @@ start/reload on C<script.pl>.
 
 =cut
 
-use Mojo::Base 'Toadfarm::Command::tail';
+use Mojo::Base 'Toadfarm::Command::start';
 
 =head1 ATTRIBUTES
 

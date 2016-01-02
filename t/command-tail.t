@@ -16,7 +16,7 @@ print $temp "# some log line\n";
 no warnings qw( once redefine );
 *CORE::GLOBAL::exec = sub { die "@_" };
 require Toadfarm::Command::tail;
-*Toadfarm::Command::start::_exit = sub { $exit = $_[2]; die $_[1] || 'EXIT'; };
+*Toadfarm::Command::tail::_exit = sub { $exit = $_[2]; die $_[1] || 'EXIT'; };
 
 my $cmd = Toadfarm::Command::tail->new;
 
