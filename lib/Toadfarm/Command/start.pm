@@ -41,29 +41,29 @@ sub run {
   my ($self, @args) = @_;
   my $moniker = $self->app->moniker;
   my $pid     = $self->_pid;
+  my $running = $pid && kill 0, $pid;
+  my $tail    = grep {/^--tail/} @args;
   my $timeout = 5;
 
-  return $self->_exit("$moniker ($pid) already running.") if $pid and kill 0, $pid;
-
-  if (grep {/^--tail/} @args) {
-    exec $self->_hypnotoad, $0 unless fork;
-    return $self->_tail(grep { !/^--tail/ } @args);
-  }
-  else {
-    system $self->_hypnotoad, $0;
-    my $exit = $? >> 8;
-    return $self->_exit("$moniker failed to start. ($exit)", $exit) if $exit;
-
-    while ($timeout--) {
-      my $pid = $self->_pid or next;
-      return $self->_exit("$moniker ($pid) started.") if $pid and kill 0, $pid;
-    }
-    continue {
-      sleep 1;
-    }
+  if ($running) {
+    return $self->_tail(grep { !/^--tail/ } @args) if $tail;
+    return $self->_exit("$moniker ($pid) already running.");
   }
 
-  return $self->_exit("$moniker failed to start.", 3);
+  system $self->_hypnotoad, $0;
+  my $exit = $? >> 8;
+  return $self->_exit("$moniker failed to start. ($exit)", $exit) if $exit;
+
+  while ($timeout--) {
+    last if $pid = $self->_pid and kill 0, $pid;
+  }
+  continue {
+    sleep 1;
+  }
+
+  return $self->_exit("$moniker failed to start.", 3) unless $pid;
+  return $self->_tail(grep { !/^--tail/ } @args) if $tail;
+  return $self->_exit("$moniker ($pid) started.");
 }
 
 sub _hypnotoad {
