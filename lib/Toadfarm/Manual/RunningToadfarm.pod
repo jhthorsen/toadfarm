@@ -108,6 +108,7 @@ example C<Docker> file:
   FROM perl:5.22.1
   WORKDIR /usr/src/myapp
   RUN cpanm Toadfarm
+  RUN chsh -s /bin/sh www-data
   USER www-data
   CMD [ "perl", "./your-toadfarm-script", "start", "--tail", "-f" ]
 
