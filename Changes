@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.73 Not Released
+ - Remove deprecated script/toadfarm
+
 0.72 2016-01-03T00:14:25+0100
  - Add support for "start --tail"
  - Documented how to run toadfarm inside docker
