@@ -1,41 +1,9 @@
 package Toadfarm::Command::start;
-
-=head1 NAME
-
-Toadfarm::Command::start - Start a Toadfarm DSL script
-
-=head1 DESCRIPTION
-
-L<Toadfarm::Command::start> is a command for starting a L<Toadfarm> application.
-
-=head1 SYNOPSIS
-
-  $ /path/to/script.pl start
-  $ /path/to/script.pl start --tail <args>
-
-=cut
-
 use Mojo::Base 'Toadfarm::Command::tail';
 use File::Basename 'dirname';
 use File::Spec;
 
-=head1 ATTRIBUTES
-
-=head2 description
-
-Short description of command, used for the command list.
-
-=cut
-
 has description => 'Toadfarm: Start the server if not already running';
-
-=head1 METHODS
-
-=head2 run
-
-Run command.
-
-=cut
 
 sub run {
   my ($self, @args) = @_;
@@ -88,6 +56,35 @@ sub _pid {
   return $pid =~ /(\d+)/ ? $1 : 0;
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Toadfarm::Command::start - Start a Toadfarm DSL script
+
+=head1 DESCRIPTION
+
+L<Toadfarm::Command::start> is a command for starting a L<Toadfarm> application.
+
+=head1 SYNOPSIS
+
+  $ /path/to/script.pl start
+  $ /path/to/script.pl start --tail <args>
+
+=head1 ATTRIBUTES
+
+=head2 description
+
+Short description of command, used for the command list.
+
+=head1 METHODS
+
+=head2 run
+
+Run command.
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014, Jan Henning Thorsen
@@ -100,5 +97,3 @@ the terms of the Artistic License version 2.0.
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

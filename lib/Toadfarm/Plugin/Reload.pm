@@ -1,108 +1,4 @@
 package Toadfarm::Plugin::Reload;
-
-=head1 NAME
-
-Toadfarm::Plugin::Reload - Reload toadfarm with new code
-
-=head1 DESCRIPTION
-
-This L<Mojolicious> plugin allows the L</Toadfarm> server to restart when a
-resource is hit with a special JSON payload. The payload needs to be compatible
-with the L<post-receive-hook|https://help.github.com/articles/post-receive-hooks>
-github use.
-
-=head1 SETUP
-
-=over 4
-
-=item *
-
-You need to set up a post receive hook on github to make this reloader work.
-Go to "https://github.com/YOUR-USERNAME/YOUR-REPO/settings/hooks" to set it up.
-
-=item *
-
-The WebHook URL (e.g. http://yourserver.com/some/private/path), should not
-trigger any mounted apps. This can be achieved by simply using an IP address
-instead of a hostname or by exempting the GitHub-Hookshot User-Agent from the
-mount configuration:
-
-  mount 'My::App' => {
-    "Host" => qr{^(www.)?yourserver.com$},
-    "User-Agent" => qr{^(?:(?!GitHub-Hookshot).)*$},
-  };
-
-=back
-
-=head1 SYNOPSIS
-
-  #!/usr/bin/env perl
-  use Toadfarm -init;
-
-  # mount applications, set up logging, ...
-
-  plugin "Toadfarm::Plugin::Reload" => {
-    path         => "/some/private/path",
-    repositories => [
-      {
-        name   => "cool-repo",
-        branch => "some-branch",
-        path   => "/path/to/cool-repo",
-        remote => "whatever",           # default="origin"
-      },
-    ],
-  };
-
-  start;
-
-Configuration details:
-
-=over 4
-
-=item * path
-
-This should be the path part of the URL to POST data to reload the server.
-Make this something semi-secret to avoid random public requests:
-
-  perl -le'print join "/", "", "reload", (time.$$.rand(9999999)) =~ /(\w\w)/g'
-
-=item * repositories
-
-This should contain a mapping between github repository names and local settings:
-
-=over 4
-
-=item * branch
-
-The name of the branch on github that you push production code to.
-
-Tip: Instead of using "master", you might want to use "production" or "release"
-instead. The reason for this is that it will prevent the server from reloading
-each time you push to "master":
-
-  # Work
-  $ git push origin master
-  $ git push origin master
-  $ git push origin master
-  # Make a new release
-  $ git tag 0.31
-  $ git push origin release
-  # This plugin will cause hypnotoad to hot deploy
-
-Note: The local branch will have the name "toadfarm_reload_branch". The reason
-for this is to avoid killing commits done manually in the local branch. This
-is of course a very bad workflow, and should be avoided.
-
-=item * path
-
-This is the path on disk to the local git repo.
-
-=back
-
-=back
-
-=cut
-
 use Mojo::Base 'Mojolicious::Plugin';
 use Mojo::JSON qw( decode_json encode_json );
 use Mojo::Util;
@@ -110,16 +6,6 @@ use Mojo::Util;
 our $GIT = $ENV{GIT_EXE} || 'git';
 
 $ENV{TOADFARM_GITHUB_DELAY} ||= 2;
-
-=head1 METHODS
-
-=head2 register
-
-  $self->register($app, \%config);
-
-See L</SYNOPSIS> for C<%config> parameters.
-
-=cut
 
 sub register {
   my ($self, $app, $config) = @_;
@@ -278,10 +164,121 @@ sub _valid_config {
   $self->{repositories} = $repositories;
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Toadfarm::Plugin::Reload - Reload toadfarm with new code
+
+=head1 DESCRIPTION
+
+This L<Mojolicious> plugin allows the L</Toadfarm> server to restart when a
+resource is hit with a special JSON payload. The payload needs to be compatible
+with the L<post-receive-hook|https://help.github.com/articles/post-receive-hooks>
+github use.
+
+=head1 SETUP
+
+=over 4
+
+=item *
+
+You need to set up a post receive hook on github to make this reloader work.
+Go to "https://github.com/YOUR-USERNAME/YOUR-REPO/settings/hooks" to set it up.
+
+=item *
+
+The WebHook URL (e.g. http://yourserver.com/some/private/path), should not
+trigger any mounted apps. This can be achieved by simply using an IP address
+instead of a hostname or by exempting the GitHub-Hookshot User-Agent from the
+mount configuration:
+
+  mount 'My::App' => {
+    "Host" => qr{^(www.)?yourserver.com$},
+    "User-Agent" => qr{^(?:(?!GitHub-Hookshot).)*$},
+  };
+
+=back
+
+=head1 SYNOPSIS
+
+  #!/usr/bin/env perl
+  use Toadfarm -init;
+
+  # mount applications, set up logging, ...
+
+  plugin "Toadfarm::Plugin::Reload" => {
+    path         => "/some/private/path",
+    repositories => [
+      {
+        name   => "cool-repo",
+        branch => "some-branch",
+        path   => "/path/to/cool-repo",
+        remote => "whatever",           # default="origin"
+      },
+    ],
+  };
+
+  start;
+
+Configuration details:
+
+=over 4
+
+=item * path
+
+This should be the path part of the URL to POST data to reload the server.
+Make this something semi-secret to avoid random public requests:
+
+  perl -le'print join "/", "", "reload", (time.$$.rand(9999999)) =~ /(\w\w)/g'
+
+=item * repositories
+
+This should contain a mapping between github repository names and local settings:
+
+=over 4
+
+=item * branch
+
+The name of the branch on github that you push production code to.
+
+Tip: Instead of using "master", you might want to use "production" or "release"
+instead. The reason for this is that it will prevent the server from reloading
+each time you push to "master":
+
+  # Work
+  $ git push origin master
+  $ git push origin master
+  $ git push origin master
+  # Make a new release
+  $ git tag 0.31
+  $ git push origin release
+  # This plugin will cause hypnotoad to hot deploy
+
+Note: The local branch will have the name "toadfarm_reload_branch". The reason
+for this is to avoid killing commits done manually in the local branch. This
+is of course a very bad workflow, and should be avoided.
+
+=item * path
+
+This is the path on disk to the local git repo.
+
+=back
+
+=back
+
+=head1 METHODS
+
+=head2 register
+
+  $self->register($app, \%config);
+
+See L</SYNOPSIS> for C<%config> parameters.
+
 =head1 AUTHOR
 
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;

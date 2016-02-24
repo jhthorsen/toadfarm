@@ -1,155 +1,4 @@
 package Toadfarm;
-
-=head1 NAME
-
-Toadfarm - One Mojolicious app to rule them all
-
-=head1 VERSION
-
-0.72
-
-=head1 DESCRIPTION
-
-Toadfarm is a module for configuring and starting your L<Mojolicious>
-applications. You can either combine multiple applications in one script,
-or just use it as a init script.
-
-Core features:
-
-=over 4
-
-=item *
-
-Wrapper around L<hypnotoad|Mojo::Server::Hypnotoad> that makes your
-application L<Sys-V|https://www.debian-administration.org/article/28/Making_scripts_run_at_boot_time_with_Debian>
-compatible.
-
-=item *
-
-Advanced routing and virtual host configuration. Also support routing
-from behind another web server, such as L<nginx|http://nginx.com/>.
-This feature is very much like L<Mojolicious::Plugin::Mount> on steroids.
-
-=item *
-
-Hijacking log messages to a common log file. There's also plugin,
-L<Toadfarm::Plugin::AccessLog>, that allows you to log the requests sent
-to your server.
-
-=back
-
-=head1 SYNOPSIS
-
-=head2 Script
-
-Here is an example script that sets up logging and mounts some applications
-under different domains, as well as loading in some custom plugins.
-
-See L<Toadfarm::Manual::DSL> for more information about the different functions.
-
-  #!/usr/bin/perl
-  use Toadfarm -init;
-
-  logging {
-    combined => 1,
-    file     => "/var/log/toadfarm/app.log",
-    level    => "info",
-  };
-
-  mount "MyApp"  => {
-    Host   => "myapp.example.com",
-    config => {
-      config_parameter_for_myapp => "foo"
-    },
-  };
-
-  mount "/path/to/app" => {
-    Host        => "example.com",
-    mount_point => "/other",
-  };
-
-  mount "Catch::All::App";
-
-  plugin "Toadfarm::Plugin::AccessLog";
-
-  start; # needs to be at the last line
-
-=head2 Usage
-
-You don't have to put L</Script> in init.d, but it will work with standard
-start/stop actions.
-
-  $ /etc/init.d/your-script reload
-  $ /etc/init.d/your-script start
-  $ /etc/init.d/your-script stop
-
-See also L<Toadfarm::Manual::RunningToadfarm/Init script> for more details.
-
-You can also start the application with normal L<Mojolicious> commands:
-
-  $ morbo /etc/init.d/your-script
-  $ /etc/init.d/your-script daemon
-
-=head1 DOCUMENTATION INDEX
-
-=over 4
-
-=item * L<Toadfarm::Manual::Intro> - Introduction.
-
-=item * L<Toadfarm::Manual::DSL> - Domain specific language for Toadfarm.
-
-=item * L<Toadfarm::Manual::Config> - Config file format.
-
-=item * L<Toadfarm::Manual::RunningToadfarm> - Command line options.
-
-=item * L<Toadfarm::Manual::BehindReverseProxy> - Toadfarm behind nginx.
-
-=item * L<Toadfarm::Manual::VirtualHost> - Virtual host setup.
-
-=back
-
-=head1 PLUGINS
-
-=over 4
-
-=item * L<Toadfarm::Plugin::AccessLog>
-
-Log each request that hit your application.
-
-=item * L<Toadfarm::Plugin::Reload>
-
-Reload Hypnotoad with a L<GitHub push hook|https://help.github.com/articles/about-webhooks/>.
-
-=item * L<Mojolicious::Plugin::SizeLimit>
-
-Kill Hypnotoad workers if they grow too large.
-
-=item * L<Mojolicious::Plugin::SetUserGroup>
-
-Start as root, run workers as less user. See also
-L<Toadfarm::Manual::RunningToadfarm/Listen to standard HTTP ports>.
-
-=back
-
-=head1 PREVIOUS VERSIONS
-
-L<Toadfarm> prior to version 0.49 used to be a configuration file loaded in
-by the C<toadfarm> script. This resulted in all the executables to be named
-C<toadfarm> instead of something descriptive. It also felt a bit awkward to
-take over C<MOJO_CONFIG> and use all the crazy hacks to start C<hypnotoad>.
-
-It also didn't work well as an init script, so there still had to be a
-seperate solution for that.
-
-The new L<Toadfarm> DSL aim to solve all of these issues. This means that
-if you decide to still use any C<MOJO_CONFIG>, it should be for the
-applications loaded from inside C<Toadfarm> and not the startup script.
-
-Note that the old solution still works, but a warning tells you to change
-to the new L<DSL|Toadfarm::Manual::DSL> based API.
-
-=cut
-
 use Mojo::Base 'Mojolicious';
 use Mojo::Util qw( class_to_path monkey_patch );
 use Cwd 'abs_path';
@@ -427,6 +276,158 @@ sub _skip_if {
   }
 }
 
+1;
+
+=encoding utf8
+
+=head1 NAME
+
+Toadfarm - One Mojolicious app to rule them all
+
+=head1 VERSION
+
+0.72
+
+=head1 DESCRIPTION
+
+Toadfarm is a module for configuring and starting your L<Mojolicious>
+applications. You can either combine multiple applications in one script,
+or just use it as a init script.
+
+Core features:
+
+=over 4
+
+=item *
+
+Wrapper around L<hypnotoad|Mojo::Server::Hypnotoad> that makes your
+application L<Sys-V|https://www.debian-administration.org/article/28/Making_scripts_run_at_boot_time_with_Debian>
+compatible.
+
+=item *
+
+Advanced routing and virtual host configuration. Also support routing
+from behind another web server, such as L<nginx|http://nginx.com/>.
+This feature is very much like L<Mojolicious::Plugin::Mount> on steroids.
+
+=item *
+
+Hijacking log messages to a common log file. There's also plugin,
+L<Toadfarm::Plugin::AccessLog>, that allows you to log the requests sent
+to your server.
+
+=back
+
+=head1 SYNOPSIS
+
+=head2 Script
+
+Here is an example script that sets up logging and mounts some applications
+under different domains, as well as loading in some custom plugins.
+
+See L<Toadfarm::Manual::DSL> for more information about the different functions.
+
+  #!/usr/bin/perl
+  use Toadfarm -init;
+
+  logging {
+    combined => 1,
+    file     => "/var/log/toadfarm/app.log",
+    level    => "info",
+  };
+
+  mount "MyApp"  => {
+    Host   => "myapp.example.com",
+    config => {
+      config_parameter_for_myapp => "foo"
+    },
+  };
+
+  mount "/path/to/app" => {
+    Host        => "example.com",
+    mount_point => "/other",
+  };
+
+  mount "Catch::All::App";
+
+  plugin "Toadfarm::Plugin::AccessLog";
+
+  start; # needs to be at the last line
+
+=head2 Usage
+
+You don't have to put L</Script> in init.d, but it will work with standard
+start/stop actions.
+
+  $ /etc/init.d/your-script reload
+  $ /etc/init.d/your-script start
+  $ /etc/init.d/your-script stop
+
+See also L<Toadfarm::Manual::RunningToadfarm/Init script> for more details.
+
+You can also start the application with normal L<Mojolicious> commands:
+
+  $ morbo /etc/init.d/your-script
+  $ /etc/init.d/your-script daemon
+
+=head1 DOCUMENTATION INDEX
+
+=over 4
+
+=item * L<Toadfarm::Manual::Intro> - Introduction.
+
+=item * L<Toadfarm::Manual::DSL> - Domain specific language for Toadfarm.
+
+=item * L<Toadfarm::Manual::Config> - Config file format.
+
+=item * L<Toadfarm::Manual::RunningToadfarm> - Command line options.
+
+=item * L<Toadfarm::Manual::BehindReverseProxy> - Toadfarm behind nginx.
+
+=item * L<Toadfarm::Manual::VirtualHost> - Virtual host setup.
+
+=back
+
+=head1 PLUGINS
+
+=over 4
+
+=item * L<Toadfarm::Plugin::AccessLog>
+
+Log each request that hit your application.
+
+=item * L<Toadfarm::Plugin::Reload>
+
+Reload Hypnotoad with a L<GitHub push hook|https://help.github.com/articles/about-webhooks/>.
+
+=item * L<Mojolicious::Plugin::SizeLimit>
+
+Kill Hypnotoad workers if they grow too large.
+
+=item * L<Mojolicious::Plugin::SetUserGroup>
+
+Start as root, run workers as less user. See also
+L<Toadfarm::Manual::RunningToadfarm/Listen to standard HTTP ports>.
+
+=back
+
+=head1 PREVIOUS VERSIONS
+
+L<Toadfarm> prior to version 0.49 used to be a configuration file loaded in
+by the C<toadfarm> script. This resulted in all the executables to be named
+C<toadfarm> instead of something descriptive. It also felt a bit awkward to
+take over C<MOJO_CONFIG> and use all the crazy hacks to start C<hypnotoad>.
+
+It also didn't work well as an init script, so there still had to be a
+seperate solution for that.
+
+The new L<Toadfarm> DSL aim to solve all of these issues. This means that
+if you decide to still use any C<MOJO_CONFIG>, it should be for the
+applications loaded from inside C<Toadfarm> and not the startup script.
+
+Note that the old solution still works, but a warning tells you to change
+to the new L<DSL|Toadfarm::Manual::DSL> based API.
+
 =head1 COPYRIGHT AND LICENSE
 
 Copyright (C) 2014, Jan Henning Thorsen
@@ -439,5 +440,3 @@ under the terms of the Artistic License version 2.0.
 Jan Henning Thorsen - C<jhthorsen@cpan.org>
 
 =cut
-
-1;
