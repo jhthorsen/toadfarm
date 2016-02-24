@@ -60,13 +60,13 @@ sub startup {
   $ENV{TOADFARM_CONFIG} = delete $ENV{MOJO_CONFIG};
 
   $self->{mounted} = 0;
-  $self->_setup_log($config->{log})                   if $config->{log}{file};
-  $self->_paths($config->{paths})                     if $config->{paths};
-  $self->secrets([$config->{secret}])                 if $config->{secret};
-  $self->secrets($config->{secrets})                  if $config->{secrets};
-  $self->_mount_apps(@{$config->{apps}})              if $config->{apps};
-  $self->_load_plugins(@{$config->{plugins}})         if $config->{plugins};
-  $self->_mount_root_app(@{delete $self->{root_app}}) if $self->{root_app};
+  $self->_setup_log($config->{log})                if $config->{log}{file};
+  $self->_paths($config->{paths})                  if $config->{paths};
+  $self->secrets([$config->{secret}])              if $config->{secret};
+  $self->secrets($config->{secrets})               if $config->{secrets};
+  $self->_mount_apps(@{$config->{apps}})           if $config->{apps};
+  $self->_load_plugins(@{$config->{plugins}})      if $config->{plugins};
+  $self->_mount_root_app(delete $self->{root_app}) if $self->{root_app};
 }
 
 sub _die_on_insecure {
@@ -107,11 +107,10 @@ sub _mount_apps {
   my $config = $self->config;
 
   while (@_) {
-    my ($name, $rules) = (shift @_, shift @_);
+    my ($app, $rules) = (shift @_, shift @_);
     my $server      = Mojo::Server->new;
-    my $path        = $name;
     my $mount_point = delete $rules->{mount_point};
-    my ($app, $request_base, $tmp, @over, @error);
+    my ($request_base, $tmp, @over);
 
     local $ENV{MOJO_CONFIG} = $ENV{MOJO_CONFIG};
 
@@ -130,11 +129,14 @@ sub _mount_apps {
       $ENV{MOJO_CONFIG} = $tmp->filename;
     }
 
-    $path = File::Which::which($path) || class_to_path($path) unless -r $path;
-    $app ||= eval { $server->build_app($name) } or push @error, $@ if $name =~ /^[\w:]+$/;
-    $app ||= eval { $server->load_app($path) } or push @error, $@;
+    unless (ref $app and UNIVERSAL::isa($app, 'Mojolicious')) {
+      my ($class, $path, @error) = ($app, $app);
+      $path = File::Which::which($path) || class_to_path($path) unless -r $path;
+      $app = eval { $server->build_app($class) } or push @error, $@ if $class =~ /^[\w:]+$/;
+      $app = eval { $server->load_app($path) } or push @error, $@ unless ref $app;
+      die join "\n", @error unless $app;
+    }
 
-    die join "\n", @error unless $app;
     $app->log($self->log)         if $config->{log}{combined};
     $app->secrets($self->secrets) if $config->{tf}{secrets};
 
@@ -155,7 +157,7 @@ sub _mount_apps {
     }
 
     if (@over) {
-      $self->log->info("Mounting $path with conditions");
+      $self->log->info("Mounting @{[$app->moniker]} with conditions");
       unshift @over, "sub { my \$h = \$_[1]->req->headers;\nlocal \$1;";
       push @over, "\$_[1]->req->url->base(Mojo::URL->new(\$1 || '$request_base'));" if $request_base;
       push @over, "return 1; }";
@@ -166,7 +168,7 @@ sub _mount_apps {
       $routes->route($mount_point)->detour(app => $app);
     }
     else {
-      $self->{root_app} = [$path => $app];
+      $self->{root_app} = $app;
     }
 
     $self->{mounted}++;
@@ -176,8 +178,8 @@ sub _mount_apps {
 }
 
 sub _mount_root_app {
-  my ($self, $path, $app) = @_;
-  $self->log->info("Mounting $path without conditions.");
+  my ($self, $app) = @_;
+  $self->log->info("Mounting @{[$app->moniker]} without conditions.");
   $self->routes->route('/')->detour(app => $app);
 }
 
@@ -235,15 +237,15 @@ sub _setup_app {
   if (my $root_app = delete $app->{root_app}) {
     if (@{$config->{apps} || []} == 2) {
       my $plugins = $config->{plugins} || [];
-      $root_app->[1]->config(hypnotoad => $config->{hypnotoad}) if $config->{hypnotoad};
-      $root_app->[1]->log($app->log) if $config->{tf}{logging};
-      $root_app->[1]->plugin(shift(@$plugins), shift(@$plugins)) for @$plugins;
-      $root_app->[1]->secrets($app->secrets);
-      push @{$root_app->[1]->commands->namespaces}, 'Toadfarm::Command';
-      return $root_app->[1];
+      $root_app->config(hypnotoad => $config->{hypnotoad}) if $config->{hypnotoad};
+      $root_app->log($app->log) if $config->{tf}{logging};
+      $root_app->plugin(shift(@$plugins), shift(@$plugins)) for @$plugins;
+      $root_app->secrets($app->secrets);
+      push @{$root_app->commands->namespaces}, 'Toadfarm::Command';
+      return $root_app;
     }
     else {
-      $app->_mount_root_app(@$root_app);
+      $app->_mount_root_app($root_app);
     }
   }
 
