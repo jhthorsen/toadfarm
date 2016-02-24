@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.73 Not Released
+0.73 2016-02-24T23:21:34+0100
  - Remove deprecated script/toadfarm
  - Can mount a Mojolicious object
 

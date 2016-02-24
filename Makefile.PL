@@ -6,7 +6,7 @@ WriteMakefile(
   LICENSE       => 'artistic_2',
   ABSTRACT_FROM => 'lib/Toadfarm.pm',
   VERSION_FROM  => 'lib/Toadfarm.pm',
-  EXE_FILES     => [],
+  EXE_FILES     => [qw(  )],
   META_MERGE    => {
     resources => {
       bugtracker => 'https://github.com/jhthorsen/toadfarm/issues',
@@ -16,5 +16,5 @@ WriteMakefile(
   },
   BUILD_REQUIRES => {'Test::More'  => '0.88'},
   PREREQ_PM      => {'File::Which' => '1.00', 'Mojolicious' => '5.00'},
-  test           => {TESTS         => 't/*.t'},
+  test           => {TESTS         => (-e 'META.yml' ? 't/*.t' : 't/*.t xt/*.t')},
 );
