@@ -1,5 +1,11 @@
 Revision history for perl distribution Toadfarm
 
+0.74 2016-03-10T22:30:39+0100
+ - Skip t/mount-object.t on windows
+   http://cpantesters.org/cpan/report/e9332a98-6c07-1014-9346-9ac2cd07d6c2
+ - Skip t/command-tail.t without TEST_TAIL=1
+   http://cpantesters.org/cpan/report/95cdabf6-dc1d-11e5-88e3-a488a082370d
+
 0.73 2016-02-24T23:21:34+0100
  - Remove deprecated script/toadfarm
  - Can mount a Mojolicious object

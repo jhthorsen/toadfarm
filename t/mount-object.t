@@ -3,7 +3,7 @@ use Test::Mojo;
 use Test::More;
 use Mojolicious;
 
-plan skip_all => 'reason' if 0;
+plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
 
 use Toadfarm -test;
 my $app = Mojolicious->new;

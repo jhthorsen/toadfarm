@@ -8,7 +8,7 @@ use File::Spec;
 use File::Which;
 use constant DEBUG => $ENV{TOADFARM_DEBUG} ? 1 : 0;
 
-our $VERSION = '0.73';
+our $VERSION = '0.74';
 
 BEGIN {
   $ENV{TOADFARM_ACTION} //= (@ARGV and $ARGV[0] =~ /^(reload|start|stop)$/) ? $1 : 'load';
@@ -288,7 +288,7 @@ Toadfarm - One Mojolicious app to rule them all
 
 =head1 VERSION
 
-0.73
+0.74
 
 =head1 DESCRIPTION
 
