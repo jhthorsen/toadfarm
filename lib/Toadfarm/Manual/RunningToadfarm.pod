@@ -146,13 +146,13 @@ Setting up iptables rules will allow Toadfarm to listen to port 8080, while
 still receiving traffic on the default port. This way you can start and run
 C<toadfarm> as a normal user instead of "root".
 
-  $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
-  $ iptables -A PREROUTING -i eth0 -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 8443
+  $ iptables -t nat -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
+  $ iptables -t nat -A PREROUTING -i eth0 -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 8443
 
 (You need to replace "eth0" with the appropriate interface)
 
 You need to use L<Mojolicious::Plugin::SetUserGroup> if you want to start
-L<Toadfarm> as root and then change to a less priviledged used in the workers.
+L<Toadfarm> as root and then change to a less privileged user in the workers.
 Example:
 
   # logging, mount, ...
