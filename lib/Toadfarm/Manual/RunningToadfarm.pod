@@ -149,7 +149,24 @@ C<toadfarm> as a normal user instead of "root".
   $ iptables -t nat -A PREROUTING -i eth0 -p tcp -m tcp --dport 80 -j REDIRECT --to-ports 8080
   $ iptables -t nat -A PREROUTING -i eth0 -p tcp -m tcp --dport 443 -j REDIRECT --to-ports 8443
 
-(You need to replace "eth0" with the appropriate interface)
+Replace "eth0" with the appropriate interface.  IP Forwarding in the
+kernel must also be enabled.  On most Linux distributions:
+
+  $ sysctl net.ipv4.ip_forward      # check
+  $ sysctl -w net.ipv4.ip_forward=1 # set
+
+The setting can be permanently enabled from /etc/sysctl.conf as:
+
+  net.ipv4.ip_forward = 1
+
+whereas on most *BSD and OSX, the setting for sysctl and
+/etc/sysctl.conf is
+
+  net.inet.ip.forwarding = 1
+
+See L<https://en.wikipedia.org/wiki/Sysctl#Examples> for further detail.
+
+=head2 Running as a non-privileged user
 
 You need to use L<Mojolicious::Plugin::SetUserGroup> if you want to start
 L<Toadfarm> as root and then change to a less privileged user in the workers.
