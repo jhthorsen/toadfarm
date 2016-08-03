@@ -1,5 +1,9 @@
 Revision history for perl distribution Toadfarm
 
+0.75 2016-08-03T16:11:31+0200
+ - Add complete iptables and forwarding example #21
+   Contributor: William Lindley
+
 0.74 2016-03-10T22:30:39+0100
  - Skip t/mount-object.t on windows
    http://cpantesters.org/cpan/report/e9332a98-6c07-1014-9346-9ac2cd07d6c2
