@@ -1,8 +1,13 @@
 use Mojo::Base -strict;
+use Mojo::File 'path';
 use Test::More;
 use Test::Mojo;
 
-$ENV{MOJO_CONFIG} = 't/basic.conf';
+my $home = path();
+$home = path($home->dirname) if $home->basename eq 'blib';
+$ENV{MOJO_CONFIG} = $home->child(qw(t basic.conf))->to_string;
+plan skip_all => "MOJO_CONFIG=$ENV{MOJO_CONFIG}" unless -r $ENV{MOJO_CONFIG};
+
 my $t = Test::Mojo->new('Toadfarm');
 
 is_deeply $t->app->secrets, ['super-secret'], 'secrets are set';

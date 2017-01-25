@@ -1,12 +1,15 @@
 use Mojo::Base -strict;
+use Mojo::File 'path';
 use Test::More;
 use Test::Mojo;
 
-plan skip_all => 'PWD need to be set' unless $ENV{PWD} and -w "$ENV{PWD}/t";
+my $home = path();
+$home = path($home->dirname) if $home->basename eq 'blib';
+$ENV{MOJO_CONFIG} = $home->child(qw(t log.conf))->to_string;
+plan skip_all => "MOJO_CONFIG=$ENV{MOJO_CONFIG}" unless -r $ENV{MOJO_CONFIG};
 
-my $log_file = "$ENV{PWD}/t/log.log";
+my $log_file = $home->child(qw(t log.log))->to_string;
 
-$ENV{MOJO_CONFIG}    = 't/log.conf';
 $ENV{MOJO_LOG_LEVEL} = 'debug';
 unlink $log_file;
 my $t = Test::Mojo->new('Toadfarm');
