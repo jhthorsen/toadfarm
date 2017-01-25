@@ -1,11 +1,14 @@
 package Toadfarm;
 use Mojo::Base 'Mojolicious';
-use Mojo::Util qw( class_to_path monkey_patch );
+
 use Cwd 'abs_path';
 use Data::Dumper ();
 use File::Basename qw( basename dirname );
 use File::Spec;
 use File::Which;
+use Mojo::File;
+use Mojo::Util qw(class_to_path monkey_patch);
+
 use constant DEBUG => $ENV{TOADFARM_DEBUG} ? 1 : 0;
 
 our $VERSION = '0.75';
@@ -118,13 +121,12 @@ sub _mount_apps {
       require File::Temp;
       my %config = (%{$self->config}, %{$rules->{config}});
       $tmp = File::Temp->new;
-      Mojo::Util::spurt(
+      Mojo::File->new($tmp->filename)->spurt(
         do {
           local $Data::Dumper::Terse    = 1;
           local $Data::Dumper::Deepcopy = 1;
           Data::Dumper::Dumper(\%config);
-        },
-        $tmp->filename
+          }
       );
       $ENV{MOJO_CONFIG} = $tmp->filename;
     }

@@ -1,5 +1,8 @@
 Revision history for perl distribution Toadfarm
 
+0.76 Not Released
+ - Compatible with Mojolicious 7.18
+
 0.75 2016-08-03T16:11:31+0200
  - Add complete iptables and forwarding example #21
    Contributor: William Lindley

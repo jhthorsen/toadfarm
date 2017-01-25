@@ -1,5 +1,4 @@
 use Mojo::Base -strict;
-use Mojo::Util 'spurt';
 use Mojo::IOLoop;
 use Mojo::Server::Daemon;
 use Test::More;

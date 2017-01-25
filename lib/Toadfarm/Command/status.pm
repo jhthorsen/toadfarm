@@ -1,6 +1,8 @@
 package Toadfarm::Command::status;
 use Mojo::Base 'Toadfarm::Command::start';
+
 use File::Basename 'dirname';
+use Mojo::File;
 use File::Spec;
 
 has description => 'Toadfarm: Get status from the server';
@@ -22,7 +24,7 @@ sub run {
     return $self->_exit("$moniker is not running: No PID file.", 3);
   }
 
-  my ($pid) = Mojo::Util::slurp($pid_file) =~ /(\d+)/;
+  my ($pid) = Mojo::File->new($pid_file)->slurp =~ /(\d+)/;
   unless ($pid and kill 0, $pid) {
     $pid ||= 0;
     return $self->_exit("$moniker ($pid) is not running, but PID file exists.", 1);

@@ -1,5 +1,5 @@
 use Mojo::Base -strict;
-use Mojo::Util 'spurt';
+use Mojo::File 'path';
 use Test::More;
 
 plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
@@ -33,7 +33,7 @@ is $sleep, 5, 'slept';
 ok -e $system[0], 'found hypnotoad';
 is $system[1], $0, 'hypnotoad $0';
 
-spurt $$ => app->config->{hypnotoad}{pid_file};
+path(app->config->{hypnotoad}{pid_file})->spurt($$);
 $? = 0;      # mock system() return value
 like $cmd->run, qr{ \($$\) already running.}, 'already running';
 

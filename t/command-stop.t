@@ -1,5 +1,5 @@
 use Mojo::Base -strict;
-use Mojo::Util 'spurt';
+use Mojo::File 'path';
 use Test::More;
 use Time::HiRes;
 
@@ -24,7 +24,7 @@ my $cmd = Toadfarm::Command::stop->new;
 
 like $cmd->run, qr{not running}, 'not running';
 
-spurt $$ => app->config->{hypnotoad}{pid_file};
+path(app->config->{hypnotoad}{pid_file})->spurt($$);
 like $cmd->run, qr{failed to stop}, 'failed to stop';
 is $quit,  2,  'signal sent';
 is $sleep, 25, 'slept';
