@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.76 Not Released
+0.76 2017-02-17T16:27:10+0100
  - Compatible with Mojolicious 7.18
  - Add change_root() alternative to sudo()
 
