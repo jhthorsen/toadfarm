@@ -3,8 +3,8 @@ use Test::More;
 use Toadfarm -test;
 
 if (delete $ENV{TOADFARM_SUDO}) {
-  diag join ' ', qw( sudo -n -E ), $^X, -I => $INC[0], $0, @ARGV;
-  exec qw( sudo -n -E ), $^X, -I => $INC[0], $0, @ARGV;
+  diag join ' ', qw(sudo -n -E), $^X, -I => $INC[0], $0, @ARGV;
+  exec qw(sudo -n -E), $^X, -I => $INC[0], $0, @ARGV;
 }
 
 eval { start ['http://*:80'], user => 'whoever' };

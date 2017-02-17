@@ -29,7 +29,7 @@ sub _tail {
   my $pos = -s $log_file;
   warn "\$ tail -f $log_file\n";
   $SIG{$_} = sub { print "\n"; $self->_exit }
-    for qw( INT TERM );
+    for qw(INT TERM);
 
   while (1) {
     seek $LOG, $pos, 0;

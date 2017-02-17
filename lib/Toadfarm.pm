@@ -3,7 +3,7 @@ use Mojo::Base 'Mojolicious';
 
 use Cwd 'abs_path';
 use Data::Dumper ();
-use File::Basename qw( basename dirname );
+use File::Basename qw(basename dirname);
 use File::Spec;
 use File::Which;
 use Mojo::File;
@@ -149,7 +149,7 @@ sub _mount_apps {
 
     $app->config->{$_} ||= $config->{$_} for keys %$config;
 
-    for my $k (qw( local_port remote_address remote_port )) {
+    for my $k (qw(local_port remote_address remote_port)) {
       push @over, $self->_skip_if(tx => $k, delete $rules->{$k});
     }
 
@@ -188,7 +188,7 @@ sub _mount_root_app {
 sub _paths {
   my ($self, $config) = @_;
 
-  for my $type (qw( renderer static )) {
+  for my $type (qw(renderer static)) {
     my $paths = $config->{$type} or next;
     $self->$type->paths($paths);
   }
@@ -214,7 +214,7 @@ sub _run_as {
   for my $p (File::Spec->path) {
     $sudo[0] = File::Spec->catfile($p, 'sudo');
     next unless -x $sudo[0];
-    push @sudo, qw( -i -n -u ), "#$uid";
+    push @sudo, qw(-i -n -u), "#$uid";
     last;
   }
 

@@ -1,6 +1,6 @@
 package Toadfarm::Plugin::Reload;
 use Mojo::Base 'Mojolicious::Plugin';
-use Mojo::JSON qw( decode_json encode_json );
+use Mojo::JSON qw(decode_json encode_json);
 use Mojo::Util;
 
 our $GIT = $ENV{GIT_EXE} || 'git';
@@ -154,7 +154,7 @@ sub _valid_config {
 
   for my $config (@$repositories) {
     $config->{remote} ||= 'origin';
-    for my $key (qw/ path branch /) {
+    for my $key (qw(path branch)) {
       next if $config->{$key};
       $self->{log}->error(qq[Abort loading Reload: "repositories -> $config->{name} -> $key" missing in config]);
       return;

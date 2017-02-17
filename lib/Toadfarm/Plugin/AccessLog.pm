@@ -1,6 +1,6 @@
 package Toadfarm::Plugin::AccessLog;
 use Mojo::Base 'Mojolicious::Plugin';
-use Time::HiRes qw( gettimeofday tv_interval );
+use Time::HiRes qw(gettimeofday tv_interval);
 
 sub register {
   my ($self, $app, $config) = @_;
