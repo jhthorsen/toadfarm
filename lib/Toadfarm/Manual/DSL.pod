@@ -19,6 +19,19 @@ L</SYNOPSIS> for example usage.
 Used to fetch the L<Toadfarm> / L<Mojolicious> instance that the rest of
 the functions below are using.
 
+=head2 change_root
+
+  change_root qw(--userspec www-data:www-data /path/to/jail);
+
+Used to change user/group and root directory. Note that this require the
+Toadfarm script to be started as "root", but it also requires that the
+underlying "chroot" command result in changing the user. Not changing
+the effective user from "root" (UID=0) will result in an infinite loop.
+
+This function is experimental and subject to change.
+
+See also L</sudo>.
+
 =head2 logging
 
   logging {
@@ -64,6 +77,8 @@ search in the C<Toadfarm::Plugin::> namespace.
   run_as $username;
 
 Use "sudo" (might change) to force the script to be run as a given user.
+
+See also L</change_root>.
 
 =head2 secrets
 

@@ -31,13 +31,14 @@ sub import {
   unshift @{$app->commands->namespaces}, 'Toadfarm::Command';
 
   monkey_patch $caller, (
-    app     => sub {$app},
+    app         => sub {$app},
+    change_root => \&_change_root,
     logging => sub { $tf->{logging}++; $app->_setup_log(@_) },
-    mount   => sub { push @{$app->config->{apps}}, @_ == 2 ? @_ : ($_[0], {}); $app },
-    plugin  => sub { push @{$app->config->{plugins}}, @_ == 2 ? @_ : ($_[0], {}); $app },
-    run_as  => \&_run_as,
+    mount  => sub { push @{$app->config->{apps}},    @_ == 2 ? @_ : ($_[0], {}); $app },
+    plugin => sub { push @{$app->config->{plugins}}, @_ == 2 ? @_ : ($_[0], {}); $app },
+    run_as => \&_run_as,
     secrets => sub { $tf->{secrets}++; $app->secrets([@_]) },
-    start   => sub {
+    start => sub {
       if (@_) {
         my $listen = ref $_[0] eq 'ARRAY' ? shift : undef;
         $app->config->{hypnotoad} = @_ > 1 ? {@_} : {%{$_[0]}} if @_;
@@ -70,6 +71,23 @@ sub startup {
   $self->_mount_apps(@{$config->{apps}})           if $config->{apps};
   $self->_load_plugins(@{$config->{plugins}})      if $config->{plugins};
   $self->_mount_root_app(delete $self->{root_app}) if $self->{root_app};
+}
+
+sub _change_root {
+  my @cmd  = @_;
+  my $exit = -2;
+
+  return 1 if $<;    # not root
+
+  unshift @cmd, $ENV{TOADFARM_CHROOT_BIN} || 'chroot';
+  push @cmd, $^X;
+  push @cmd, -I => $INC[0] if $ENV{TOADFARM_ACTION} eq 'test';
+  push @cmd, File::Spec->rel2abs($0), @ARGV;
+
+  warn "[Toadfarm] system @cmd\n" if DEBUG;
+  system @cmd;
+  die "Could not run '@cmd' exit=$exit\n" if $exit = $? >> 8;
+  exit $?;
 }
 
 sub _die_on_insecure {
