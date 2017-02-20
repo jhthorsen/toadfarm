@@ -1,6 +1,6 @@
 Revision history for perl distribution Toadfarm
 
-0.77 Not Released
+0.77 2017-02-20T17:04:15+0100
  - Add "restart" command
  - Improved init log messages
 
