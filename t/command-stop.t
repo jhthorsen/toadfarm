@@ -7,7 +7,7 @@ plan skip_all => 'Cannot run as root' if $< == 0 or $> == 0;
 
 $ENV{TOADFARM_NO_EXIT} = 1;
 no warnings qw( once redefine );
-my ($exit, $sleep, $quit);
+my ($sleep, $quit);
 *Time::HiRes::usleep = sub ($) { $sleep++ };
 
 $SIG{QUIT} = sub { $quit++ };
@@ -16,21 +16,26 @@ plan skip_all => 'Fail to send SIGQUIT' unless kill QUIT => $$ and $quit;
 require Toadfarm::Command::stop;
 my $cmd = Toadfarm::Command::stop->new;
 
+*Toadfarm::Command::start::_printf = sub {
+  my ($self, $format) = (shift, shift);
+  note(sprintf $format, @_);
+};
+
 {
   use Toadfarm -init;
   start;
   $cmd->app(app);
 }
 
-like $cmd->run, qr{not running}, 'not running';
+is $cmd->run, 0, 'not running';
 
 path(app->config->{hypnotoad}{pid_file})->spurt($$);
-like $cmd->run, qr{failed to stop}, 'failed to stop';
+is $cmd->run, 1, 'failed to stop';
 is $quit,  2,  'signal sent';
 is $sleep, 25, 'slept';
 
 $SIG{QUIT} = sub { unlink app->config->{hypnotoad}{pid_file} };
-like $cmd->run, qr{\($$\) stopped\.}, 'server stopped';
+is $cmd->run, 0, 'server stopped';
 
 done_testing;
 

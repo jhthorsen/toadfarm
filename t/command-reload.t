@@ -13,6 +13,11 @@ my $cmd = Toadfarm::Command::reload->new;
 
 plan skip_all => $@ unless eval { $cmd->_hypnotoad };
 
+*Toadfarm::Command::start::_printf = sub {
+  my ($self, $format) = (shift, shift);
+  note(sprintf $format, @_);
+};
+
 {
   use Toadfarm -init;
   start;
@@ -20,12 +25,10 @@ plan skip_all => $@ unless eval { $cmd->_hypnotoad };
 }
 
 $? = 256;    # mock system() return value
-like $cmd->run, qr{failed to reload\. \(1\)$}, 'failed to reload. (1)';
-is int($!), 1, 'exit 1';
+is $cmd->run, 1, 'failed to reload. (1)';
 like "@system", qr{hypnotoad \S*command-reload\.t$}, 'system';
 
 $? = 0;      # mock system() return value
-is $cmd->run, '', 'reloaded';
-is int($!), 0, 'exit 0';
+is $cmd->run, 0, 'reloaded';
 
 done_testing;

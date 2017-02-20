@@ -2,25 +2,27 @@ package Toadfarm::Command::stop;
 use Mojo::Base 'Toadfarm::Command::start';
 use Time::HiRes 'usleep';
 
+$ENV{TOADFARM_STOP_SIGNAL} //= 'QUIT';
+
 has description => 'Toadfarm: Stop the server';
 
-sub run {
-  my $self    = shift;
-  my $signal  = uc(shift || 'QUIT');
-  my $moniker = $self->app->moniker;
-  my $timeout = ($self->app->config->{hypnotoad}{graceful_timeout} || 20) + 5;
+sub run { shift->_stop(@_) }
 
-  return $self->_exit("$moniker not running.") unless my $pid = $self->_pid;
-  kill $signal, $pid or die "Could not send SIG$signal to $pid: $!\n";
+sub _stop {
+  my $self = shift;
+  my $pid  = $self->_pid;
 
-  while ($timeout--) {
-    return $self->_exit("$moniker ($pid) stopped.") unless $self->_pid;
-  }
-  continue {
-    usleep 200e3;
-  }
+  # stop
+  $self->_log_daemon_msg('Stopping the process %s');
+  return $self->_end(0) unless $self->_is_running;
+  kill $ENV{TOADFARM_STOP_SIGNAL}, $pid or return $self->_end($!, 'kill failed') if $pid;
 
-  return $self->_exit("$moniker ($pid) failed to stop.", 1);
+  # wait until stopped
+  $self->_wait_for(sub { !shift->_is_running });
+
+  # check if stopped
+  $pid = $self->_pid || 0;
+  return $self->_end($self->_is_running ? 1 : 0, $pid ? "running with pid=$pid" : "");
 }
 
 1;

@@ -17,7 +17,7 @@ print $temp "# some log line\n";
 no warnings qw( once redefine );
 *CORE::GLOBAL::exec = sub { die "@_" };
 require Toadfarm::Command::tail;
-*Toadfarm::Command::tail::_exit = sub { $exit = $_[2]; die $_[1] || 'EXIT'; };
+*Toadfarm::Command::tail::_end = sub { $exit = $_[1]; die $_[2] || 'EXIT'; };
 
 my $cmd = Toadfarm::Command::tail->new;
 
@@ -41,6 +41,6 @@ Time::HiRes::ualarm(100e3);
 $exit = 42;
 eval { $cmd->run; };
 like $@,  qr{^EXIT}, 'tail -f';
-is $exit, undef,     'exit';
+is $exit, 0,         'exit';
 
 done_testing;

@@ -7,8 +7,14 @@ $ENV{TOADFARM_NO_EXIT} = 1;
 require Toadfarm::Command::status;
 my $cmd = Toadfarm::Command::status->new;
 
-like $cmd->run, qr{has invalid config}, 'has invalid config';
-is int($!), 4, 'exit=4';
+no warnings qw(once redefine);
+*Toadfarm::Command::start::_printf = sub {
+  my ($self, $format) = (shift, shift);
+  note(sprintf $format, @_);
+};
+
+eval { $cmd->run };
+like $@, qr{invalid config}, 'invalid config';
 
 {
   use Toadfarm -init;
@@ -16,8 +22,7 @@ is int($!), 4, 'exit=4';
   $cmd->app(app);
 }
 
-like $cmd->run, qr{No PID file}, 'No PID file';
-is int($!), 3, 'exit=3';
+is $cmd->run, 3, 'No PID file';
 
 my $pid_file = $cmd->app->config->{hypnotoad}{pid_file};
 
@@ -25,18 +30,14 @@ if (open my $PID, '>', $pid_file) {
   print $PID "$$\n";
   close $PID;
 
-  like $cmd->run, qr{is running}, 'is running';
-  is int($!), 0, 'exit=0';
+  is $cmd->run, 0, 'is running';
 
   my $pid = fork or exit;    # make up a PID
   wait;                      # wait for fork to exit
   open my $PID, '>', $pid_file;
   print $PID "     $pid   \n";
   close $PID;
-  like $cmd->run, qr{PID file exists}, 'PID file exists';
-  is int($!), 1, 'exit=1';
-
-  diag $cmd->app->config->{hypnotoad}{pid_file};
+  is $cmd->run, 1, 'PID file exists';
   unlink $cmd->app->config->{hypnotoad}{pid_file};
 }
 

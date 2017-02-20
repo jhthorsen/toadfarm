@@ -4,20 +4,17 @@ use Mojo::Base 'Toadfarm::Command::start';
 has description => 'Toadfarm: Hot deploy or start the server';
 
 sub run {
-  my $self    = shift;
-  my $moniker = $self->app->moniker;
+  my $self = shift;
 
   if (grep {/^--tail/} @_) {
     exec $self->_hypnotoad, $0 unless fork;    # start or hot reload
     return $self->_tail(grep { !/^--tail/ } @_);
   }
-  else {
-    system $self->_hypnotoad, $0;              # start or hot reload
-    my $exit = $? >> 8;
-    return $self->_exit("$moniker failed to reload. ($exit)", $exit) if $exit;
-  }
 
-  return $self->_exit;
+  # reload
+  $self->_log_daemon_msg('Reloading the process %s');
+  system $self->_hypnotoad, $0;                # start or hot reload
+  $self->_end($? >> 8);
 }
 
 1;

@@ -11,24 +11,25 @@ has description => 'Toadfarm: Tail the log file';
 
 sub run { shift->_tail(@_) }
 
-sub _exit {
-  return do { $! = $_[2]; $_[1] || '' } if $ENV{TOADFARM_NO_EXIT};
-  say $_[1] if $_[1];
-  exit($_[2] || 0);
+sub _end {
+  my ($self, $exit, $message) = @_;
+  say $message if $message;
+  return $exit if $ENV{TOADFARM_NO_EXIT};
+  exit $exit;
 }
 
 sub _tail {
   my $self     = shift;
   my $log_file = $self->app->log->path;
 
-  return $self->_exit('Unknown log file.', 2) unless $log_file;
+  return $self->_end(2, 'Unknown log file.') unless $log_file;
   exec TAIL_EXE, @_, $log_file if @_;
 
   # open and go to end of file
   open my $LOG, '<', $log_file or die "Cannot tail $log_file: $!\n";
   my $pos = -s $log_file;
   warn "\$ tail -f $log_file\n";
-  $SIG{$_} = sub { print "\n"; $self->_exit }
+  $SIG{$_} = sub { print "\n"; $self->_end(0) }
     for qw(INT TERM);
 
   while (1) {

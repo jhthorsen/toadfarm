@@ -10,27 +10,31 @@ has description => 'Toadfarm: Get status from the server';
 sub run {
   my ($self, @args) = @_;
   my $moniker  = $self->app->moniker;
-  my $pid_file = $self->app->config->{hypnotoad}{pid_file};
+  my $pid_file = $self->_pid_file;
 
   # 0 program is running or service is OK
   # 1 program is dead and /var/run pid file exists
   # 3 program is not running
-  # 4 program or service status is unknown
 
-  unless ($pid_file) {
-    return $self->_exit("$moniker has invalid config: /hypnotoad/pid_file is not set.", 4);
-  }
   unless (-e $pid_file) {
-    return $self->_exit("$moniker is not running: No PID file.", 3);
+    return $self->_end(3, 'no pid file');
   }
 
   my ($pid) = Mojo::File->new($pid_file)->slurp =~ /(\d+)/;
-  unless ($pid and kill 0, $pid) {
+  if ($pid and !kill 0, $pid) {
     $pid ||= 0;
-    return $self->_exit("$moniker ($pid) is not running, but PID file exists.", 1);
+    return $self->_end(1, "but $pid_file exists");
   }
 
-  return $self->_exit("$moniker ($pid) is running.", 0);
+  return $self->_end(0);
+}
+
+sub _end {
+  my ($self, $exit, $message) = @_;
+  my $format = $exit ? 'Process %s is not running (%s)' : 'Process %s is running';
+  $self->_printf(" * $format\n", $self->app->moniker, $message);
+  return $exit if $ENV{TOADFARM_NO_EXIT};
+  exit $exit;
 }
 
 1;
