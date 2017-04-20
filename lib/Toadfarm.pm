@@ -179,7 +179,11 @@ sub _mount_apps {
     if (@over) {
       $self->log->info("Mounting @{[$app->moniker]} with conditions");
       unshift @over, "sub { my \$h = \$_[1]->req->headers;\nlocal \$1;";
-      push @over, "\$_[1]->req->url->base(Mojo::URL->new(\$1 || '$request_base'));" if $request_base;
+      if ( $request_base ) {
+        push @over, "\$_[1]->req->url->base(Mojo::URL->new(\$1 || '$request_base'));";
+      } elsif ( $mount_point ) {
+        push @over, "\$_[1]->req->url->base(Mojo::URL->new(\$_[1]->req->url->path('$mount_point')->to_abs));";
+      }
       push @over, "return 1; }";
       $routes->add_condition("toadfarm_condition_$self->{mounted}", => eval "@over" || die "@over: $@");
       $routes->route($mount_point || '/')->detour(app => $app)->over("toadfarm_condition_$self->{mounted}");
