@@ -6,8 +6,6 @@ get '/url' => sub { $_[0]->render(text => $_[0]->req->url->to_abs) };
 get
   '/config' => [format => ['json']],
   sub { $_[0]->render(json => $_[0]->app->config) };
-get
-  '/secrets' => [format => ['json']],
-  sub { $_[0]->render(json => $_[0]->app->secrets) };
+get '/secrets' => sub { $_[0]->render(json => $_[0]->app->secrets) };
 
 app->start;
