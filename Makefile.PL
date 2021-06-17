@@ -8,9 +8,10 @@ my %WriteMakefileArgs = (
   ABSTRACT_FROM  => 'lib/Toadfarm.pm',
   VERSION_FROM   => 'lib/Toadfarm.pm',
   EXE_FILES      => [qw()],
+  OBJECT         => '',
   BUILD_REQUIRES => {},
-  TEST_REQUIRES  => {'Test::More' => '0.88'},
-  PREREQ_PM      => {'File::Which' => '1.00', 'Mojolicious' => '8.73'},
+  TEST_REQUIRES  => {'Test::More'  => '0.88'},
+  PREREQ_PM      => {'File::Which' => '1.00', 'Mojolicious' => '9.11'},
   META_MERGE     => {
     'dynamic_config' => 0,
     'meta-spec'      => {version => 2},
